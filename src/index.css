@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-slate-950 text-slate-100;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+  ::selection {
+    @apply bg-primary-500/30 text-white;
+  }
+  ::-webkit-scrollbar {
+    @apply w-2;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-900;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-700 rounded-full;
+  }
+}
+
+@layer components {
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-400 via-accent-400 to-primary-400 animate-gradient bg-[length:200%_200%];
+  }
+  .section-heading {
+    @apply text-4xl md:text-5xl font-display font-bold mb-12;
+  }
+  .card {
+    @apply bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 hover:border-primary-500/30 transition-all duration-300;
+  }
+  .glow {
+    box-shadow: 0 0 60px -15px rgba(99, 102, 241, 0.3);
+  }
+  .instagram-hover {
+    transition: all 0.3s ease;
+  }
+  .instagram-hover:hover .insta-svg path {
+    fill: url(#ig-grad);
+  }
+  .leetcode-hover {
+    transition: all 0.3s ease;
+  }
+  .leetcode-hover:hover {
+    color: #FFA116 !important;
+  }
+}
