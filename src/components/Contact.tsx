@@ -46,6 +46,16 @@ const socialLinks = [
     hover: 'hover:text-[var(--text-primary)]',
   },
   {
+    label: 'Google Scholar',
+    href: 'https://scholar.google.com/citations?user=IquMx3kAAAAJ&hl=en',
+    icon: (
+      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M5.242 13.769L0 9.5 12 0l12 9.5-5.242 4.269C17.548 11.249 14.978 9.5 12 9.5c-2.977 0-5.548 1.748-6.758 4.269zM12 10a7 7 0 100 14 7 7 0 000-14z"/>
+      </svg>
+    ),
+    hover: 'hover:text-blue-300',
+  },
+  {
     label: 'Facebook',
     href: 'https://facebook.com/5upto',
     icon: (

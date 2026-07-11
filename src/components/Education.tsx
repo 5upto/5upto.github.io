@@ -37,7 +37,27 @@ const certifications = [
 ]
 
 const publications = [
-  'S. Ghosh, S. K. Panda, M. K. Bishwal, and P. K. Sa, "Transformer-Based Model for Building Classification Under Diverse Lighting Conditions," in Proceedings of the IEEE International Conference on Innovative Trends in Information Technology, 2025.',
+  {
+    title: 'Transformer-Based Model for Building Classification Under Diverse Lighting Conditions',
+    authors: [
+      { name: 'S. Ghosh', affil: 1 },
+      { name: 'S. K. Panda', affil: 2 },
+      { name: 'M. K. Bishwal', affil: 1 },
+      { name: 'P. K. Sa', affil: 1 },
+    ],
+    affiliations: [
+      'Department of Computer Science and Engineering, National Institute of Technology Rourkela, India',
+      'Department of Computer Science, School of Computer Science, UPES Dehradun, India',
+    ],
+    conference: '2025 International Conference on Innovative Trends in Information Technology (ICITIIT)',
+    location: 'Kottayam, India',
+    date: '21–22 February 2025',
+    doi: '10.1109/ICITIIT64777.2025.11040288',
+    pages: 'pp. 1–6',
+    keywords: ['Building Classification', 'Transformer', 'Self-Attention', 'Computer Vision', 'Image Enhancement'],
+    abstract: 'Building classification is pivotal in various applications, such as urban planning, navigation, and campus management. This paper presents a novel approach for building classification using a transformer-based model. The proposed framework integrates convolutional neural networks and self-attention mechanisms, leveraging the capabilities of both local and non-local feature extraction. We have curated a diverse dataset by taking images of various buildings at the National Institute of Technology Rourkela (NITR) campus. To address challenges posed by diverse lighting conditions, we have included images of both day and night. Our dataset includes 1600 images in total, having 10 classes. Image enhancement techniques such as histogram equalization are employed to mitigate the effects of poor illumination. Experimental results demonstrate the superiority of our approach in achieving robust classification under varying lighting conditions. Additionally, a user-friendly graphical user interface (GUI) is developed, enabling building classification through image uploads.',
+    url: 'https://ieeexplore.ieee.org/abstract/document/11040288',
+  },
 ]
 
 export default function Education() {
@@ -55,8 +75,8 @@ export default function Education() {
   }, [])
 
   return (
-    <section ref={sectionRef} id="education" className="py-24 px-4 relative">
-      <h2 ref={headingRef} className="section-heading text-center mb-12">
+    <section ref={sectionRef} id="education" className="py-16 md:py-20 px-4 relative">
+      <h2 ref={headingRef} className="section-heading text-center mb-8 md:mb-10">
         <span className="gradient-text">Education</span>
       </h2>
       <div className="max-w-4xl mx-auto">
@@ -129,8 +149,8 @@ export default function Education() {
         </ScrollStack>
       </div>
 
-      <div className="max-w-4xl mx-auto mt-20">
-        <h2 className="section-heading text-center mb-12">
+      <div className="max-w-4xl mx-auto mt-12 md:mt-16">
+        <h2 className="section-heading text-center mb-8 md:mb-10">
           <span className="gradient-text">Certifications</span>
         </h2>
         <ScrollStack useWindowScroll={true} itemDistance={120} itemScale={0.03} itemStackDistance={25} stackPosition="15%" baseScale={0.88}>
@@ -173,14 +193,84 @@ export default function Education() {
           })}
         </ScrollStack>
 
-        <div className="mt-20">
-          <h2 className="section-heading text-center">
+        <div className="mt-12 md:mt-16">
+          <h2 className="section-heading text-center mb-8 md:mb-10">
             <span className="gradient-text">Publications</span>
           </h2>
-          <div className="mt-8">
+          <div className="mt-6">
             {publications.map((pub, idx) => (
-              <div key={idx} className="card">
-                <p className="text-[var(--text-secondary)] text-sm leading-relaxed italic">{pub}</p>
+              <div key={idx} className="bg-white dark:bg-[#121212] rounded-lg overflow-hidden border border-[#d0d0d0] dark:border-[#2a2a2a]">
+                {/* IEEE header bar */}
+                <div className="bg-[#006699] dark:bg-[#004466] px-4 md:px-6 py-2.5">
+                  <div className="flex items-center gap-2">
+                    <svg viewBox="0 0 36 16" className="h-4 fill-white shrink-0">
+                      <path d="M0 0v16h36V0H0zm34 2v12H2V2h32z"/>
+                      <path d="M6 5h5v1H6zM6 7h8v1H6zM6 9h6v1H6zM6 11h7v1H6zM17 5h13v1H17zM17 7h13v1H17zM17 9h13v1H17zM17 11h13v1H17z"/>
+                    </svg>
+                    <span className="text-[10px] md:text-[11px] text-white/90 font-medium tracking-wide truncate">{pub.conference}</span>
+                  </div>
+                </div>
+                <div className="px-4 md:px-6 py-4 md:py-5">
+                  {/* Title with link */}
+                  <a href={pub.url} target="_blank" rel="noopener noreferrer" className="group">
+                    <h3 className="text-base md:text-lg font-bold text-[#1a1a2a] dark:text-[#e0e0e8] leading-snug group-hover:text-[#006699] dark:group-hover:text-[#4a9eff] transition-colors">{pub.title}</h3>
+                  </a>
+                  {/* Authors */}
+                  <div className="flex flex-wrap gap-x-1 mt-2 text-[13px] md:text-sm text-[#006699] dark:text-[#4a9eff]">
+                    {pub.authors.map((author, ai) => (
+                      <span key={ai}>
+                        {ai > 0 && <span className="text-[#6a7a8a] mr-0.5">, </span>}
+                        <span>{author.name}<sup className="text-[10px]">{author.affil}</sup></span>
+                      </span>
+                    ))}
+                  </div>
+                  {/* Affiliations */}
+                  <div className="mt-1.5 text-[10px] md:text-[11px] text-[#6a7a8a] dark:text-[#7a8a9a] leading-relaxed">
+                    {pub.affiliations.map((aff, ai) => (
+                      <div key={ai}>
+                        <sup className="text-[9px]">{ai + 1}</sup> {aff}
+                      </div>
+                    ))}
+                  </div>
+                  {/* Abstract */}
+                  <div className="mt-3">
+                    <span className="text-[10px] md:text-[11px] font-semibold text-[#1a1a2a] dark:text-[#c0c0d0] uppercase tracking-wider">Abstract</span>
+                    <p className="text-xs md:text-sm text-[#4a4a5a] dark:text-[#9a9aaa] leading-relaxed mt-1">{pub.abstract}</p>
+                  </div>
+                  {/* Keywords */}
+                  <div className="flex flex-wrap items-center gap-1.5 mt-3">
+                    <span className="text-[10px] font-semibold text-[#1a1a2a] dark:text-[#c0c0d0] uppercase tracking-wider">Keywords:</span>
+                    {pub.keywords.map((kw, ki) => (
+                      <span key={ki} className="text-[10px] md:text-[11px] text-[#006699] dark:text-[#4a9eff] bg-[#e8f0f8] dark:bg-[#0a1a2a] px-2 py-0.5 rounded">{kw}</span>
+                    ))}
+                  </div>
+                  {/* Metadata row */}
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-3 pt-3 border-t border-[#e0e0e0] dark:border-[#2a2a2a] text-[10px] md:text-[11px] text-[#6a7a8a] dark:text-[#7a8a9a]">
+                    <span>Date: {pub.date}</span>
+                    <span>Location: {pub.location}</span>
+                    <span>{pub.pages}</span>
+                  </div>
+                  {/* DOI + Actions */}
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-2">
+                    <span className="text-[10px] md:text-[11px] text-[#6a7a8a] dark:text-[#7a8a9a]">
+                      DOI: <a href={`https://doi.org/${pub.doi}`} target="_blank" rel="noopener noreferrer" className="text-[#006699] dark:text-[#4a9eff] hover:underline">{pub.doi}</a>
+                    </span>
+                    <a href={pub.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] md:text-[11px] text-white bg-[#006699] dark:bg-[#004466] px-3 py-1.5 rounded font-medium hover:bg-[#005580] transition-colors">
+                      <svg viewBox="0 0 16 16" className="w-3 h-3 fill-current">
+                        <rect x="1" y="1" width="6" height="14" rx="1"/>
+                        <rect x="9" y="4" width="6" height="11" rx="1"/>
+                        <rect x="1" y="1" width="14" height="2" rx="1"/>
+                      </svg>
+                      PDF
+                    </a>
+                    <a href={pub.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] md:text-[11px] text-[#006699] dark:text-[#4a9eff] border border-[#006699] dark:border-[#4a9eff] px-3 py-1.5 rounded font-medium hover:bg-[#006699]/5 transition-colors">
+                      <svg viewBox="0 0 16 16" className="w-3 h-3 fill-current">
+                        <path d="M8 1a7 7 0 110 14A7 7 0 018 1zm3.36 4.65a.5.5 0 00-.71 0L7 9.29 5.35 7.65a.5.5 0 10-.7.7l2 2c.2.2.5.2.7 0l4-4a.5.5 0 000-.7z"/>
+                      </svg>
+                      IEEE Xplore
+                    </a>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
