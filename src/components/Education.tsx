@@ -123,9 +123,7 @@ export default function Education() {
                       <div className="border border-[#c8b88a]/60 dark:border-[#5a4f3a]/60">
                         <div className="flex flex-col md:flex-row">
                           <div className="md:w-[30%] flex items-center justify-center py-6 px-4">
-                            <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-[#f5f0e8] dark:bg-[#1a1510] flex items-center justify-center p-3 overflow-hidden">
-                              <img src={edu.logo} alt={edu.institution} className="w-full h-full object-contain" onError={(e) => {(e.target as HTMLImageElement).style.display = 'none'}} />
-                            </div>
+                            <img src={edu.logo} alt={edu.institution} className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover" onError={(e) => {(e.target as HTMLImageElement).style.display = 'none'}} />
                           </div>
                           <div className="md:w-[70%] text-center md:text-left py-6 px-4 md:pl-0 md:pr-6">
                             <p className="text-[10px] tracking-[0.15em] uppercase text-[#8a7a6a] dark:text-[#8a7a6a] font-medium">Government of the People's Republic of Bangladesh</p>
