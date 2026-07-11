@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useNavigate } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import About from './components/About'
@@ -37,6 +37,7 @@ function LegacyPage({ onSelect }: { onSelect: (file: string) => void }) {
 }
 
 export default function App() {
+  const navigate = useNavigate()
   const [logo, setLogo] = useState(() => localStorage.getItem(LOGO_KEY) || 'w26.jpeg')
 
   useEffect(() => {
@@ -44,12 +45,12 @@ export default function App() {
   }, [logo])
 
   const handleLogoClick = () => {
-    window.location.href = '/legacy'
+    navigate('/legacy')
   }
 
   const handleLegacySelect = (file: string) => {
     setLogo(file)
-    window.location.href = '/'
+    navigate('/')
   }
 
   return (
