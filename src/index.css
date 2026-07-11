@@ -4,6 +4,7 @@
 
 @layer base {
   html {
+    --accent: #6366f1;
     --bg-primary: #ffffff;
     --bg-secondary: #ffffff;
     --bg-card: #f8fafc;
@@ -19,6 +20,7 @@
   }
 
   html.dark {
+    --accent: #818cf8;
     --bg-primary: #020617;
     --bg-secondary: #0f172a;
     --bg-card: #1e293b;
