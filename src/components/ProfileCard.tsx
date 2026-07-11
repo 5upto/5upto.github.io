@@ -32,8 +32,8 @@ interface Props {
 
 export default function ProfileCard({
   avatarUrl,
-  name = 'Shawon Ghosh',
-  title = 'Software Engineer',
+  name,
+  title,
   handle = '5upto',
   status = 'Online',
   contactText = 'Contact',
@@ -235,7 +235,7 @@ export default function ProfileCard({
               <img
                 className="avatar"
                 src={avatarUrl}
-                alt={`${name} avatar`}
+                alt="Profile avatar"
                 loading="lazy"
                 onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
               />
@@ -244,7 +244,7 @@ export default function ProfileCard({
                   <div className="pc-mini-avatar">
                     <img
                       src={avatarUrl}
-                      alt={`${name} mini`}
+                      alt="Profile mini"
                       loading="lazy"
                       onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
                     />
@@ -264,12 +264,14 @@ export default function ProfileCard({
                 </button>
               </div>
             </div>
+            {name && title && (
             <div className="pc-content">
               <div className="pc-details">
                 <h3>{name}</h3>
                 <p>{title}</p>
               </div>
             </div>
+            )}
           </div>
         </section>
       </div>

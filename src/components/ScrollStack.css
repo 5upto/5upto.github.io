@@ -22,6 +22,18 @@
   min-height: 100vh;
 }
 
+@media (max-width: 768px) {
+  .scroll-stack-inner {
+    padding: 20vh 1.5rem 50rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .scroll-stack-inner {
+    padding: 20vh 0.75rem 50rem;
+  }
+}
+
 .scroll-stack-card {
   position: relative;
   width: 100%;

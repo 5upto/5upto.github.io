@@ -1,9 +1,12 @@
 import { useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import ScrollStack, { ScrollStackItem } from './ScrollStack'
 
 gsap.registerPlugin(ScrollTrigger)
+
+const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
 const projects = [
   {
@@ -124,6 +127,7 @@ const projects = [
 export default function Projects() {
   const sectionRef = useRef<HTMLElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -143,7 +147,7 @@ export default function Projects() {
       <div className="max-w-4xl mx-auto">
         <ScrollStack useWindowScroll={true} itemDistance={120} itemScale={0.03} itemStackDistance={25} stackPosition="15%" baseScale={0.88}>
           {projects.map((project, idx) => (
-            <ScrollStackItem key={idx} itemClassName="!h-auto !p-0 !rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] overflow-hidden">
+            <ScrollStackItem key={idx} itemClassName="!h-auto !p-0 !rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] overflow-hidden cursor-pointer" onClick={() => navigate(`/projects/${slugify(project.title)}`)}>
               <div className="flex flex-col md:flex-row">
                 <div className="md:w-2/5 relative h-44 md:h-auto overflow-hidden bg-[var(--bg-elevated)]">
                   <img

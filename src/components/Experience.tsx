@@ -1,9 +1,12 @@
 import { useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import ScrollStack, { ScrollStackItem } from './ScrollStack'
 
 gsap.registerPlugin(ScrollTrigger)
+
+const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 
 const experiences = [
   {
@@ -89,6 +92,7 @@ const experiences = [
 export default function Experience() {
   const sectionRef = useRef<HTMLElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -108,7 +112,7 @@ export default function Experience() {
       <div className="max-w-3xl mx-auto">
         <ScrollStack useWindowScroll={true} itemDistance={120} itemScale={0.03} itemStackDistance={25} stackPosition="15%" baseScale={0.88}>
           {experiences.map((exp, idx) => (
-            <ScrollStackItem key={idx} itemClassName="!h-auto !p-6 md:!p-8 !rounded-2xl bg-[var(--bg-card)] border border-[var(--border)]">
+            <ScrollStackItem key={idx} itemClassName="!h-auto !p-6 md:!p-8 !rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] cursor-pointer" onClick={() => navigate(`/experience/${slugify(exp.company)}`)}>
             <div className="flex items-center gap-3 mb-4">
               {exp.logo && (
                 <img

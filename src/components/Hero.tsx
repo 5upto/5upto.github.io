@@ -26,16 +26,15 @@ export default function Hero() {
     >
       <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
         <div ref={textRef} className="flex-1 text-center lg:text-left">
-          <p className="text-primary-400 font-display text-lg md:text-xl mb-4 tracking-wider uppercase">
+          <p className="text-primary-400 font-display text-base md:text-lg mb-4 tracking-[0.2em] uppercase opacity-80">
             Software Engineer
           </p>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold mb-6">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold mb-4 leading-tight">
             Shawon{' '}
             <span className="gradient-text">Ghosh</span>
           </h1>
-          <p className="text-[var(--text-muted)] text-lg md:text-xl max-w-xl leading-relaxed mb-10">
-            Building scalable systems at the intersection of AI and software engineering.
-            From real-time computer vision pipelines to full-stack web platforms.
+          <p className="text-[var(--text-muted)] text-base md:text-lg leading-relaxed mb-10">
+            I build production systems at the intersection of computer vision, AI, and software engineering.
           </p>
           <div className="flex flex-wrap gap-4 justify-center lg:justify-start mb-8">
             <button
@@ -55,8 +54,6 @@ export default function Hero() {
         <div className="flex-shrink-0 w-full max-w-sm lg:max-w-md">
           <ProfileCard
             avatarUrl="/images/DSC_0329.jpg.jpeg"
-            name="Shawon Ghosh"
-            title="Software Engineer"
             handle="5upto"
             status="Open to opportunities"
             contactText="Contact"

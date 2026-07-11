@@ -6,8 +6,8 @@ let sharedLenis = null;
 let lenisCount = 0;
 let sharedRafId = null;
 
-export const ScrollStackItem = ({ children, itemClassName = '' }) => (
-  <div className={`scroll-stack-card ${itemClassName}`.trim()}>{children}</div>
+export const ScrollStackItem = ({ children, itemClassName = '', ...props }) => (
+  <div className={`scroll-stack-card ${itemClassName}`.trim()} {...props}>{children}</div>
 );
 
 const ScrollStack = ({
