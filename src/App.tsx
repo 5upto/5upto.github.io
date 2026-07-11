@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom'
-import Navbar from './components/Navbar'
+import PillNav from './components/PillNav'
 import Hero from './components/Hero'
 import About from './components/About'
 import Experience from './components/Experience'
@@ -15,10 +15,19 @@ import ClickSpark from './components/ClickSpark'
 
 const LOGO_KEY = 'portfolio-logo'
 
+const navItems = [
+  { label: 'Home', href: '#hero' },
+  { label: 'About', href: '#about' },
+  { label: 'Experience', href: '#experience' },
+  { label: 'Projects', href: '#projects' },
+  { label: 'Skills', href: '#skills' },
+  { label: 'Contact', href: '#contact' },
+]
+
 function HomePage({ logo, onLogoClick }: { logo: string; onLogoClick: () => void }) {
   return (
     <>
-      <Navbar logo={logo} onLogoClick={onLogoClick} />
+      <PillNav logo={logo} onLogoClick={onLogoClick} items={navItems} />
       <main className="relative z-10">
         <Hero />
         <About />

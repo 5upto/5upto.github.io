@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import gsap from 'gsap'
 
 const navItems = [
   { label: 'Home', href: '#hero' },
@@ -18,6 +19,8 @@ export default function Navbar({ logo, onLogoClick }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [dark, setDark] = useState(() => document.documentElement.classList.contains('dark'))
+  const menuRef = useRef<HTMLDivElement>(null)
+  const tlRef = useRef<gsap.core.Timeline | null>(null)
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
@@ -28,6 +31,33 @@ export default function Navbar({ logo, onLogoClick }: NavbarProps) {
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  useEffect(() => {
+    const menu = menuRef.current
+    if (!menu) return
+
+    if (mobileOpen) {
+      menu.style.display = 'block'
+      const items = menu.querySelectorAll('.mobile-nav-item')
+      gsap.set(menu, { height: 0, opacity: 0 })
+      gsap.set(items, { y: -10, opacity: 0 })
+
+      tlRef.current = gsap.timeline()
+        .to(menu, { height: 'auto', opacity: 1, duration: 0.35, ease: 'power3.out' })
+        .to(items, { y: 0, opacity: 1, duration: 0.25, stagger: 0.05, ease: 'power2.out' }, '-=0.1')
+    } else {
+      if (tlRef.current) {
+        tlRef.current.reverse()
+        tlRef.current.eventCallback('onReverseComplete', () => {
+          if (menu) menu.style.display = 'none'
+        })
+      } else {
+        menu.style.display = 'none'
+      }
+    }
+  }, [mobileOpen])
+
+  const toggleMenu = () => setMobileOpen(prev => !prev)
 
   return (
     <nav
@@ -66,35 +96,29 @@ export default function Navbar({ logo, onLogoClick }: NavbarProps) {
           )}
         </button>
         <button
-          className="md:hidden text-[var(--text-secondary)]"
-          onClick={() => setMobileOpen(!mobileOpen)}
+          className="md:hidden flex flex-col items-center justify-center w-9 h-9 gap-[5px] group"
+          onClick={toggleMenu}
           aria-label="Menu"
         >
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            {mobileOpen ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            )}
-          </svg>
+          <span className={`block w-5 h-[2px] bg-current rounded transition-all duration-300 ${mobileOpen ? 'translate-y-[3.5px] rotate-45' : ''}`} />
+          <span className={`block w-5 h-[2px] bg-current rounded transition-all duration-300 ${mobileOpen ? 'opacity-0 scale-x-0' : ''}`} />
+          <span className={`block w-5 h-[2px] bg-current rounded transition-all duration-300 ${mobileOpen ? '-translate-y-[3.5px] -rotate-45' : ''}`} />
         </button>
       </div>
-      {mobileOpen && (
-        <div className="md:hidden bg-[var(--bg-secondary)] backdrop-blur-lg border-t border-[var(--border)]">
-          <div className="px-4 py-4 space-y-3">
-            {navItems.map((item) => (
-              <a
-                key={item.href}
-                href={item.href}
-                onClick={() => setMobileOpen(false)}
-                className="block text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
-              >
-                {item.label}
-              </a>
-            ))}
-          </div>
+      <div ref={menuRef} className="md:hidden bg-[var(--bg-secondary)] backdrop-blur-lg border-t border-[var(--border)] overflow-hidden" style={{ display: 'none' }}>
+        <div className="px-4 py-4 space-y-3">
+          {navItems.map((item) => (
+            <a
+              key={item.href}
+              href={item.href}
+              onClick={() => { setMobileOpen(false); tlRef.current?.kill(); if (menuRef.current) menuRef.current.style.display = 'none' }}
+              className="mobile-nav-item block text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              {item.label}
+            </a>
+          ))}
         </div>
-      )}
+      </div>
     </nav>
   )
 }
