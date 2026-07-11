@@ -34,6 +34,9 @@ export default function ParticleBackground() {
     window.addEventListener('mousemove', onMouse)
 
     const animate = () => {
+      const isDark = document.documentElement.classList.contains('dark')
+      const lightness = isDark ? 60 : 85
+      const lineOpacity = isDark ? 0.08 : 0.04
       ctx.clearRect(0, 0, canvas.width, canvas.height)
       const pArr = particles.current
       for (const p of pArr) {
@@ -51,7 +54,7 @@ export default function ParticleBackground() {
         }
         ctx.beginPath()
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-        ctx.fillStyle = `hsla(${p.hue}, 70%, 60%, ${p.opacity})`
+        ctx.fillStyle = `hsla(${p.hue}, 70%, ${lightness}%, ${p.opacity})`
         ctx.fill()
       }
       for (let i = 0; i < pArr.length; i++) {
@@ -63,7 +66,7 @@ export default function ParticleBackground() {
             ctx.beginPath()
             ctx.moveTo(pArr[i].x, pArr[i].y)
             ctx.lineTo(pArr[j].x, pArr[j].y)
-            ctx.strokeStyle = `hsla(230, 50%, 60%, ${0.08 * (1 - dist / 120)})`
+            ctx.strokeStyle = `hsla(230, 50%, ${lightness}%, ${lineOpacity * (1 - dist / 120)})`
             ctx.stroke()
           }
         }

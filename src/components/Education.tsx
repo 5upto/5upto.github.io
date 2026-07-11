@@ -53,9 +53,9 @@ export default function Education() {
             {education.map((edu, idx) => (
               <div key={idx} className="card flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                  <h3 className="text-lg font-display font-semibold text-white">{edu.degree}</h3>
-                  <p className="text-slate-400 text-sm">{edu.subject}</p>
-                  <p className="text-slate-500 text-xs">{edu.institution}</p>
+                  <h3 className="text-lg font-display font-semibold text-[var(--text-primary)]">{edu.degree}</h3>
+                  <p className="text-[var(--text-muted)] text-sm">{edu.subject}</p>
+                  <p className="text-[var(--text-muted)] text-xs">{edu.institution}</p>
                 </div>
                 <span className="text-primary-400 font-mono text-sm">{edu.year}</span>
               </div>
@@ -71,7 +71,7 @@ export default function Education() {
             {certifications.map((cert, idx) => (
               <div key={idx} className="card flex items-center gap-3">
                 <div className="w-2 h-2 rounded-full bg-primary-500 shrink-0" />
-                <p className="text-slate-300 text-sm">{cert}</p>
+                <p className="text-[var(--text-secondary)] text-sm">{cert}</p>
               </div>
             ))}
           </div>
@@ -83,7 +83,7 @@ export default function Education() {
           </h2>
           {publications.map((pub, idx) => (
             <div key={idx} className="card">
-              <p className="text-slate-300 text-sm leading-relaxed italic">{pub}</p>
+              <p className="text-[var(--text-secondary)] text-sm leading-relaxed italic">{pub}</p>
             </div>
           ))}
         </div>

@@ -4,23 +4,59 @@
 
 @layer base {
   html {
+    --bg-primary: #ffffff;
+    --bg-secondary: #ffffff;
+    --bg-card: #f8fafc;
+    --bg-elevated: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --border: #e2e8f0;
+    --border-hover: #cbd5e1;
+    --nav-bg: rgba(255, 255, 255, 0.85);
+    --scrollbar-track: #e2e8f0;
+    --scrollbar-thumb: #94a3b8;
+  }
+
+  html.dark {
+    --bg-primary: #020617;
+    --bg-secondary: #0f172a;
+    --bg-card: #1e293b;
+    --bg-elevated: #1e293b;
+    --text-primary: #ffffff;
+    --text-secondary: #cbd5e1;
+    --text-muted: #64748b;
+    --border: rgba(51, 65, 85, 0.5);
+    --border-hover: rgba(71, 85, 105, 0.5);
+    --nav-bg: rgba(2, 6, 23, 0.8);
+    --scrollbar-track: #0f172a;
+    --scrollbar-thumb: #334155;
+  }
+
+  html {
     scroll-behavior: smooth;
   }
+
   body {
-    @apply bg-slate-950 text-slate-100;
+    @apply bg-[var(--bg-primary)] text-[var(--text-primary)];
     font-family: 'Inter', system-ui, sans-serif;
   }
+
   ::selection {
     @apply bg-primary-500/30 text-white;
   }
+
   ::-webkit-scrollbar {
     @apply w-2;
   }
+
   ::-webkit-scrollbar-track {
-    @apply bg-slate-900;
+    background: var(--scrollbar-track);
   }
+
   ::-webkit-scrollbar-thumb {
-    @apply bg-slate-700 rounded-full;
+    background: var(--scrollbar-thumb);
+    border-radius: 9999px;
   }
 }
 
@@ -28,25 +64,43 @@
   .gradient-text {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-400 via-accent-400 to-primary-400 animate-gradient bg-[length:200%_200%];
   }
+
   .section-heading {
     @apply text-4xl md:text-5xl font-display font-bold mb-12;
   }
+
   .card {
-    @apply bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 hover:border-primary-500/30 transition-all duration-300;
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    @apply rounded-2xl p-6 transition-all duration-300;
   }
+
+  .card:hover {
+    border-color: rgba(99, 102, 241, 0.3);
+  }
+
   .glow {
     box-shadow: 0 0 60px -15px rgba(99, 102, 241, 0.3);
   }
+
   .instagram-hover {
     transition: all 0.3s ease;
   }
+
   .instagram-hover:hover .insta-svg path {
     fill: url(#ig-grad);
   }
+
   .leetcode-hover {
     transition: all 0.3s ease;
   }
+
   .leetcode-hover:hover {
     color: #FFA116 !important;
+  }
+
+  .timeline-dot-ring {
+    box-shadow: 0 0 0 4px var(--bg-primary);
   }
 }

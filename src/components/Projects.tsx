@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import ScrollStack, { ScrollStackItem } from './ScrollStack'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -63,13 +64,13 @@ const projects = [
     tech: ['Arduino IDE', 'Python', 'C++', 'RFID', 'IoT', 'Embedded Systems'],
   },
   {
-    title: 'Alzheimer\'s Detection',
+    title: "Alzheimer's Detection",
     tagline: 'Deep Learning on MRI Data',
     period: 'May 2024 – Jul 2024',
     org: 'IIT Mandi',
     image: '/images/projects/alzheimer.svg',
     points: [
-      'Deep learning framework using MRI data for early detection of Alzheimer\'s disease.',
+      "Deep learning framework using MRI data for early detection of Alzheimer's disease.",
       'Implemented CNN with transfer learning, achieving superior accuracy, sensitivity, and specificity.',
       'Model outperformed existing state-of-the-art diagnostic methods in comparative evaluation.',
       'Showcased potential of AI-driven approaches in advancing clinical neuroimaging and AD research.',
@@ -130,65 +131,62 @@ export default function Projects() {
         { y: 40, opacity: 0 },
         { y: 0, opacity: 1, duration: 0.8, scrollTrigger: { trigger: sectionRef.current, start: 'top 75%' } }
       )
-      const cards = sectionRef.current?.querySelectorAll('.project-card')
-      if (cards) {
-        gsap.fromTo(cards,
-          { y: 50, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.6, stagger: 0.1, scrollTrigger: { trigger: sectionRef.current, start: 'top 65%' } }
-        )
-      }
     }, sectionRef)
     return () => ctx.revert()
   }, [])
 
   return (
     <section ref={sectionRef} id="projects" className="py-24 px-4 relative">
-      <div className="max-w-6xl mx-auto">
-        <h2 ref={headingRef} className="section-heading text-center">
-          <span className="gradient-text">Projects</span>
-        </h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-2 gap-6">
+      <h2 ref={headingRef} className="section-heading text-center mb-12">
+        <span className="gradient-text">Projects</span>
+      </h2>
+      <div className="max-w-4xl mx-auto">
+        <ScrollStack useWindowScroll={true} itemDistance={120} itemScale={0.03} itemStackDistance={25} stackPosition="15%" baseScale={0.88}>
           {projects.map((project, idx) => (
-            <div key={idx} className="project-card group rounded-2xl bg-slate-800/40 border border-slate-700/40 overflow-hidden hover:border-primary-500/40 hover:bg-slate-800/60 transition-all duration-500">
-              <div className="relative h-44 overflow-hidden bg-slate-800/60">
-                <img
-                  src={project.image}
-                  alt={project.title}
-                  className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-700 animate-float"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/10 to-transparent" />
-                <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
-                  <span className="text-xs text-primary-300 font-mono">{project.period}</span>
-                  {project.org && (
-                    <span className="text-[10px] text-slate-400 bg-slate-900/60 px-2 py-0.5 rounded-full">{project.org}</span>
-                  )}
+            <ScrollStackItem key={idx} itemClassName="!h-auto !p-0 !rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] overflow-hidden">
+              <div className="flex flex-col md:flex-row">
+                <div className="md:w-2/5 relative h-44 md:h-auto overflow-hidden bg-[var(--bg-elevated)]">
+                  <img
+                    src={project.image}
+                    alt={project.title}
+                    className="w-full h-full object-contain p-6"
+                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-[var(--bg-card)] hidden md:block" />
+                </div>
+                <div className="md:w-3/5 p-6">
+                  <div className="flex items-start justify-between mb-2">
+                    <div>
+                      <h3 className="text-lg font-display font-bold text-[var(--text-primary)]">{project.title}</h3>
+                      <p className="text-accent-400 text-sm font-medium">{project.tagline}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-xs text-primary-400 font-mono">{project.period}</span>
+                    {project.org && (
+                      <span className="text-[10px] text-[var(--text-muted)] bg-[var(--bg-elevated)] px-2 py-0.5 rounded-full">{project.org}</span>
+                    )}
+                  </div>
+                  <ul className="space-y-1.5 mb-4">
+                    {project.points.slice(0, 3).map((point, i) => (
+                      <li key={i} className="text-[var(--text-muted)] text-xs leading-relaxed flex gap-2">
+                        <span className="text-primary-500 mt-0.5 shrink-0">•</span>
+                        <span>{point}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.tech.slice(0, 6).map((t) => (
+                      <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--bg-elevated)] text-[var(--text-secondary)] border border-[var(--border)]">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="p-5">
-                <h3 className="text-lg font-display font-bold text-white group-hover:text-primary-400 transition-colors">
-                  {project.title}
-                </h3>
-                <p className="text-accent-400 text-sm font-medium mb-3">{project.tagline}</p>
-                <ul className="space-y-1.5 mb-4">
-                  {project.points.slice(0, 3).map((point, i) => (
-                    <li key={i} className="text-slate-400 text-xs leading-relaxed flex gap-2">
-                      <span className="text-primary-500 mt-0.5 shrink-0">•</span>
-                      <span>{point}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="flex flex-wrap gap-1.5">
-                  {project.tech.slice(0, 6).map((t) => (
-                    <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-slate-700/50 text-slate-300 border border-slate-600/30">
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+          </ScrollStackItem>
+        ))}
+        </ScrollStack>
       </div>
     </section>
   )

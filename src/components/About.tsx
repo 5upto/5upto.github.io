@@ -41,7 +41,7 @@ export default function About() {
         <h2 ref={headingRef} className="section-heading text-center">
           About <span className="gradient-text">Me</span>
         </h2>
-        <p ref={textRef} className="text-slate-400 text-lg leading-relaxed max-w-3xl mx-auto text-center mb-16">
+        <p ref={textRef} className="text-[var(--text-muted)] text-lg leading-relaxed max-w-3xl mx-auto text-center mb-16">
           I'm a Software Engineer from Dhaka, Bangladesh, currently building intelligent transportation
           solutions at Regnum Resource Ltd. I graduated from the National Institute of Technology Rourkela
           with a B.Tech in Computer Science, where I was awarded the ICCR International Scholarship by
@@ -52,7 +52,7 @@ export default function About() {
           {highlights.map((item) => (
             <div key={item.label} className="card text-center">
               <div className="text-3xl font-display font-bold gradient-text mb-1">{item.value}</div>
-              <div className="text-slate-500 text-sm">{item.label}</div>
+              <div className="text-[var(--text-muted)] text-sm">{item.label}</div>
             </div>
           ))}
         </div>

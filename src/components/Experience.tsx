@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import ScrollStack, { ScrollStackItem } from './ScrollStack'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -95,72 +96,46 @@ export default function Experience() {
         { y: 40, opacity: 0 },
         { y: 0, opacity: 1, duration: 0.8, scrollTrigger: { trigger: sectionRef.current, start: 'top 75%' } }
       )
-      const items = sectionRef.current?.querySelectorAll('.exp-item')
-      if (items) {
-        gsap.fromTo(items,
-          { y: 40, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.6, stagger: 0.15, scrollTrigger: { trigger: sectionRef.current, start: 'top 65%' } }
-        )
-        items.forEach((item) => {
-          const dot = item.querySelector('.timeline-dot')
-          if (dot) {
-            gsap.to(dot, {
-              backgroundColor: '#f472b6',
-              boxShadow: '0 0 12px rgba(244, 114, 182, 0.6)',
-              scrollTrigger: {
-                trigger: item,
-                start: 'top 70%',
-                end: 'top 30%',
-                toggleActions: 'play reverse play reverse',
-              },
-            })
-          }
-        })
-      }
     }, sectionRef)
     return () => ctx.revert()
   }, [])
 
   return (
     <section ref={sectionRef} id="experience" className="py-24 px-4 relative">
-      <div className="max-w-4xl mx-auto">
-        <h2 ref={headingRef} className="section-heading text-center">
-          Experience
-        </h2>
-        <div className="relative">
-          <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-gradient-to-b from-primary-500 via-accent-500 to-transparent" />
+      <h2 ref={headingRef} className="section-heading text-center mb-12">
+        Experience
+      </h2>
+      <div className="max-w-3xl mx-auto">
+        <ScrollStack useWindowScroll={true} itemDistance={120} itemScale={0.03} itemStackDistance={25} stackPosition="15%" baseScale={0.88}>
           {experiences.map((exp, idx) => (
-            <div key={idx} className={`exp-item relative flex flex-col md:flex-row gap-4 md:gap-8 mb-12 ${idx % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
-              <div className="hidden md:block flex-1" />
-              <div className="timeline-dot absolute left-4 md:left-1/2 w-3 h-3 bg-primary-500 rounded-full -translate-x-1/2 mt-2 ring-4 ring-slate-950 transition-shadow duration-300" />
-              <div className={`flex-1 ml-10 md:ml-0 ${idx % 2 === 0 ? 'md:text-right md:pr-8' : 'md:pl-8'}`}>
-                <div className={`flex items-center gap-3 mb-2 ${idx % 2 === 0 ? 'md:flex-row-reverse' : ''}`}>
-                  {exp.logo && (
-                    <img
-                      src={exp.logo}
-                      alt={exp.company}
-                      className="w-8 h-8 object-contain rounded bg-white/10 p-1"
-                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                    />
-                  )}
-                  <div>
-                    <span className="text-xs text-primary-400 font-mono">{exp.period}</span>
-                    <h3 className="text-xl font-display font-bold text-white mt-1">{exp.role}</h3>
-                    <p className="text-accent-400 font-medium text-sm">{exp.company}</p>
-                    <p className="text-slate-500 text-xs">{exp.location}</p>
-                  </div>
-                </div>
-                <ul className={`space-y-2 mt-3 ${idx % 2 === 0 ? 'md:text-right' : ''}`}>
-                  {exp.points.map((point, i) => (
-                    <li key={i} className="text-slate-400 text-sm leading-relaxed">
-                      {point}
-                    </li>
-                  ))}
-                </ul>
+            <ScrollStackItem key={idx} itemClassName="!h-auto !p-6 md:!p-8 !rounded-2xl bg-[var(--bg-card)] border border-[var(--border)]">
+            <div className="flex items-center gap-3 mb-4">
+              {exp.logo && (
+                <img
+                  src={exp.logo}
+                  alt={exp.company}
+                  className="w-10 h-10 object-contain rounded bg-white/10 p-1.5"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+                />
+              )}
+              <div>
+                <span className="text-xs text-primary-400 font-mono">{exp.period}</span>
+                <h3 className="text-xl font-display font-bold text-[var(--text-primary)] mt-0.5">{exp.role}</h3>
+                <p className="text-accent-400 font-medium text-sm">{exp.company}</p>
+                <p className="text-[var(--text-muted)] text-xs">{exp.location}</p>
               </div>
             </div>
-          ))}
-        </div>
+            <ul className="space-y-2">
+              {exp.points.map((point, i) => (
+                <li key={i} className="text-[var(--text-muted)] text-sm leading-relaxed flex gap-2">
+                  <span className="text-primary-500 mt-1 shrink-0">•</span>
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+          </ScrollStackItem>
+        ))}
+        </ScrollStack>
       </div>
     </section>
   )
