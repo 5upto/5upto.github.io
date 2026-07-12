@@ -11,7 +11,7 @@ import Contact from './components/Contact'
 import Legacy from './components/Legacy'
 import ProjectStory from './components/ProjectStory'
 import ExperienceStory from './components/ExperienceStory'
-import NeuralNetwork from './components/NeuralNetwork'
+import ParticleBackground from './components/ParticleBackground'
 
 const LOGO_KEY = 'portfolio-logo'
 
@@ -69,7 +69,7 @@ export default function App() {
 
   return (
     <>
-      <NeuralNetwork />
+      <ParticleBackground />
       <Routes>
         <Route path="/" element={<HomePage logo={logo} onLogoClick={handleLogoClick} />} />
         <Route path="/legacy" element={<LegacyPage onSelect={handleLegacySelect} />} />

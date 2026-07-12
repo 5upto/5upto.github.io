@@ -30,10 +30,11 @@ const experiences = [
     location: 'Dhaka, Bangladesh',
     period: 'Oct 2025 – May 2026',
     points: [
-      'Built enterprise business applications using Microsoft Power Apps with focus on scalability.',
-      'Developed Visitor Management, Gate Pass and Requisition Management Systems.',
-      'Implemented workflow automation via Power Automate, reducing manual intervention.',
-      'Administered Microsoft 365 and Active Directory (AD DS), managing users and access control.',
+      'Designed and developed enterprise-grade business applications using Microsoft Power Apps, focusing on scalability, usability, and performance.',
+      'Built a fully automated Visitor Management System, streamlining check-in, tracking, and security workflows.',
+      'Developed a Gate Pass Management System, enabling end-to-end automation of request, approval, and monitoring processes.',
+      'Designed and delivered a Requisition Management System, automating request, approval, and tracking processes.',
+      'Implemented workflow automation using Microsoft Power Automate to eliminate manual interventions and improve process efficiency.',
     ],
   },
   {
@@ -43,10 +44,11 @@ const experiences = [
     location: 'Minsk, Belarus',
     period: 'Jul 2025 – Sep 2025',
     points: [
-      'Developed and deployed scalable web applications using MERN stack and Agile practices.',
-      'Engineered a user management module with secure role-based authentication.',
-      'Built a library management system with automated fake data generation for testing.',
-      'Collaborated on a real-time presentation platform with multi-user editing.',
+      'Developed and deployed scalable web applications using MERN, Agile methodologies and clean coding practices.',
+      'Engineered a user management module with secure role-based authentication and authorization workflows.',
+      'Designed and implemented a library management system featuring automated fake book generation for testing and demonstration.',
+      'Collaborated on building a real-time presentation platform supporting multi-user editing and content synchronization.',
+      'Delivered a customizable inventory management system with dynamic data fields and adaptive visualization.',
     ],
   },
   {
@@ -56,10 +58,10 @@ const experiences = [
     location: 'Bengaluru, India',
     period: 'Jan 2025 – Jul 2025',
     points: [
-      'Collaborated with the professional services team to integrate enterprise solutions.',
-      'Developed a workflow for store incharges to collect COD payments from delivery partners.',
-      'Built an interactive UI using ReactFlow to visualize task templates.',
-      'Integrated the UI with existing Java Vert.x backend APIs.',
+      'Collaborated with the professional services team to integrate and optimize solutions.',
+      'Developed a new workflow for store incharges to collect COD payments from delivery partners.',
+      'Built an interactive UI using ReactFlow to visualize and create reusable process and task templates, improving efficiency for the configuration team.',
+      'Integrated the UI with existing Java Vert.x backend APIs to support automation and streamline workflow configuration.',
     ],
   },
   {
@@ -82,9 +84,10 @@ const experiences = [
     location: 'Mandi, India',
     period: 'May 2024 – Jul 2024',
     points: [
-      'Worked in the Visual Intelligence and Machine Learning (VIML) research group.',
-      'Developed DICOMET, a desktop app for DICOM visualization and metadata extraction.',
-      'Improved AI detection accuracy and optimized bounding-box placement for medical image analysis.',
+      'Worked as a research intern at IIT Mandi in the VIML research group for 2 months.',
+      'Developed MedImagePro, an application for DICOM operations like detection, metadata extraction, bounding box management, and report generation.',
+      'Fixed bugs related to incorrect detection and bounding box placements, and enabled annotation.',
+      'The application generates PDF reports and saves updated DICOM files for further research.',
     ],
   },
 ]
