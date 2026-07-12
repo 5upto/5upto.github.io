@@ -96,7 +96,7 @@ export default function ProfileCard({
       currentX += (targetX - currentX) * k
       currentY += (targetY - currentY) * k
       setVarsFromXY(currentX, currentY)
-      if (Math.abs(targetX - currentX) > 0.05 || Math.abs(targetY - currentY) > 0.05 || document.hasFocus()) {
+      if (Math.abs(targetX - currentX) > 0.05 || Math.abs(targetY - currentY) > 0.05) {
         rafId = requestAnimationFrame(step)
       } else {
         running = false
