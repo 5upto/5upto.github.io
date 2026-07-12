@@ -5,7 +5,7 @@ export default function ParticleBackground() {
     const init = () => {
       const isDark = document.documentElement.classList.contains('dark')
 
-      window.particlesJS('particles-js', {
+      window.particlesJS!('particles-js', {
         particles: {
           number: { value: 80, density: { enable: true, value_area: 800 } },
           color: { value: isDark ? '#818cf8' : '#1e1b4b' },

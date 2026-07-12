@@ -113,7 +113,7 @@ export default function Experience() {
         Experience
       </h2>
       <div className="max-w-3xl mx-auto">
-        <ScrollStack useWindowScroll={true} itemDistance={120} itemScale={0.03} itemStackDistance={25} stackPosition="15%" baseScale={0.88} onStackComplete={() => {}}>
+        <ScrollStack useWindowScroll={true} itemDistance={120} itemScale={0.03} itemStackDistance={25} stackPosition="15%" baseScale={0.88}>
           {experiences.map((exp, idx) => (
             <ScrollStackItem key={idx} itemClassName="!h-auto !p-6 md:!p-8 !rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] cursor-pointer">
               <button
