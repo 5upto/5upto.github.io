@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, useCallback } from 'react';
 import Lenis from 'lenis';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './ScrollStack.css';
 
 let sharedLenis = null;
@@ -176,6 +177,7 @@ const ScrollStack = ({
           syncTouchLerp: 0.5
         });
 
+        sharedLenis.on('scroll', () => ScrollTrigger.update());
         const raf = time => {
           sharedLenis?.raf(time);
           sharedRafId = requestAnimationFrame(raf);
