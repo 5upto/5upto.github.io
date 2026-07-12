@@ -53,6 +53,11 @@ export default function App() {
     localStorage.setItem(LOGO_KEY, logo)
   }, [logo])
 
+  useEffect(() => {
+    const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
+    if (link) link.href = `/images/logos/${logo}`
+  }, [logo])
+
   const handleLogoClick = () => {
     navigate('/legacy')
   }
