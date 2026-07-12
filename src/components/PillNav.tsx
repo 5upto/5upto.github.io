@@ -16,9 +16,11 @@ interface PillNavProps {
 export default function PillNav({ logo, onLogoClick, items }: PillNavProps) {
   const navigate = useNavigate()
   const location = useLocation()
-  const [dark, setDark] = useState(() =>
-    window.matchMedia('(prefers-color-scheme: dark)').matches
-  )
+  const [dark, setDark] = useState(() => {
+    const saved = localStorage.getItem('portfolio-theme')
+    if (saved) return saved === 'dark'
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+  })
   const [mobileOpen, setMobileOpen] = useState(false)
   const circleRefs = useRef<Array<HTMLSpanElement | null>>([])
   const tlRefs = useRef<Array<gsap.core.Timeline | null>>([])
@@ -29,14 +31,8 @@ export default function PillNav({ logo, onLogoClick, items }: PillNavProps) {
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', dark)
+    localStorage.setItem('portfolio-theme', dark ? 'dark' : 'light')
   }, [dark])
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-color-scheme: dark)')
-    const handler = (e: MediaQueryListEvent) => setDark(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
 
   useEffect(() => {
     const layout = () => {
