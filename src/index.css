@@ -37,11 +37,21 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 
   body {
     @apply bg-[var(--bg-primary)] text-[var(--text-primary)];
     font-family: 'Inter', system-ui, sans-serif;
+    overflow-x: hidden;
+  }
+
+  html.lenis {
+    height: 100%;
+  }
+
+  html.lenis body {
+    min-height: 100%;
   }
 
   ::selection {
