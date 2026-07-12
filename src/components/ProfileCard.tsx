@@ -237,6 +237,7 @@ export default function ProfileCard({
                 src={avatarUrl}
                 alt="Profile avatar"
                 loading="lazy"
+                decoding="async"
                 onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
               />
               <div className="pc-user-info">
@@ -246,6 +247,7 @@ export default function ProfileCard({
                       src={avatarUrl}
                       alt="Profile mini"
                       loading="lazy"
+                      decoding="async"
                       onError={e => { (e.target as HTMLImageElement).style.display = 'none' }}
                     />
                   </div>

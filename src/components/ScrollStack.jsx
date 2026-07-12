@@ -1,6 +1,5 @@
 import { useLayoutEffect, useRef, useCallback } from 'react';
 import Lenis from 'lenis';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './ScrollStack.css';
 
 let sharedLenis = null;
@@ -166,18 +165,17 @@ const ScrollStack = ({
       lenisCount++;
       if (!sharedLenis) {
         sharedLenis = new Lenis({
-          duration: 0.6,
+          duration: 1.2,
           easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
           smoothWheel: true,
-          touchMultiplier: 1,
+          touchMultiplier: 2,
           infinite: false,
           wheelMultiplier: 1,
-          lerp: 0.06,
+          lerp: 0.1,
           syncTouch: true,
-          syncTouchLerp: 0.5
+          syncTouchLerp: 0.3
         });
 
-        sharedLenis.on('scroll', () => ScrollTrigger.update());
         const raf = time => {
           sharedLenis?.raf(time);
           sharedRafId = requestAnimationFrame(raf);
@@ -190,16 +188,16 @@ const ScrollStack = ({
       const lenis = new Lenis({
         wrapper: scroller,
         content: scroller.querySelector('.scroll-stack-inner'),
-        duration: 0.6,
+        duration: 1.2,
         easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
         smoothWheel: true,
-        touchMultiplier: 1,
+        touchMultiplier: 2,
         infinite: false,
         normalizeWheel: true,
         wheelMultiplier: 1,
-        lerp: 0.06,
+        lerp: 0.1,
         syncTouch: true,
-        syncTouchLerp: 0.5
+        syncTouchLerp: 0.3
       });
 
       lenis.on('scroll', handleScroll);
