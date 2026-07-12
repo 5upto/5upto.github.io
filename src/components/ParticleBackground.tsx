@@ -7,29 +7,29 @@ export default function ParticleBackground() {
 
       window.particlesJS!('particles-js', {
         particles: {
-          number: { value: 80, density: { enable: true, value_area: 800 } },
-          color: { value: isDark ? '#818cf8' : '#1e1b4b' },
+          number: { value: 160, density: { enable: true, value_area: 500 } },
+          color: { value: isDark ? '#a5b4fc' : '#312e81' },
           shape: { type: 'circle' },
           opacity: {
-            value: 0.5,
+            value: 0.65,
             random: true,
-            anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false },
+            anim: { enable: true, speed: 0.6, opacity_min: 0.2, sync: false },
           },
           size: {
-            value: 3,
+            value: 3.5,
             random: true,
-            anim: { enable: false },
+            anim: { enable: true, speed: 1, size_min: 1, sync: false },
           },
           line_linked: {
             enable: true,
-            distance: 150,
-            color: isDark ? '#6366f1' : '#1e1b4b',
+            distance: 120,
+            color: isDark ? '#818cf8' : '#4338ca',
             opacity: 0.4,
             width: 1,
           },
           move: {
             enable: true,
-            speed: 3,
+            speed: 1.5,
             direction: 'none',
             random: true,
             straight: false,
@@ -45,8 +45,8 @@ export default function ParticleBackground() {
             resize: true,
           },
           modes: {
-            repulse: { distance: 100, duration: 0.4 },
-            push: { particles_nb: 4 },
+            repulse: { distance: 80, duration: 0.4 },
+            push: { particles_nb: 3 },
           },
         },
         retina_detect: true,
@@ -56,8 +56,8 @@ export default function ParticleBackground() {
         const pJS = window.pJSDom?.[0]?.pJS
         if (!pJS) return
         const d = document.documentElement.classList.contains('dark')
-        pJS.particles.color.value = d ? '#818cf8' : '#1e1b4b'
-        pJS.particles.line_linked.color = d ? '#6366f1' : '#1e1b4b'
+        pJS.particles.color.value = d ? '#a5b4fc' : '#312e81'
+        pJS.particles.line_linked.color = d ? '#818cf8' : '#4338ca'
         pJS.particles.array.forEach((p: any) => { p.color.value = pJS.particles.color.value })
       })
       observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
