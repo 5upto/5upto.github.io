@@ -103,7 +103,7 @@ export default function Skills() {
   }, [])
 
   return (
-    <section ref={sectionRef} id="skills" className="py-16 md:py-20 px-4 relative">
+    <section ref={sectionRef} id="skills" className="py-20 md:py-24 px-4 relative">
       <div className="max-w-5xl mx-auto">
         <h2 ref={headingRef} className="section-heading text-center">
           Technical <span className="gradient-text">Skills</span>
