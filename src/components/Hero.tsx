@@ -22,7 +22,7 @@ export default function Hero() {
     <section
       ref={containerRef}
       id="hero"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 py-12"
+      className="relative min-h-screen flex items-start lg:items-center justify-center overflow-hidden px-4 pt-20 pb-12 lg:py-12"
     >
       <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
         <div ref={textRef} className="flex-1 text-center lg:text-left">
