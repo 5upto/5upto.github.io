@@ -221,12 +221,11 @@ export default function PillNav({ logo, onLogoClick, items }: PillNavProps) {
     'relative overflow-hidden inline-flex items-center justify-center h-full no-underline rounded-full box-border font-semibold text-sm leading-none tracking-[0.2px] whitespace-nowrap cursor-pointer px-0'
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50" style={{ ...baseStyle, minHeight: 56 }}>
+    <nav className="fixed top-0 left-0 right-0 z-[999]" style={{ ...baseStyle, height: 56 }}>
       <div
-        className="flex items-center justify-center transition-all duration-300"
+        className="flex items-center justify-center w-full h-full transition-all duration-300"
         style={{
-          minHeight: scrolled ? 0 : 56,
-          paddingTop: scrolled ? 7 : 0
+          padding: scrolled ? '7px 1rem 0' : '0 1rem'
         }}
       >
         <div
