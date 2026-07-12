@@ -11,7 +11,7 @@ import Contact from './components/Contact'
 import Legacy from './components/Legacy'
 import ProjectStory from './components/ProjectStory'
 import ExperienceStory from './components/ExperienceStory'
-import ClickSpark from './components/ClickSpark'
+import NeuralNetwork from './components/NeuralNetwork'
 
 const LOGO_KEY = 'portfolio-logo'
 
@@ -63,13 +63,14 @@ export default function App() {
   }
 
   return (
-    <ClickSpark sparkColor="#818cf8" sparkSize={8} sparkRadius={25} sparkCount={6} duration={400}>
+    <>
+      <NeuralNetwork />
       <Routes>
         <Route path="/" element={<HomePage logo={logo} onLogoClick={handleLogoClick} />} />
         <Route path="/legacy" element={<LegacyPage onSelect={handleLegacySelect} />} />
         <Route path="/projects/:slug" element={<ProjectStory />} />
         <Route path="/experience/:slug" element={<ExperienceStory />} />
       </Routes>
-    </ClickSpark>
+    </>
   )
 }

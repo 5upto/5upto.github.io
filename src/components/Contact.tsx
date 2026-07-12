@@ -9,11 +9,15 @@ const socialLinks = [
     label: 'Email',
     href: 'mailto:shawonghosh2002@gmail.com',
     icon: (
-      <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 193" className="w-5 h-5">
+        <path className="group-hover/gmail:fill-[#4285f4]" fill="currentColor" d="M58.182 192.05V93.14L27.507 65.077L0 49.504v125.091c0 9.658 7.825 17.455 17.455 17.455z"/>
+        <path className="group-hover/gmail:fill-[#34a853]" fill="currentColor" d="M197.818 192.05h40.727c9.659 0 17.455-7.826 17.455-17.455V49.505l-31.156 17.837l-27.026 25.798z"/>
+        <path className="group-hover/gmail:fill-[#ea4335]" fill="currentColor" d="m58.182 93.14l-4.174-38.647l4.174-36.989L128 69.868l69.818-52.364l4.669 34.992l-4.669 40.644L128 145.504z"/>
+        <path className="group-hover/gmail:fill-[#fbbc04]" fill="currentColor" d="M197.818 17.504V93.14L256 49.504V26.231c0-21.585-24.64-33.89-41.89-20.945z"/>
+        <path className="group-hover/gmail:fill-[#c5221f]" fill="currentColor" d="m0 49.504l26.759 20.07L58.182 93.14V17.504L41.89 5.286C24.61-7.66 0 4.646 0 26.23z"/>
       </svg>
     ),
-    hover: 'hover:text-primary-400',
+    hover: '',
   },
   // {
   //   label: 'WhatsApp',
@@ -133,7 +137,7 @@ export default function Contact() {
               target="_blank"
               rel="noopener noreferrer"
               title={link.label}
-              className={`social-icon w-12 h-12 rounded-full bg-[var(--bg-card)] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] ${link.hover} hover:border-[var(--border-hover)] hover:scale-110 transition-all duration-300`}
+              className={`social-icon w-12 h-12 rounded-full bg-[var(--bg-card)] border border-[var(--border)] flex items-center justify-center text-[var(--text-muted)] ${link.hover} ${link.label === 'Email' ? 'group/gmail' : ''} hover:border-[var(--border-hover)] hover:scale-110 transition-all duration-300`}
             >
               {link.icon}
             </a>
