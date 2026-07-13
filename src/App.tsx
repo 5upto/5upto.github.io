@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom'
+import Navbar from './components/Navbar'
 import PillNav from './components/PillNav'
 import Hero from './components/Hero'
 import About from './components/About'
@@ -25,9 +26,22 @@ const navItems = [
 ]
 
 function HomePage({ logo, onLogoClick }: { logo: string; onLogoClick: () => void }) {
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 80)
+    window.addEventListener('scroll', onScroll)
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
     <>
-      <PillNav logo={logo} onLogoClick={onLogoClick} items={navItems} />
+      <div style={{ opacity: scrolled ? 0 : 1, pointerEvents: scrolled ? 'none' : 'auto', transition: 'opacity 0.3s ease' }}>
+        <Navbar logo={logo} onLogoClick={onLogoClick} />
+      </div>
+      <div style={{ opacity: scrolled ? 1 : 0, pointerEvents: scrolled ? 'auto' : 'none', transition: 'opacity 0.3s ease' }}>
+        <PillNav logo={logo} onLogoClick={onLogoClick} items={navItems} />
+      </div>
       <main className="relative z-10">
         <Hero />
         <About />

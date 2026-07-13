@@ -61,11 +61,9 @@ export default function Navbar({ logo, onLogoClick }: NavbarProps) {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-[var(--nav-bg)] backdrop-blur-lg shadow-lg shadow-black/10' : 'bg-transparent'
-      }`}
+      className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-transparent"
     >
-      <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <button onClick={onLogoClick} className="group w-10 overflow-hidden rounded-lg aspect-[513/531]">
           <img
             src={`/images/logos/${logo}`}
@@ -73,7 +71,7 @@ export default function Navbar({ logo, onLogoClick }: NavbarProps) {
             className="w-full h-full object-cover"
           />
         </button>
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-16">
           {navItems.map((item) => (
             <a
               key={item.href}
