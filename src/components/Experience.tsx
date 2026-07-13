@@ -126,7 +126,7 @@ export default function Experience() {
                     <img
                       src={exp.logo}
                       alt={exp.company}
-                      className="w-10 h-10 object-contain rounded bg-white/10 p-1.5"
+                      className="w-10 h-10 object-contain rounded"
                       onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                     />
                   )}

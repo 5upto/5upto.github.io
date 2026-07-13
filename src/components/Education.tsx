@@ -88,7 +88,7 @@ export default function Education() {
             >
               {edu.degree === 'Bachelor of Technology' ? (
                 /* NIT Rourkela degree style */
-                <div className="bg-white dark:bg-[#1a1818] rounded-sm overflow-hidden">
+                <div className="bg-[#faf8f0] dark:bg-[#1a1818] rounded-sm overflow-hidden">
                   <div className="px-6 md:px-10 py-6 md:py-8">
                     <div className="border-2 border-[#1a237e]/40 dark:border-[#5a6abf]/40 p-1">
                       <div className="border border-[#1a237e]/20 dark:border-[#5a6abf]/20">
@@ -117,7 +117,7 @@ export default function Education() {
                 </div>
               ) : (
                 /* Bangladesh Board certificate style (HSC / SSC) */
-                <div className="bg-white dark:bg-[#1a1816] rounded-sm overflow-hidden">
+                <div className="bg-[#faf8f0] dark:bg-[#1a1816] rounded-sm overflow-hidden">
                   <div className="px-6 md:px-10 py-6 md:py-8">
                     <div className="border-2 border-[#c8b88a] dark:border-[#5a4f3a] p-1">
                       <div className="border border-[#c8b88a]/60 dark:border-[#5a4f3a]/60">

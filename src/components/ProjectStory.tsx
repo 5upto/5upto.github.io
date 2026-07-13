@@ -227,7 +227,7 @@ export default function ProjectStory() {
   const paragraphs = project.story.split('\n\n')
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)]">
+    <div className="min-h-screen relative z-10 bg-[var(--bg-primary)]">
       <div className="max-w-3xl mx-auto px-4 py-12">
         <button
           onClick={() => navigate('/')}
