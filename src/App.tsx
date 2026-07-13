@@ -19,9 +19,9 @@ const LOGO_KEY = 'portfolio-logo'
 const navItems = [
   { label: 'Home', href: '#hero' },
   { label: 'About', href: '#about' },
+  { label: 'Skills', href: '#skills' },
   { label: 'Experience', href: '#experience' },
   { label: 'Projects', href: '#projects' },
-  { label: 'Skills', href: '#skills' },
   { label: 'Contact', href: '#contact' },
 ]
 
@@ -45,9 +45,9 @@ function HomePage({ logo, onLogoClick }: { logo: string; onLogoClick: () => void
       <main className="relative z-10">
         <Hero />
         <About />
+        <Skills />
         <Experience />
         <Projects />
-        <Skills />
         <Education />
         <Contact />
       </main>
