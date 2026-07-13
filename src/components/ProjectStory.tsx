@@ -85,7 +85,7 @@ Inteldoordemonstrates that resource-constrained embedded platforms, when program
   },
   {
     title: "Alzheimer's Detection",
-    slug: "alzheimers-detection",
+    slug: "alzheimer-s-detection",
     tagline: 'Deep Learning on MRI Data',
     period: 'May 2024 – Jul 2024',
     org: 'IIT Mandi',

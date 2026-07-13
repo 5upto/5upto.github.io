@@ -297,6 +297,7 @@
   transition: all 0.2s ease;
   backdrop-filter: blur(10px);
   background: rgba(255, 255, 255, 0.05);
+  pointer-events: auto;
 }
 
 .pc-contact-btn:hover {
