@@ -96,7 +96,7 @@ const socialLinks = [
   },
   {
     label: 'LeetCode',
-    href: 'https://leetcode.com/shawonghosh',
+    href: 'https://leetcode.com/5upto',
     icon: (
       <span className="relative w-5 h-5">
         <svg className="absolute inset-0 w-5 h-5 group-hover:opacity-0 transition-opacity duration-300" viewBox="0 0 24 24" fill="currentColor">
