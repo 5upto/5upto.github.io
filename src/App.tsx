@@ -13,6 +13,10 @@ import Legacy from './components/Legacy'
 import ProjectStory from './components/ProjectStory'
 import ExperienceStory from './components/ExperienceStory'
 import ParticleBackground from './components/ParticleBackground'
+import CircularGalleryPage from './components/CircularGalleryPage'
+import GalleryStory from './components/GalleryStory'
+import BlogsPage from './components/BlogsPage'
+import BlogStory from './components/BlogStory'
 
 const LOGO_KEY = 'portfolio-logo'
 
@@ -22,6 +26,8 @@ const navItems = [
   { label: 'Skills', href: '#skills' },
   { label: 'Experience', href: '#experience' },
   { label: 'Projects', href: '#projects' },
+  { label: 'Gallery', href: '/gallery' },
+  { label: 'Blog', href: '/blog' },
   { label: 'Contact', href: '#contact' },
 ]
 
@@ -76,6 +82,10 @@ export default function App() {
         <Route path="/legacy" element={<LegacyPage onSelect={handleLegacySelect} />} />
         <Route path="/projects/:slug" element={<ProjectStory />} />
         <Route path="/experience/:slug" element={<ExperienceStory />} />
+        <Route path="/gallery" element={<CircularGalleryPage />} />
+        <Route path="/gallery/:slug" element={<GalleryStory />} />
+        <Route path="/blog" element={<BlogsPage />} />
+        <Route path="/blog/:slug" element={<BlogStory />} />
       </Routes>
     </>
   )
