@@ -1,13 +1,15 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { sortByDate } from '../../lib/sortByDate'
 import type { GalleryStory } from '../../types/database'
 import FormDialog from '../components/FormDialog'
 import DeleteDialog from '../components/DeleteDialog'
 import JsonArrayField from '../components/JsonArrayField'
+import ImagePicker from '../components/ImagePicker'
 import Toast from '../components/Toast'
 
-const empty = { title: '', image: '', period: '', slug: '', story: '', tags: [] as string[], sort_order: 0 }
+const empty = { title: '', image: '', period: '', slug: '', story: '', tags: [] as string[] }
 
 export default function GalleryAdminPage() {
   const qc = useQueryClient()
@@ -20,7 +22,7 @@ export default function GalleryAdminPage() {
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['admin-gallery'],
-    queryFn: async () => { const { data, error } = await supabase.from('gallery_stories').select('*').order('sort_order'); if (error) throw error; return data as GalleryStory[] },
+    queryFn: async () => { const { data, error } = await supabase.from('gallery_stories').select('*'); if (error) throw error; return sortByDate(data as GalleryStory[], 'period') },
   })
 
   const save = useMutation({
@@ -48,7 +50,7 @@ export default function GalleryAdminPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {isLoading ? <div className="text-center py-12 text-[var(--text-muted)] col-span-3">Loading...</div> : items.map(s => (
-          <div key={s.id} className="bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl rounded-xl overflow-hidden hover:border-primary-500/30 transition-all group cursor-pointer" onClick={() => { setEditing(s); setForm({ title: s.title, image: s.image, period: s.period, slug: s.slug, story: s.story, tags: s.tags, sort_order: s.sort_order }); setDialogOpen(true) }}>
+          <div key={s.id} className="bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl rounded-xl overflow-hidden hover:border-primary-500/30 transition-all group cursor-pointer" onClick={() => { setEditing(s); setForm({ title: s.title, image: s.image, period: s.period, slug: s.slug, story: s.story, tags: s.tags }); setDialogOpen(true) }}>
             {s.image && <div className="h-32 bg-[var(--bg-elevated)]"><img src={s.image} alt={s.title} className="w-full h-full object-cover" /></div>}
             <div className="p-4">
               <h3 className="text-sm font-bold text-[var(--text-primary)]">{s.title}</h3>
@@ -57,7 +59,7 @@ export default function GalleryAdminPage() {
                 {s.tags.slice(0, 3).map((t, i) => <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)]">{t}</span>)}
               </div>
               <div className="flex gap-2 mt-3 pt-3 border-t border-[var(--border)]">
-                <button onClick={(e) => { e.stopPropagation(); setEditing(s); setForm({ title: s.title, image: s.image, period: s.period, slug: s.slug, story: s.story, tags: s.tags, sort_order: s.sort_order }); setDialogOpen(true) }} className="flex-1 py-1.5 text-xs text-primary-400 hover:bg-primary-600/10 rounded-lg">Edit</button>
+                <button onClick={(e) => { e.stopPropagation(); setEditing(s); setForm({ title: s.title, image: s.image, period: s.period, slug: s.slug, story: s.story, tags: s.tags }); setDialogOpen(true) }} className="flex-1 py-1.5 text-xs text-primary-400 hover:bg-primary-600/10 rounded-lg">Edit</button>
                 <button onClick={(e) => { e.stopPropagation(); setDeleting(s); setDeleteOpen(true) }} className="flex-1 py-1.5 text-xs text-red-400 hover:bg-red-500/10 rounded-lg">Delete</button>
               </div>
             </div>
@@ -73,9 +75,8 @@ export default function GalleryAdminPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Period</label><input value={form.period} onChange={e => setForm(f => ({...f, period: e.target.value}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
-            <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Sort Order</label><input type="number" value={form.sort_order} onChange={e => setForm(f => ({...f, sort_order: Number(e.target.value)}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
           </div>
-          <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Image URL</label><input value={form.image} onChange={e => setForm(f => ({...f, image: e.target.value}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
+          <ImagePicker value={form.image} onChange={v => setForm(f => ({...f, image: v}))} bucket="gallery" label="Story Image" />
           <JsonArrayField value={form.tags} onChange={v => setForm(f => ({...f, tags: v}))} label="Tags" />
           <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Story</label><textarea value={form.story} onChange={e => setForm(f => ({...f, story: e.target.value}))} rows={8} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30 resize-y" /></div>
           <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border)]">

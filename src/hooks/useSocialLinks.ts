@@ -9,7 +9,7 @@ export function useSocialLinks() {
       const { data, error } = await supabase
         .from('social_links')
         .select('*')
-        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false })
       if (error) throw error
       return data as SocialLink[]
     },

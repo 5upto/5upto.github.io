@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { sortByDate } from '../../lib/sortByDate'
 import type { Experience } from '../../types/database'
 import FormDialog from '../components/FormDialog'
 import DeleteDialog from '../components/DeleteDialog'
@@ -8,7 +9,7 @@ import ImagePicker from '../components/ImagePicker'
 import JsonArrayField from '../components/JsonArrayField'
 import Toast from '../components/Toast'
 
-const empty = { role: '', company: '', logo: '', location: '', period: '', slug: '', points: [] as string[], story: '', sort_order: 0 }
+const empty = { role: '', company: '', logo: '', location: '', period: '', slug: '', points: [] as string[], story: '' }
 
 export default function ExperiencesPage() {
   const qc = useQueryClient()
@@ -21,7 +22,7 @@ export default function ExperiencesPage() {
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['admin-experiences'],
-    queryFn: async () => { const { data, error } = await supabase.from('experiences').select('*').order('sort_order'); if (error) throw error; return data as Experience[] },
+    queryFn: async () => { const { data, error } = await supabase.from('experiences').select('*'); if (error) throw error; return sortByDate(data as Experience[], 'period') },
   })
 
   const save = useMutation({
@@ -40,7 +41,7 @@ export default function ExperiencesPage() {
   })
 
   const openAdd = () => { setEditing(null); setForm(empty); setDialogOpen(true) }
-  const openEdit = (e: Experience) => { setEditing(e); setForm({ role: e.role, company: e.company, logo: e.logo, location: e.location, period: e.period, slug: e.slug, points: e.points, story: e.story, sort_order: e.sort_order }); setDialogOpen(true) }
+  const openEdit = (e: Experience) => { setEditing(e); setForm({ role: e.role, company: e.company, logo: e.logo, location: e.location, period: e.period, slug: e.slug, points: e.points, story: e.story }); setDialogOpen(true) }
   const F = ({ l, v, onChange, ph, ta, r }: { l: string; v: string; onChange: (s: string) => void; ph?: string; ta?: boolean; r?: number }) => (
     <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">{l}</label>
       {ta ? <textarea value={v} onChange={e => onChange(e.target.value)} rows={r||3} placeholder={ph} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 resize-y" />
@@ -79,7 +80,7 @@ export default function ExperiencesPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><F l="Role *" v={form.role} onChange={v => setForm(f => ({...f, role: v}))} /><F l="Company *" v={form.company} onChange={v => setForm(f => ({...f, company: v}))} /></div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><F l="Period" v={form.period} onChange={v => setForm(f => ({...f, period: v}))} ph="Jun 2026 – Present" /><F l="Location" v={form.location} onChange={v => setForm(f => ({...f, location: v}))} /></div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><F l="Slug *" v={form.slug} onChange={v => setForm(f => ({...f, slug: v}))} /><F l="Sort Order" v={String(form.sort_order)} onChange={v => setForm(f => ({...f, sort_order: Number(v)}))} /></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><F l="Slug *" v={form.slug} onChange={v => setForm(f => ({...f, slug: v}))} /></div>
           <ImagePicker value={form.logo} onChange={v => setForm(f => ({...f, logo: v}))} bucket="logos" label="Company Logo" />
           <JsonArrayField value={form.points} onChange={v => setForm(f => ({...f, points: v}))} label="Key Points" />
           <F l="Full Story" v={form.story} onChange={v => setForm(f => ({...f, story: v}))} ta r={6} />

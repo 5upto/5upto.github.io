@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { sortByDate } from '../lib/sortByDate'
 import type { Education, Certification, Publication } from '../types/database'
 
 export function useEducation() {
@@ -7,17 +8,17 @@ export function useEducation() {
     queryKey: ['education'],
     queryFn: async () => {
       const [eduRes, certRes, pubRes] = await Promise.all([
-        supabase.from('education').select('*').order('sort_order', { ascending: true }),
-        supabase.from('certifications').select('*').order('sort_order', { ascending: true }),
-        supabase.from('publications').select('*').limit(1).single(),
+        supabase.from('education').select('*'),
+        supabase.from('certifications').select('*').order('created_at', { ascending: false }),
+        supabase.from('publications').select('*'),
       ])
       if (eduRes.error) throw eduRes.error
       if (certRes.error) throw certRes.error
       if (pubRes.error) throw pubRes.error
       return {
-        education: eduRes.data as Education[],
+        education: sortByDate(eduRes.data as Education[], 'year'),
         certifications: certRes.data as Certification[],
-        publication: pubRes.data as Publication,
+        publications: sortByDate(pubRes.data as Publication[], 'date'),
       }
     },
   })

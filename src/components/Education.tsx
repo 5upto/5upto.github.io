@@ -7,28 +7,32 @@ import LoadingSpinner from './LoadingSpinner'
 import { FaAws } from 'react-icons/fa'
 import { SiIeee, SiElsevier, SiAcm, SiArxiv, SiGooglecloud, SiCisco, SiComptia, SiLinuxfoundation, SiHashicorp } from 'react-icons/si'
 import { GrOracle } from 'react-icons/gr'
-import { FaBook, FaBookOpen, FaNewspaper } from 'react-icons/fa'
+import { publisherIcons } from './PublisherIcons'
 
 gsap.registerPlugin(ScrollTrigger)
 
 // Publisher detection from conference name
 const publishers = [
-  { name: 'IEEE', color: '#006699', icon: SiIeee },
-  { name: 'Springer', color: '#C41230', icon: FaBook },
-  { name: 'Elsevier', color: '#FF6C00', icon: SiElsevier },
-  { name: 'ACM', color: '#007398', icon: SiAcm },
-  { name: 'Wiley', color: '#003B5C', icon: FaBookOpen },
-  { name: 'MDPI', color: '#89B842', icon: FaNewspaper },
-  { name: 'Preprint', color: '#8B5CF6', icon: SiArxiv },
-  { name: 'Other', color: '#6B7280', icon: FaBook },
+  { name: 'IEEE', color: '#006699', icon: publisherIcons.IEEE },
+  { name: 'Springer', color: '#C41230', icon: publisherIcons.Springer },
+  { name: 'Elsevier', color: '#FF6C00', icon: publisherIcons.Elsevier },
+  { name: 'ACM', color: '#007398', icon: publisherIcons.ACM },
+  { name: 'Wiley', color: '#003B5C', icon: publisherIcons.Wiley },
+  { name: 'MDPI', color: '#89B842', icon: publisherIcons.MDPI },
+  { name: 'Preprint', color: '#8B5CF6', icon: publisherIcons.Preprint },
+  { name: 'Other', color: '#6B7280', icon: publisherIcons.Other },
 ]
 
-function getPublisher(conference: string) {
-  const lower = (conference || '').toLowerCase()
+function getPublisher(pub: { publisher?: string; conference?: string }) {
+  if (pub.publisher) {
+    const match = publishers.find(p => p.name === pub.publisher)
+    if (match) return match
+  }
+  const lower = (pub.conference || '').toLowerCase()
   for (const p of publishers) {
     if (lower.includes(p.name.toLowerCase())) return p
   }
-  return publishers[0] // default to IEEE
+  return publishers[publishers.length - 1] // default to Other
 }
 
 const certProviders = [
@@ -67,7 +71,7 @@ export default function Education() {
   if (isLoading) return <LoadingSpinner />
   if (!data) return null
 
-  const { education, certifications, publication } = data
+  const { education, certifications, publications } = data
 
   const renderEducationCard = (edu: typeof education[0]) => {
     const isNitStyle = edu.style === 'nit'
@@ -441,9 +445,9 @@ export default function Education() {
           <h2 className="section-heading text-center mb-8 md:mb-10">
             <span className="gradient-text">Publications</span>
           </h2>
-          <div className="mt-6">
-            {(() => { const pub = getPublisher(publication.conference); const PubIcon = pub.icon; return (
-            <div className="bg-white dark:bg-[#121212] rounded-xl overflow-hidden border border-[#d0d0d0] dark:border-[#2a2a2a]">
+          <div className="mt-6 space-y-6">
+            {publications.map((publication) => { const pub = getPublisher(publication); const PubIcon = pub.icon; return (
+            <div key={publication.id} className="bg-white dark:bg-[#121212] rounded-xl overflow-hidden border border-[#d0d0d0] dark:border-[#2a2a2a]">
               <div className="h-1.5" style={{ background: pub.color }} />
               <div className="px-6 md:px-8 py-6 md:py-7">
                 <div className="flex items-center gap-2 mb-3">
@@ -487,12 +491,12 @@ export default function Education() {
                   </a>
                   <a href={publication.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[10px] md:text-[11px] text-[#006699] dark:text-[#4a9eff] border border-[#006699] dark:border-[#4a9eff] px-3 py-1.5 rounded font-medium hover:bg-[#006699]/5 transition-colors">
                     <svg viewBox="0 0 16 16" className="w-3 h-3 fill-current"><path d="M8 1a7 7 0 110 14A7 7 0 018 1zm3.36 4.65a.5.5 0 00-.71 0L7 9.29 5.35 7.65a.5.5 0 10-.7.7l2 2c.2.2.5.2.7 0l4-4a.5.5 0 000-.7z"/></svg>
-                    IEEE Xplore
+                    {pub.name === 'IEEE' ? 'IEEE Xplore' : 'View'}
                   </a>
                 </div>
               </div>
             </div>
-            )})()}
+            )})}
           </div>
         </div>
       </div>

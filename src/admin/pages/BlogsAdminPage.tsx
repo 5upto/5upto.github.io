@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { sortByDate } from '../../lib/sortByDate'
 import type { Blog, ContentBlock } from '../../types/database'
 import FormDialog from '../components/FormDialog'
 import DeleteDialog from '../components/DeleteDialog'
 import JsonArrayField from '../components/JsonArrayField'
 import Toast from '../components/Toast'
 
-const emptyBlog = { title: '', excerpt: '', date: '', image: '', tags: [] as string[], content: [] as ContentBlock[], slug: '', sort_order: 0 }
+const emptyBlog = { title: '', excerpt: '', date: '', image: '', tags: [] as string[], content: [] as ContentBlock[], slug: '' }
 
 export default function BlogsAdminPage() {
   const qc = useQueryClient()
@@ -20,7 +21,7 @@ export default function BlogsAdminPage() {
 
   const { data: blogs = [], isLoading } = useQuery({
     queryKey: ['admin-blogs'],
-    queryFn: async () => { const { data, error } = await supabase.from('blogs').select('*').order('sort_order'); if (error) throw error; return (data ?? []) as Blog[] },
+    queryFn: async () => { const { data, error } = await supabase.from('blogs').select('*'); if (error) throw error; return sortByDate((data ?? []) as Blog[], 'date') },
   })
 
   const save = useMutation({
@@ -93,7 +94,7 @@ export default function BlogsAdminPage() {
                     )}
                   </div>
                   <div className="flex gap-2 shrink-0">
-                    <button onClick={() => { setEditing(b); setForm({ title: b.title, excerpt: b.excerpt, date: b.date, image: b.image ?? '', tags: b.tags, content: b.content, slug: b.slug, sort_order: b.sort_order }); setDialogOpen(true) }} className="p-2 rounded-lg hover:bg-[var(--bg-elevated)] text-primary-400"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
+                    <button onClick={() => { setEditing(b); setForm({ title: b.title, excerpt: b.excerpt, date: b.date, image: b.image ?? '', tags: b.tags, content: b.content, slug: b.slug }); setDialogOpen(true) }} className="p-2 rounded-lg hover:bg-[var(--bg-elevated)] text-primary-400"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
                     <button onClick={() => { setDeleting(b); setDeleteOpen(true) }} className="p-2 rounded-lg hover:bg-red-500/10 text-red-400"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                   </div>
                 </div>
@@ -115,7 +116,6 @@ export default function BlogsAdminPage() {
           </div>
           <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Excerpt</label><textarea value={form.excerpt} onChange={e => setForm(f => ({...f, excerpt: e.target.value}))} rows={2} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30 resize-y" /></div>
           <JsonArrayField value={form.tags} onChange={v => setForm(f => ({...f, tags: v}))} label="Tags" />
-          <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Sort Order</label><input type="number" value={form.sort_order} onChange={e => setForm(f => ({...f, sort_order: Number(e.target.value)}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
 
           {/* Content Blocks Editor */}
           <div>

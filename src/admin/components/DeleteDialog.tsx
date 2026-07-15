@@ -22,8 +22,8 @@ export default function DeleteDialog({ open, onClose, onConfirm, title, loading 
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center">
-      <div className="fixed inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative w-full max-w-md mx-4 bg-white dark:bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--border)] rounded-2xl shadow-2xl p-6">
+      <div className="fixed inset-0 bg-black/60 touch-none" onClick={onClose} />
+      <div className="relative w-full max-w-md mx-4 bg-white dark:bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--border)] rounded-2xl shadow-2xl p-6" onClick={e => e.stopPropagation()}>
         <h2 className="text-lg font-display font-bold text-[var(--text-primary)] mb-2">Delete {title}</h2>
         <p className="text-sm text-[var(--text-muted)] mb-6">Are you sure you want to delete this item? This action cannot be undone.</p>
         <div className="flex justify-end gap-3">

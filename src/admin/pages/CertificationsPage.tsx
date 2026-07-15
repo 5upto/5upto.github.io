@@ -245,21 +245,21 @@ export default function CertificationsPage() {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [editing, setEditing] = useState<Certification | null>(null)
   const [deleting, setDeleting] = useState<Certification | null>(null)
-  const [form, setForm] = useState({ format: 'Microsoft', title: '', certId: '', sort_order: 0 })
+  const [form, setForm] = useState({ format: 'Microsoft', title: '', certId: '' })
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [showSuggestions, setShowSuggestions] = useState(false)
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['admin-certifications'],
-    queryFn: async () => { const { data, error } = await supabase.from('certifications').select('*').order('sort_order'); if (error) throw error; return data as Certification[] },
+    queryFn: async () => { const { data, error } = await supabase.from('certifications').select('*').order('created_at', { ascending: false }); if (error) throw error; return data as Certification[] },
   })
 
   const save = useMutation({
     mutationFn: async (d: typeof form) => {
       const fmt = certFormats.find(f => f.name === d.format)
       const fullName = fmt?.prefix ? `${fmt.prefix} ${d.title}${d.certId ? ` (${d.certId})` : ''}`.trim() : `${d.title}${d.certId ? ` (${d.certId})` : ''}`.trim()
-      if (editing) { const { error } = await supabase.from('certifications').update({ name: fullName, sort_order: d.sort_order }).eq('id', editing.id); if (error) throw error }
-      else { const { error } = await supabase.from('certifications').insert({ name: fullName, sort_order: items.length }); if (error) throw error }
+      if (editing) { const { error } = await supabase.from('certifications').update({ name: fullName }).eq('id', editing.id); if (error) throw error }
+      else { const { error } = await supabase.from('certifications').insert({ name: fullName }); if (error) throw error }
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin-certifications'] }); setDialogOpen(false); setEditing(null); setToast({ message: editing ? 'Updated' : 'Added', type: 'success' }) },
     onError: (e: any) => setToast({ message: e.message, type: 'error' }),
@@ -271,11 +271,11 @@ export default function CertificationsPage() {
     onError: (e: any) => setToast({ message: e.message, type: 'error' }),
   })
 
-  const openAdd = () => { setEditing(null); setForm({ format: 'Microsoft', title: '', certId: '', sort_order: 0 }); setShowSuggestions(true); setDialogOpen(true) }
+  const openAdd = () => { setEditing(null); setForm({ format: 'Microsoft', title: '', certId: '' }); setShowSuggestions(true); setDialogOpen(true) }
   const openEdit = (c: Certification) => {
     const match = c.name.match(/^(Microsoft Certified|AWS Certified|Google Cloud Certified|Cisco Certified|CompTIA|Oracle Certified|Linux Foundation|HashiCorp):\s*(.+?)\s*\((.+?)\)$/)
-    if (match) setForm({ format: match[1].replace(' Certified', ''), title: match[2], certId: match[3], sort_order: c.sort_order })
-    else setForm({ format: 'Other', title: c.name, certId: '', sort_order: c.sort_order })
+    if (match) setForm({ format: match[1].replace(' Certified', ''), title: match[2], certId: match[3] })
+    else setForm({ format: 'Other', title: c.name, certId: '' })
     setShowSuggestions(false)
     setEditing(c); setDialogOpen(true)
   }
@@ -373,12 +373,9 @@ export default function CertificationsPage() {
           <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Certification Title *</label>
             <input value={form.title} onChange={e => setForm(f => ({...f, title: e.target.value}))} placeholder="e.g. Azure Fundamentals"
               className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Cert ID</label>
               <input value={form.certId} onChange={e => setForm(f => ({...f, certId: e.target.value}))} placeholder="e.g. AZ-900"
-                className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
-            <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Sort Order</label>
-              <input type="number" value={form.sort_order} onChange={e => setForm(f => ({...f, sort_order: Number(e.target.value)}))}
                 className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
           </div>
           <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border)]">

@@ -95,6 +95,7 @@ create table public.certifications (
 create table public.publications (
   id uuid primary key default uuid_generate_v4(),
   title text not null,
+  publisher text default 'Other',
   authors jsonb default '[]'::jsonb,
   affiliations jsonb default '[]'::jsonb,
   conference text,

@@ -1,22 +1,22 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { sortByDate } from '../../lib/sortByDate'
 import type { Publication } from '../../types/database'
 import FormDialog from '../components/FormDialog'
 import DeleteDialog from '../components/DeleteDialog'
 import Toast from '../components/Toast'
-import { SiIeee, SiElsevier, SiAcm, SiArxiv } from 'react-icons/si'
-import { FaBook, FaBookOpen, FaNewspaper } from 'react-icons/fa'
+import { publisherIcons } from '../../components/PublisherIcons'
 
 const pubFormats = [
-  { name: 'IEEE', color: '#006699', icon: SiIeee },
-  { name: 'Springer', color: '#C41230', icon: FaBook },
-  { name: 'Elsevier', color: '#FF6C00', icon: SiElsevier },
-  { name: 'ACM', color: '#007398', icon: SiAcm },
-  { name: 'Wiley', color: '#003B5C', icon: FaBookOpen },
-  { name: 'MDPI', color: '#89B842', icon: FaNewspaper },
-  { name: 'Preprint', color: '#8B5CF6', icon: SiArxiv },
-  { name: 'Other', color: '#6B7280', icon: FaBook },
+  { name: 'IEEE', color: '#006699', icon: publisherIcons.IEEE },
+  { name: 'Springer', color: '#C41230', icon: publisherIcons.Springer },
+  { name: 'Elsevier', color: '#FF6C00', icon: publisherIcons.Elsevier },
+  { name: 'ACM', color: '#007398', icon: publisherIcons.ACM },
+  { name: 'Wiley', color: '#003B5C', icon: publisherIcons.Wiley },
+  { name: 'MDPI', color: '#89B842', icon: publisherIcons.MDPI },
+  { name: 'Preprint', color: '#8B5CF6', icon: publisherIcons.Preprint },
+  { name: 'Other', color: '#6B7280', icon: publisherIcons.Other },
 ]
 
 function PublisherIcon({ format, size = 24 }: { format: string; size?: number }) {
@@ -44,12 +44,12 @@ export default function PublicationsPage() {
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['admin-publications'],
-    queryFn: async () => { const { data, error } = await supabase.from('publications').select('*'); if (error) throw error; return data as Publication[] },
+    queryFn: async () => { const { data, error } = await supabase.from('publications').select('*'); if (error) throw error; return sortByDate(data as Publication[], 'date') },
   })
 
   const save = useMutation({
     mutationFn: async (d: typeof form) => {
-      const pubData = { title: d.title, authors: d.authors, affiliations: d.affiliations, conference: d.conference || `${d.format} Publication`, location: d.location, date: d.date, doi: d.doi, pages: d.pages, keywords: d.keywords, abstract: d.abstract, url: d.url }
+      const pubData = { title: d.title, publisher: d.format, authors: d.authors, affiliations: d.affiliations, conference: d.conference || `${d.format} Publication`, location: d.location, date: d.date, doi: d.doi, pages: d.pages, keywords: d.keywords, abstract: d.abstract, url: d.url }
       if (editing) { const { error } = await supabase.from('publications').update(pubData).eq('id', editing.id); if (error) throw error }
       else { const { error } = await supabase.from('publications').insert(pubData); if (error) throw error }
     },
@@ -113,7 +113,7 @@ export default function PublicationsPage() {
           date = dateParts.length >= 3 ? `${dateParts[0]}-${String(dateParts[1]).padStart(2, '0')}-${String(dateParts[2]).padStart(2, '0')}` : dateParts.length >= 2 ? `${dateParts[0]}-${String(dateParts[1]).padStart(2, '0')}` : `${dateParts[0] || ''}`
         }
         if (!pages) pages = work.page || ''
-        if (!keywords.length) keywords = (work.subject || []).map((k: any) => String(k))
+        if (!keywords.length) keywords = (work.keyword || work.subject || []).map((k: any) => String(k))
         if (!abstract) abstract = (work.abstract || '').replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ').trim()
         if (!url) url = work.URL || `https://doi.org/${cleanDoi}`
       }
@@ -151,7 +151,7 @@ export default function PublicationsPage() {
 
   const openAdd = () => { setEditing(null); setForm(empty); setDoiInput(''); setDialogOpen(true) }
   const openEdit = (p: Publication) => {
-    const fmt = pubFormats.find(f => p.conference?.includes(f.name)) || pubFormats[0]
+    const fmt = pubFormats.find(f => f.name === p.publisher) || pubFormats.find(f => p.conference?.includes(f.name)) || pubFormats[0]
     setForm({ format: fmt.name, title: p.title, authors: p.authors, affiliations: p.affiliations, conference: p.conference, location: p.location, date: p.date, doi: p.doi, pages: p.pages, keywords: p.keywords, abstract: p.abstract, url: p.url })
     setEditing(p); setDialogOpen(true)
   }
@@ -172,7 +172,7 @@ export default function PublicationsPage() {
 
       <div className="space-y-3">
         {isLoading ? <div className="text-center py-12 text-[var(--text-muted)]">Loading...</div> : items.map(p => {
-          const fmt = pubFormats.find(f => p.conference?.includes(f.name)) || pubFormats[0]
+          const fmt = pubFormats.find(f => f.name === p.publisher) || pubFormats.find(f => p.conference?.includes(f.name)) || pubFormats[0]
           return (
             <div key={p.id} className="bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl rounded-xl overflow-hidden hover:border-primary-500/30 transition-all group cursor-pointer" onClick={() => openEdit(p)}>
               <div className="h-1.5" style={{ background: fmt.color }} />
@@ -223,7 +223,7 @@ export default function PublicationsPage() {
             <div className="h-1.5" style={{ background: selectedFormat.color }} />
             <div className="p-4">
               <div className="flex items-center gap-2 mb-2">
-                <PublisherIcon format={form.format} size={16} />
+                <PublisherIcon format={form.format} size={24} />
                 <p className="text-[10px] font-semibold uppercase tracking-wider" style={{ color: selectedFormat.color }}>{form.format}</p>
               </div>
               <h3 className="text-sm font-bold text-[var(--text-primary)]">{form.title || 'Publication Title'}</h3>
@@ -245,7 +245,7 @@ export default function PublicationsPage() {
               {pubFormats.map(f => (
                 <button key={f.name} type="button" onClick={() => setForm(fm => ({...fm, format: f.name}))}
                   className={`flex flex-col items-center gap-1 p-2 rounded-xl border transition-all ${form.format === f.name ? 'border-primary-500 bg-primary-500/10' : 'border-[var(--border)] hover:border-primary-500/30'}`}>
-                  <PublisherIcon format={f.name} size={18} />
+                  <PublisherIcon format={f.name} size={22} />
                   <span className="text-[9px] text-[var(--text-muted)]">{f.name}</span>
                 </button>
               ))}

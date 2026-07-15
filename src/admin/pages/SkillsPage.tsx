@@ -7,7 +7,7 @@ import DeleteDialog from '../components/DeleteDialog'
 import IconPicker from '../components/IconPicker'
 import Toast from '../components/Toast'
 
-const empty: { label: string; color: string; icon_name: string; category: 'languages' | 'web' | 'databases'; sort_order: number } = { label: '', color: '#000000', icon_name: '', category: 'web', sort_order: 0 }
+const empty: { label: string; color: string; icon_name: string; category: 'languages' | 'web' | 'databases' } = { label: '', color: '#000000', icon_name: '', category: 'web' }
 
 // Load all icons dynamically
 const allIcons: Record<string, React.ComponentType<any>> = {}
@@ -42,7 +42,7 @@ export default function SkillsPage() {
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['admin-skills'],
-    queryFn: async () => { const { data, error } = await supabase.from('skills').select('*').order('category').order('sort_order'); if (error) throw error; return data as Skill[] },
+    queryFn: async () => { const { data, error } = await supabase.from('skills').select('*').order('category').order('created_at', { ascending: false }); if (error) throw error; return data as Skill[] },
   })
 
   const save = useMutation({
@@ -85,7 +85,7 @@ export default function SkillsPage() {
               {catItems.map(skill => {
                 const IconComp = skill.icon_name ? allIcons[skill.icon_name] : null
                 return (
-                  <div key={skill.id} className="group bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl rounded-xl px-3 py-2 flex items-center gap-2 hover:border-primary-500/30 transition-all cursor-pointer" onClick={() => { setEditing(skill); setForm({ label: skill.label, color: skill.color, icon_name: skill.icon_name || '', category: skill.category, sort_order: skill.sort_order }); setDialogOpen(true) }}>
+                  <div key={skill.id} className="group bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl rounded-xl px-3 py-2 flex items-center gap-2 hover:border-primary-500/30 transition-all cursor-pointer" onClick={() => { setEditing(skill); setForm({ label: skill.label, color: skill.color, icon_name: skill.icon_name || '', category: skill.category }); setDialogOpen(true) }}>
                     {IconComp ? <IconComp size={16} style={{ color: skill.color }} /> : <span className="w-3 h-3 rounded-full shrink-0" style={{ background: skill.color }} />}
                     <span className="text-sm text-[var(--text-secondary)]">{skill.label}</span>
                     <button onClick={(e) => { e.stopPropagation(); setDeleting(skill); setDeleteOpen(true) }} className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-red-400 hover:text-red-300 transition-all">

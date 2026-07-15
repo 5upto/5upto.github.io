@@ -8,7 +8,7 @@ import Toast from '../components/Toast'
 import { platformIcons } from '../../lib/socialIcons'
 import { FaGlobe } from 'react-icons/fa'
 
-const empty = { platform: '', url: '', label: '', icon_svg: '', sort_order: 0 }
+const empty = { platform: '', url: '', label: '', icon_svg: '' }
 
 export default function SocialLinksPage() {
   const qc = useQueryClient()
@@ -21,7 +21,7 @@ export default function SocialLinksPage() {
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['admin-social-links'],
-    queryFn: async () => { const { data, error } = await supabase.from('social_links').select('*').order('sort_order'); if (error) throw error; return data as SocialLink[] },
+    queryFn: async () => { const { data, error } = await supabase.from('social_links').select('*').order('created_at', { ascending: false }); if (error) throw error; return data as SocialLink[] },
   })
 
   const save = useMutation({
@@ -58,7 +58,7 @@ export default function SocialLinksPage() {
                 <p className="text-xs text-[var(--text-muted)] truncate">{l.url}</p>
               </div>
               <div className="flex gap-2 shrink-0">
-                <button onClick={() => { setEditing(l); setForm({ platform: l.platform, url: l.url, label: l.label, icon_svg: l.icon_svg ?? '', sort_order: l.sort_order }); setDialogOpen(true) }} className="p-2 rounded-lg hover:bg-[var(--bg-elevated)] text-primary-400"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
+                <button onClick={() => { setEditing(l); setForm({ platform: l.platform, url: l.url, label: l.label, icon_svg: l.icon_svg ?? '' }); setDialogOpen(true) }} className="p-2 rounded-lg hover:bg-[var(--bg-elevated)] text-primary-400"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
                 <button onClick={() => { setDeleting(l); setDeleteOpen(true) }} className="p-2 rounded-lg hover:bg-red-500/10 text-red-400"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
               </div>
             </div>
@@ -79,8 +79,6 @@ export default function SocialLinksPage() {
             </div></div>
           <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">URL *</label>
             <input value={form.url} onChange={e => setForm(f => ({...f, url: e.target.value}))} placeholder="https://..." className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
-          <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Sort Order</label>
-            <input type="number" value={form.sort_order} onChange={e => setForm(f => ({...f, sort_order: Number(e.target.value)}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500/30" /></div>
           <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border)]">
             <button onClick={() => setDialogOpen(false)} className="px-4 py-2 text-sm text-[var(--text-muted)]">Cancel</button>
             <button onClick={() => save.mutate(form)} disabled={save.isPending || !form.platform || !form.url} className="px-6 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium">{save.isPending ? 'Saving...' : editing ? 'Update' : 'Create'}</button>

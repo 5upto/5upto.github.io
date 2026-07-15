@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { sortByDate } from '../lib/sortByDate'
 import type { Experience } from '../types/database'
 
 export function useExperiences() {
@@ -9,9 +10,8 @@ export function useExperiences() {
       const { data, error } = await supabase
         .from('experiences')
         .select('*')
-        .order('sort_order', { ascending: true })
       if (error) throw error
-      return data as Experience[]
+      return sortByDate(data as Experience[], 'period')
     },
   })
 }

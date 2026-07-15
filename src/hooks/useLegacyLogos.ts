@@ -9,7 +9,7 @@ export function useLegacyLogos() {
       const { data, error } = await supabase
         .from('legacy_logos')
         .select('*')
-        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false })
       if (error) throw error
       return data as LegacyLogo[]
     },

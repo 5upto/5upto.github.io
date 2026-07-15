@@ -225,9 +225,10 @@ VALUES
 -- ============================================
 -- PUBLICATIONS
 -- ============================================
-INSERT INTO public.publications (title, authors, affiliations, conference, location, date, doi, pages, keywords, abstract, url)
+INSERT INTO public.publications (title, publisher, authors, affiliations, conference, location, date, doi, pages, keywords, abstract, url)
 VALUES (
   'Transformer-Based Model for Building Classification Under Diverse Lighting Conditions',
+  'IEEE',
   '[{"name":"S. Ghosh","affil":1},{"name":"S. K. Panda","affil":2},{"name":"M. K. Bishwal","affil":1},{"name":"P. K. Sa","affil":1}]',
   '["Department of Computer Science and Engineering, National Institute of Technology Rourkela, India","Department of Computer Science, School of Computer Science, UPES Dehradun, India"]',
   '2025 International Conference on Innovative Trends in Information Technology (ICITIIT)',

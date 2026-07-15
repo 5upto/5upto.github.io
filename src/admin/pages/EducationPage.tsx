@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
+import { sortByDate } from '../../lib/sortByDate'
 import type { Education } from '../../types/database'
 import FormDialog from '../components/FormDialog'
 import DeleteDialog from '../components/DeleteDialog'
 import Toast from '../components/Toast'
 import ImagePicker from '../components/ImagePicker'
 
-const empty = { degree: '', subject: '', institution: '', logo: '', year: '', style: 'bangladesh' as 'nit' | 'bangladesh' | 'international', country_name: '', board_name: '', certificate_label: 'Certificate of', signatory: '', sort_order: 0 }
+const empty = { degree: '', subject: '', institution: '', logo: '', year: '', style: 'bangladesh' as 'nit' | 'bangladesh' | 'international', country_name: '', board_name: '', certificate_label: 'Certificate of', signatory: '' }
 
 export default function EducationPage() {
   const qc = useQueryClient()
@@ -20,7 +21,7 @@ export default function EducationPage() {
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['admin-education'],
-    queryFn: async () => { const { data, error } = await supabase.from('education').select('*').order('sort_order'); if (error) throw error; return data as Education[] },
+    queryFn: async () => { const { data, error } = await supabase.from('education').select('*'); if (error) throw error; return sortByDate(data as Education[], 'year') },
   })
 
   const save = useMutation({
@@ -61,7 +62,7 @@ export default function EducationPage() {
                 </div>
               </div>
               <div className="flex gap-2 shrink-0">
-                <button onClick={() => { setEditing(e); setForm({ degree: e.degree, subject: e.subject, institution: e.institution, logo: e.logo, year: e.year, style: e.style || 'bangladesh', country_name: e.country_name || '', board_name: e.board_name || '', certificate_label: e.certificate_label || 'Certificate of', signatory: e.signatory || '', sort_order: e.sort_order }); setDialogOpen(true) }} className="p-2 rounded-lg hover:bg-[var(--bg-elevated)] text-primary-400"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
+                <button onClick={() => { setEditing(e); setForm({ degree: e.degree, subject: e.subject, institution: e.institution, logo: e.logo, year: e.year, style: e.style || 'bangladesh', country_name: e.country_name || '', board_name: e.board_name || '', certificate_label: e.certificate_label || 'Certificate of', signatory: e.signatory || '' }); setDialogOpen(true) }} className="p-2 rounded-lg hover:bg-[var(--bg-elevated)] text-primary-400"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
                 <button onClick={() => { setDeleting(e); setDeleteOpen(true) }} className="p-2 rounded-lg hover:bg-red-500/10 text-red-400"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
               </div>
             </div>
@@ -175,7 +176,6 @@ export default function EducationPage() {
             <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Certificate Label</label><input value={form.certificate_label} onChange={e => setForm(f => ({...f, certificate_label: e.target.value}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
             <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Signatory</label><input value={form.signatory} onChange={e => setForm(f => ({...f, signatory: e.target.value}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
           </div>
-          <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Sort Order</label><input type="number" value={form.sort_order} onChange={e => setForm(f => ({...f, sort_order: Number(e.target.value)}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
           <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border)]">
             <button onClick={() => setDialogOpen(false)} className="px-4 py-2 text-sm text-[var(--text-muted)]">Cancel</button>
             <button onClick={() => save.mutate(form)} disabled={save.isPending || !form.degree || !form.institution} className="px-6 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium">{save.isPending ? 'Saving...' : editing ? 'Update' : 'Create'}</button>

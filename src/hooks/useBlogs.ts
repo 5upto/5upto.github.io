@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../lib/supabase'
+import { sortByDate } from '../lib/sortByDate'
 import type { Blog } from '../types/database'
 
 export function useBlogs() {
@@ -9,9 +10,8 @@ export function useBlogs() {
       const { data, error } = await supabase
         .from('blogs')
         .select('*')
-        .order('sort_order', { ascending: true })
       if (error) throw error
-      return data as Blog[]
+      return sortByDate(data as Blog[], 'date')
     },
   })
 }

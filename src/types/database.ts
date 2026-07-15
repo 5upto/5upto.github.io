@@ -76,6 +76,7 @@ export interface Certification {
 export interface Publication {
   id: string
   title: string
+  publisher: string
   authors: PublicationAuthor[]
   affiliations: string[]
   conference: string
