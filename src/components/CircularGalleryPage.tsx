@@ -2,26 +2,23 @@ import { useCallback, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import CircularGallery from './CircularGallery'
-
-const slugify = (s: string) =>
-  s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-
-const galleryImages = [
-  { image: 'https://picsum.photos/seed/mountain/800/600', text: 'Mountain Escape' },
-  { image: 'https://picsum.photos/seed/urban/800/600', text: 'Urban Nights' },
-  { image: 'https://picsum.photos/seed/ocean/800/600', text: 'Ocean Breeze' },
-  { image: 'https://picsum.photos/seed/forest/800/600', text: 'Forest Trail' },
-  { image: 'https://picsum.photos/seed/desert/800/600', text: 'Desert Dunes' },
-]
+import { useGallery } from '../hooks/useGallery'
+import LoadingSpinner from './LoadingSpinner'
 
 export default function CircularGalleryPage() {
   const navigate = useNavigate()
   const headingRef = useRef<HTMLHeadingElement>(null)
+  const { data: stories, isLoading } = useGallery()
+
+  const galleryImages = (stories ?? []).map(s => ({
+    image: s.image.replace('/1200/800', '/800/600'),
+    text: s.title,
+  }))
 
   const handleClick = useCallback((index: number) => {
     const item = galleryImages[index % galleryImages.length]
-    navigate(`/gallery/${slugify(item.text)}`)
-  }, [navigate])
+    navigate(`/gallery/${item.text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`)
+  }, [navigate, galleryImages])
 
   useEffect(() => {
     if (headingRef.current) {
@@ -32,32 +29,22 @@ export default function CircularGalleryPage() {
     }
   }, [])
 
+  if (isLoading) return <LoadingSpinner />
+
   return (
     <section className="min-h-screen py-24 px-4 relative">
       <div className="max-w-5xl mx-auto">
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors mb-10 group"
-        >
-          <svg
-            className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
+        <button onClick={() => navigate('/')} className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors mb-10 group">
+          <svg className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           <span className="text-sm font-medium">Back</span>
         </button>
       </div>
-
       <h2 ref={headingRef} className="section-heading text-center mb-4">
         <span className="gradient-text">Gallery</span>
       </h2>
-      <p className="text-center text-[var(--text-muted)] mb-6 max-w-md mx-auto text-sm">
-        Click any image to view its story.
-      </p>
-
+      <p className="text-center text-[var(--text-muted)] mb-6 max-w-md mx-auto text-sm">Click any image to view its story.</p>
       <div className="max-w-5xl mx-auto h-[400px] md:h-[500px]">
         <CircularGallery
           items={galleryImages}

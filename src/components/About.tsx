@@ -1,21 +1,17 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useProfile } from '../hooks/useProfile'
+import LoadingSpinner from './LoadingSpinner'
 
 gsap.registerPlugin(ScrollTrigger)
-
-const highlights = [
-  { label: 'Experience', value: '2+ Years' },
-  { label: 'Projects', value: '5+' },
-  { label: 'Publications', value: '1' },
-  { label: 'Certifications', value: '4' },
-]
 
 export default function About() {
   const sectionRef = useRef<HTMLElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
   const textRef = useRef<HTMLParagraphElement>(null)
   const statsRef = useRef<HTMLDivElement>(null)
+  const { data: profile, isLoading } = useProfile()
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -35,6 +31,9 @@ export default function About() {
     return () => ctx.revert()
   }, [])
 
+  if (isLoading) return <LoadingSpinner />
+  if (!profile) return null
+
   return (
     <section ref={sectionRef} id="about" className="py-24 px-4 relative">
       <div className="max-w-5xl mx-auto">
@@ -42,14 +41,10 @@ export default function About() {
           About <span className="gradient-text">Me</span>
         </h2>
         <p ref={textRef} className="text-[var(--text-muted)] text-lg leading-relaxed max-w-3xl mx-auto text-center mb-16">
-          I'm a Software Engineer from Dhaka, Bangladesh, currently building intelligent transportation
-          solutions at Regnum Resource Ltd. I graduated from the National Institute of Technology Rourkela
-          with a B.Tech in Computer Science, where I was awarded the ICCR International Scholarship by
-          the Government of India. My work spans AI, computer vision, full-stack development, and
-          enterprise systems.
+          {profile.bio}
         </p>
         <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {highlights.map((item) => (
+          {profile.about_highlights.map((item) => (
             <div key={item.label} className="card text-center">
               <div className="text-3xl font-display font-bold gradient-text mb-1">{item.value}</div>
               <div className="text-[var(--text-muted)] text-sm">{item.label}</div>

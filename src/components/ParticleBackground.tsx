@@ -82,5 +82,5 @@ export default function ParticleBackground() {
     }
   }, [])
 
-  return <div id="particles-js" className="fixed inset-0 z-0" />
+  return <div id="particles-js" className="fixed inset-0 z-0 pointer-events-none" />
 }

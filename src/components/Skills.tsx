@@ -1,96 +1,61 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import LogoLoop from './LogoLoop'
-import {
-  SiPython, SiCplusplus, SiJavascript, SiTypescript,
-  SiFastapi, SiFlask, SiReact, SiNodedotjs, SiExpress,
-  SiPostgresql, SiMysql, SiMongodb, SiSqlite,
-  SiPytorch, SiTensorflow, SiOpencv, SiScikitlearn, SiNumpy, SiPandas,
-  SiHtml5, SiCss, SiTailwindcss, SiRedux, SiNextdotjs,
-  SiJquery, SiGulp, SiSpringboot, SiDjango, SiStreamlit,
-  SiDocker, SiSocketdotio, SiApachekafka, SiRedis,
-  SiKubernetes, SiNginx, SiYaml, SiJenkins, SiGit, SiGithub,
-  SiKeras, SiDask, SiPolars, SiPlotly, SiTqdm, SiScipy,
-  SiLangchain, SiMlflow, SiFirebase,
-} from 'react-icons/si'
-import { FaJava } from 'react-icons/fa'
+import { useSkills } from '../hooks/useSkills'
+import LoadingSpinner from './LoadingSpinner'
 
 gsap.registerPlugin(ScrollTrigger)
 
-interface SkillIcon {
-  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>
-  label: string
-  color: string
+// All icons loaded dynamically from react-icons
+const allIcons: Record<string, React.ComponentType<{ size?: number; style?: React.CSSProperties }>> = {}
+
+// Label -> icon_name mapping for fallback
+const labelToIcon: Record<string, string> = {
+  Python: 'SiPython', Java: 'FaJava', 'C++': 'SiCplusplus', JavaScript: 'SiJavascript', TypeScript: 'SiTypescript',
+  HTML5: 'SiHtml5', CSS: 'SiCss', TailwindCSS: 'SiTailwindcss', React: 'SiReact', Redux: 'SiRedux',
+  'Node.js': 'SiNodedotjs', 'Express.js': 'SiExpress', 'Next.js': 'SiNextdotjs', jQuery: 'SiJquery',
+  Gulp: 'SiGulp', 'Spring Boot': 'SiSpringboot', Django: 'SiDjango', Flask: 'SiFlask',
+  Streamlit: 'SiStreamlit', FastAPI: 'SiFastapi', Docker: 'SiDocker', 'Socket.io': 'SiSocketdotio',
+  'Apache Kafka': 'SiApachekafka', Redis: 'SiRedis', Kubernetes: 'SiKubernetes', nginx: 'SiNginx',
+  YAML: 'SiYaml', Jenkins: 'SiJenkins', Git: 'SiGit', GitHub: 'SiGithub', PyTorch: 'SiPytorch',
+  Keras: 'SiKeras', TensorFlow: 'SiTensorflow', NumPy: 'SiNumpy', Pandas: 'SiPandas',
+  Dask: 'SiDask', Polars: 'SiPolars', 'Scikit-learn': 'SiScikitlearn', OpenCV: 'SiOpencv',
+  Plotly: 'SiPlotly', tqdm: 'SiTqdm', SciPy: 'SiScipy', MLflow: 'SiMlflow', LangChain: 'SiLangchain',
+  PostgreSQL: 'SiPostgresql', MySQL: 'SiMysql', MongoDB: 'SiMongodb', SQLite: 'SiSqlite', Firebase: 'SiFirebase',
 }
 
-const languages: SkillIcon[] = [
-  { icon: SiPython, label: 'Python', color: '#3776AB' },
-  { icon: FaJava, label: 'Java', color: '#ED8B00' },
-  { icon: SiCplusplus, label: 'C++', color: '#00599C' },
-  { icon: SiJavascript, label: 'JavaScript', color: '#F7DF1E' },
-  { icon: SiTypescript, label: 'TypeScript', color: '#3178C6' },
-]
+function useAllIcons() {
+  const [loaded, setLoaded] = useState(Object.keys(allIcons).length > 0)
 
-const webTech: SkillIcon[] = [
-  { icon: SiHtml5, label: 'HTML5', color: '#E34F26' },
-  { icon: SiCss, label: 'CSS', color: '#1572B6' },
-  { icon: SiTailwindcss, label: 'TailwindCSS', color: '#06B6D4' },
-  { icon: SiReact, label: 'React', color: '#61DAFB' },
-  { icon: SiRedux, label: 'Redux', color: '#764ABC' },
-  { icon: SiNodedotjs, label: 'Node.js', color: '#339933' },
-  { icon: SiExpress, label: 'Express.js', color: '#000000' },
-  { icon: SiNextdotjs, label: 'Next.js', color: '#000000' },
-  { icon: SiJquery, label: 'jQuery', color: '#0769AD' },
-  { icon: SiGulp, label: 'Gulp', color: '#CF4647' },
-  { icon: SiSpringboot, label: 'Spring Boot', color: '#6DB33F' },
-  { icon: SiDjango, label: 'Django', color: '#092E20' },
-  { icon: SiFlask, label: 'Flask', color: '#000000' },
-  { icon: SiStreamlit, label: 'Streamlit', color: '#FF4B4B' },
-  { icon: SiFastapi, label: 'FastAPI', color: '#009688' },
-  { icon: SiDocker, label: 'Docker', color: '#2496ED' },
-  { icon: SiSocketdotio, label: 'Socket.io', color: '#010101' },
-  { icon: SiApachekafka, label: 'Apache Kafka', color: '#231F20' },
-  { icon: SiRedis, label: 'Redis', color: '#FF4438' },
-  { icon: SiKubernetes, label: 'Kubernetes', color: '#326CE5' },
-  { icon: SiNginx, label: 'nginx', color: '#009639' },
-  { icon: SiYaml, label: 'YAML', color: '#CB171E' },
-  { icon: SiJenkins, label: 'Jenkins', color: '#D24939' },
-  { icon: SiGit, label: 'Git', color: '#F05032' },
-  { icon: SiGithub, label: 'GitHub', color: '#181717' },
-  { icon: SiPytorch, label: 'PyTorch', color: '#EE4C2C' },
-  { icon: SiKeras, label: 'Keras', color: '#D00000' },
-  { icon: SiTensorflow, label: 'TensorFlow', color: '#FF6F00' },
-  { icon: SiNumpy, label: 'NumPy', color: '#013243' },
-  { icon: SiPandas, label: 'Pandas', color: '#150458' },
-  { icon: SiDask, label: 'Dask', color: '#F9A03F' },
-  { icon: SiPolars, label: 'Polars', color: '#CD7F32' },
-  { icon: SiScikitlearn, label: 'Scikit-learn', color: '#F7931E' },
-  { icon: SiOpencv, label: 'OpenCV', color: '#5C3EE8' },
-  { icon: SiPlotly, label: 'Plotly', color: '#3F4F75' },
-  { icon: SiTqdm, label: 'tqdm', color: '#FF6F00' },
-  { icon: SiScipy, label: 'SciPy', color: '#8CAAE6' },
-  { icon: SiMlflow, label: 'MLflow', color: '#0194E2' },
-  { icon: SiLangchain, label: 'LangChain', color: '#1C3C3C' },
-]
+  useEffect(() => {
+    if (loaded) return
+    Promise.all([
+      import('react-icons/si'),
+      import('react-icons/fa'),
+    ]).then(([si, fa]) => {
+      Object.assign(allIcons, si, fa)
+      setLoaded(true)
+    })
+  }, [loaded])
 
-const databases: SkillIcon[] = [
-  { icon: SiPostgresql, label: 'PostgreSQL', color: '#4169E1' },
-  { icon: SiMysql, label: 'MySQL', color: '#4479A1' },
-  { icon: SiMongodb, label: 'MongoDB', color: '#47A248' },
-  { icon: SiSqlite, label: 'SQLite', color: '#003B57' },
-  { icon: SiFirebase, label: 'Firebase', color: '#FFCA28' },
-]
+  return loaded
+}
 
-const rows = [
-  { label: 'Languages', items: languages, speed: 50 },
-  { label: 'Web Technologies', items: webTech, speed: -60 },
-  { label: 'Databases', items: databases, speed: 50 },
-]
+function getIcon(skill: { label: string; icon_name?: string }): React.ComponentType<{ size?: number; style?: React.CSSProperties }> | null {
+  // 1. Try icon_name from database
+  if (skill.icon_name && allIcons[skill.icon_name]) return allIcons[skill.icon_name]
+  // 2. Try label -> icon_name mapping
+  const iconName = labelToIcon[skill.label]
+  if (iconName && allIcons[iconName]) return allIcons[iconName]
+  return null
+}
 
 export default function Skills() {
   const sectionRef = useRef<HTMLElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
+  const { data: skills, isLoading } = useSkills()
+  const iconsLoaded = useAllIcons()
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -102,6 +67,14 @@ export default function Skills() {
     return () => ctx.revert()
   }, [])
 
+  if (isLoading || !iconsLoaded) return <LoadingSpinner />
+
+  const categories = [
+    { label: 'Languages', category: 'languages' as const, speed: 50 },
+    { label: 'Web Technologies', category: 'web' as const, speed: -60 },
+    { label: 'Databases', category: 'databases' as const, speed: 50 },
+  ]
+
   return (
     <section ref={sectionRef} id="skills" className="py-20 md:py-24 px-4 relative">
       <div className="max-w-5xl mx-auto">
@@ -109,24 +82,34 @@ export default function Skills() {
           Technical <span className="gradient-text">Skills</span>
         </h2>
         <div className="mt-6 space-y-6">
-          {rows.map((row) => (
-            <div key={row.label}>
-              <p className="text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)] mb-2">{row.label}</p>
-              <LogoLoop
-                logos={row.items.map(({ icon: Icon, label, color }) => ({
-                  node: (
-                    <span title={label} className="skill-icon-wrapper inline-flex items-center justify-center cursor-pointer">
-                      <Icon size={24} style={{ color }} />
-                    </span>
-                  ),
-                }))}
-                speed={row.speed}
-                gap={32}
-                fadeOut
-                pauseOnHover
-              />
-            </div>
-          ))}
+          {categories.map((cat) => {
+            const items = (skills ?? []).filter(s => s.category === cat.category)
+            return (
+              <div key={cat.label}>
+                <p className="text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)] mb-2">{cat.label}</p>
+                <LogoLoop
+                  logos={items.map((skill) => {
+                    const Icon = getIcon(skill)
+                    return {
+                      node: (
+                        <span title={skill.label} className="skill-icon-wrapper inline-flex items-center justify-center cursor-pointer">
+                          {Icon ? (
+                            <Icon size={24} style={{ color: skill.color }} />
+                          ) : (
+                            <span className="text-sm font-medium" style={{ color: skill.color }}>{skill.label}</span>
+                          )}
+                        </span>
+                      ),
+                    }
+                  })}
+                  speed={cat.speed}
+                  gap={32}
+                  fadeOut
+                  pauseOnHover
+                />
+              </div>
+            )
+          })}
         </div>
       </div>
     </section>

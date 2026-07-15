@@ -1,17 +1,16 @@
+import { useLegacyLogos } from '../hooks/useLegacyLogos'
+import LoadingSpinner from './LoadingSpinner'
+
 interface LegacyProps {
   onBack: () => void
   onSelect: (logo: string) => void
 }
 
-const items = [
-  { file: 'w26.jpeg', num: '26', aspect: '513/531' },
-  { file: 'w22.jpeg', num: '22', aspect: '222/230' },
-  { file: '21.jpeg', num: '21', aspect: '229/237' },
-  { file: '19.jpeg', num: '19', aspect: '235/235' },
-  { file: 'w18.jpeg', num: '18', aspect: '240/240' },
-]
-
 export default function Legacy({ onBack, onSelect }: LegacyProps) {
+  const { data: items, isLoading } = useLegacyLogos()
+
+  if (isLoading) return <LoadingSpinner />
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg-primary)] relative z-10 px-4">
       <button
@@ -25,12 +24,12 @@ export default function Legacy({ onBack, onSelect }: LegacyProps) {
       </button>
       <h2 className="text-3xl md:text-4xl font-display font-bold mb-12 gradient-text">Legacy Numbers</h2>
       <div className="flex flex-nowrap items-center justify-center gap-2 md:gap-12 max-w-full px-2 md:px-4">
-        {items.map((item) => (
-          <button key={item.num} onClick={() => onSelect(item.file)} className="flex flex-col items-center gap-1 md:gap-4 group">
+        {(items ?? []).map((item) => (
+          <button key={item.id} onClick={() => onSelect(item.file)} className="flex flex-col items-center gap-1 md:gap-4 group">
             <div className="w-14 md:w-44 overflow-hidden rounded-lg md:rounded-2xl ring-2 ring-transparent hover:ring-primary-400 transition-all" style={{ aspectRatio: item.aspect }}>
-              <img src={`/images/logos/${item.file}`} alt={item.num} className="w-full h-full object-cover" />
+              <img src={`/images/logos/${item.file}`} alt={item.number} className="w-full h-full object-cover" />
             </div>
-            <span className="text-[10px] md:text-xl text-[var(--text-primary)] font-bold group-hover:text-primary-400 transition-colors">{item.num}</span>
+            <span className="text-[10px] md:text-xl text-[var(--text-primary)] font-bold group-hover:text-primary-400 transition-colors">{item.number}</span>
           </button>
         ))}
       </div>

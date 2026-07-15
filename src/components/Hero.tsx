@@ -1,10 +1,13 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import ProfileCard from './ProfileCard'
+import { useProfile } from '../hooks/useProfile'
+import LoadingSpinner from './LoadingSpinner'
 
 export default function Hero() {
   const containerRef = useRef<HTMLElement>(null)
   const textRef = useRef<HTMLDivElement>(null)
+  const { data: profile, isLoading } = useProfile()
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
@@ -18,6 +21,9 @@ export default function Hero() {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  if (isLoading) return <LoadingSpinner />
+  if (!profile) return null
+
   return (
     <section
       ref={containerRef}
@@ -27,14 +33,14 @@ export default function Hero() {
       <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
         <div ref={textRef} className="flex-1 text-center lg:text-left">
           <p className="text-primary-400 font-display text-base md:text-lg mb-4 tracking-[0.2em] uppercase opacity-80">
-            Software Engineer
+            {profile.title}
           </p>
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold mb-4 leading-tight">
-            Shawon{' '}
-            <span className="gradient-text">Ghosh</span>
+            {profile.name.split(' ')[0]}{' '}
+            <span className="gradient-text">{profile.name.split(' ').slice(1).join(' ')}</span>
           </h1>
           <p className="text-[var(--text-muted)] text-base md:text-lg leading-relaxed mb-10">
-            I build production systems at the intersection of computer vision, AI, and software engineering.
+            {profile.tagline}
           </p>
           <div className="flex flex-wrap gap-4 justify-center lg:justify-start mb-8">
             <button
@@ -53,9 +59,9 @@ export default function Hero() {
         </div>
         <div className="flex-shrink-0 w-full max-w-sm lg:max-w-md">
           <ProfileCard
-            avatarUrl="/images/DSC_0329.jpg.jpeg"
-            handle="5upto"
-            status="Open to opportunities"
+            avatarUrl={profile.avatar_url}
+            handle={profile.handle}
+            status={profile.status}
             contactText="Contact"
             onContactClick={() => scrollTo('contact')}
           />

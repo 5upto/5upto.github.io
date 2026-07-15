@@ -5,3 +5,25 @@ dist-ssr
 .DS_Store
 *.tsbuildinfo
 .mimocode
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+*.log
+npm-debug.log*
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Supabase local dev
+supabase/.temp
+supabase/.env
