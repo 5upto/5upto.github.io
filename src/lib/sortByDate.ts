@@ -46,5 +46,5 @@ export function parseDateField(text: string): number {
 }
 
 export function sortByDate<T>(items: T[], dateField: keyof T): T[] {
-  return [...items].sort((a, b) => parseDateField(String(a[dateField])) - parseDateField(String(b[dateField])))
+  return [...items].sort((a, b) => parseDateField(String(b[dateField])) - parseDateField(String(a[dateField])))
 }
