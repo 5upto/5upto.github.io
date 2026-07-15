@@ -5,26 +5,10 @@ import type { SocialLink } from '../../types/database'
 import FormDialog from '../components/FormDialog'
 import DeleteDialog from '../components/DeleteDialog'
 import Toast from '../components/Toast'
-import { FaLinkedin, FaGithub, FaFacebook, FaInstagram, FaYoutube, FaDiscord, FaTwitch, FaTelegram, FaGlobe } from 'react-icons/fa'
-import { SiLeetcode, SiX, SiGmail, SiGooglescholar } from 'react-icons/si'
+import { platformIcons } from '../../lib/socialIcons'
+import { FaGlobe } from 'react-icons/fa'
 
 const empty = { platform: '', url: '', label: '', icon_svg: '', sort_order: 0 }
-
-const platformIcons: Record<string, React.ReactNode> = {
-  Email: <SiGmail size={22} className="fill-[var(--text-primary)]" />,
-  LinkedIn: <FaLinkedin size={22} className="fill-[var(--text-primary)]" />,
-  GitHub: <FaGithub size={22} className="fill-[var(--text-primary)]" />,
-  'Google Scholar': <SiGooglescholar size={22} className="fill-[var(--text-primary)]" />,
-  Facebook: <FaFacebook size={22} className="fill-[var(--text-primary)]" />,
-  Instagram: <FaInstagram size={22} className="fill-[var(--text-primary)]" />,
-  X: <SiX size={22} className="fill-[var(--text-primary)]" />,
-  LeetCode: <SiLeetcode size={22} className="fill-[var(--text-primary)]" />,
-  YouTube: <FaYoutube size={22} className="fill-[var(--text-primary)]" />,
-  Discord: <FaDiscord size={22} className="fill-[var(--text-primary)]" />,
-  Twitch: <FaTwitch size={22} className="fill-[var(--text-primary)]" />,
-  Telegram: <FaTelegram size={22} className="fill-[var(--text-primary)]" />,
-  Website: <FaGlobe size={22} className="fill-[var(--text-primary)]" />,
-}
 
 export default function SocialLinksPage() {
   const qc = useQueryClient()
@@ -67,7 +51,7 @@ export default function SocialLinksPage() {
           <div key={l.id} className="bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl rounded-xl p-4 hover:border-primary-500/30 transition-all">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 bg-[var(--bg-elevated)] rounded-xl flex items-center justify-center shrink-0">
-                {platformIcons[l.platform] || <FaGlobe size={22} className="fill-[var(--text-muted)]" />}
+                <span className="fill-[var(--text-primary)]">{platformIcons[l.platform] || <FaGlobe size={22} className="fill-[var(--text-muted)]" />}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm font-bold text-[var(--text-primary)]">{l.platform}</h3>
@@ -88,7 +72,7 @@ export default function SocialLinksPage() {
               {Object.keys(platformIcons).map(p => (
                 <button key={p} type="button" onClick={() => setForm(f => ({...f, platform: p, label: p}))}
                   className={`flex flex-col items-center gap-1 p-2 rounded-xl border transition-all ${form.platform === p ? 'border-primary-500 bg-primary-500/10' : 'border-[var(--border)] hover:border-primary-500/30'}`}>
-                  {platformIcons[p]}
+                  <span className="fill-[var(--text-primary)]">{platformIcons[p]}</span>
                   <span className="text-[9px] text-[var(--text-muted)] text-center leading-tight">{p}</span>
                 </button>
               ))}

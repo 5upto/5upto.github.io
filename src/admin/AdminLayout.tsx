@@ -115,7 +115,7 @@ export default function AdminLayout() {
   const handleSignOut = async () => { await signOut(); navigate('/admin/login') }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)]">
+    <div className="min-h-screen relative z-10" style={{ background: 'transparent' }}>
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-14 flex items-center px-4 z-40">
         <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 -ml-2 rounded-xl hover:bg-[var(--bg-elevated)] text-[var(--text-muted)]">

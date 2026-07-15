@@ -4,10 +4,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useSocialLinks } from '../hooks/useSocialLinks'
 import { useProfile } from '../hooks/useProfile'
 import LoadingSpinner from './LoadingSpinner'
+import { platformIcons, platformHoverColors } from '../lib/socialIcons'
 
 gsap.registerPlugin(ScrollTrigger)
-
-const iconMap: Record<string, { svg: React.ReactNode; hover: string }> = {}
 
 export default function Contact() {
   const sectionRef = useRef<HTMLElement>(null)
@@ -106,18 +105,12 @@ export default function Contact() {
           </span>
         )
       default:
-        return null
+        return platformIcons[platform] ?? null
     }
   }
 
   const getHoverClass = (platform: string) => {
-    switch (platform) {
-      case 'LinkedIn': return 'hover:text-blue-400'
-      case 'GitHub': return 'hover:text-[var(--text-primary)]'
-      case 'Facebook': return 'hover:text-blue-500'
-      case 'Instagram': return 'instagram-hover'
-      default: return ''
-    }
+    return platformHoverColors[platform] ?? ''
   }
 
   return (
