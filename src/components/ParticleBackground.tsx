@@ -9,7 +9,7 @@ export default function ParticleBackground() {
 
       window.particlesJS!('particles-js', {
         particles: {
-          number: { value: isMobile ? 40 : 160, density: { enable: true, value_area: isMobile ? 800 : 500 } },
+          number: { value: isMobile ? 80 : 160, density: { enable: true, value_area: isMobile ? 600 : 500 } },
           color: { value: isDark ? '#a5b4fc' : '#312e81' },
           shape: { type: 'circle' },
           opacity: {
@@ -23,7 +23,7 @@ export default function ParticleBackground() {
             anim: { enable: true, speed: 1, size_min: 1, sync: false },
           },
           line_linked: {
-            enable: !isMobile,
+            enable: true,
             distance: 120,
             color: isDark ? '#818cf8' : '#4338ca',
             opacity: 0.4,
@@ -42,8 +42,8 @@ export default function ParticleBackground() {
         interactivity: {
           detect_on: 'window',
           events: {
-            onhover: { enable: !isMobile, mode: 'repulse' },
-            onclick: { enable: !isMobile, mode: 'push' },
+            onhover: { enable: true, mode: 'repulse' },
+            onclick: { enable: true, mode: 'push' },
             resize: true,
           },
           modes: {
