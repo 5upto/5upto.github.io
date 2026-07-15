@@ -69,6 +69,11 @@ create table public.education (
   institution text not null,
   logo text,
   year text,
+  style text default 'bangladesh',
+  country_name text,
+  board_name text,
+  certificate_label text,
+  signatory text,
   sort_order int default 0,
   created_at timestamptz default now(),
   updated_at timestamptz default now()

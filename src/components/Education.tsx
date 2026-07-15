@@ -102,6 +102,67 @@ export default function Education() {
       )
     }
 
+    if (edu.style === 'international') {
+      return (
+        <div className="bg-[#fdfbf5] dark:bg-[#0f0e0c] rounded-sm overflow-hidden">
+          <div className="px-6 md:px-10 py-6 md:py-8">
+            <div className="border border-[#c9a84c]/30 dark:border-[#c9a84c]/20 p-1">
+              <div className="p-6 md:p-8">
+                {/* Country */}
+                {edu.country_name && <p className="text-center text-[10px] tracking-[0.2em] uppercase text-[#8a7a5a] dark:text-[#c9a84c]/50 font-sans">{edu.country_name}</p>}
+                {edu.board_name && <p className="text-center text-[11px] tracking-[0.1em] uppercase text-[#1a1a2e] dark:text-[#c9a84c]/60 font-medium mt-1 font-sans">{edu.board_name}</p>}
+
+                {/* Institution - Cloister Black, not all caps */}
+                <p className="text-center text-sm text-[#1a1a2e] dark:text-[#e0d5c0] mt-5 font-certificate">{edu.institution}</p>
+
+                {/* Simple line */}
+                <div className="flex justify-center my-5">
+                  <div className="w-12 h-px bg-[#c9a84c]/40 dark:bg-[#c9a84c]/25" />
+                </div>
+
+                {/* Certificate label */}
+                {edu.certificate_label && <p className="text-center text-[10px] text-[#8a7a5a] dark:text-[#c9a84c]/45 uppercase tracking-[0.2em] font-sans">{edu.certificate_label}</p>}
+
+                {/* Degree - Cloister Black */}
+                <h3 className="text-center text-xl md:text-2xl text-[#1a1a2e] dark:text-[#f0e6d0] mt-2 leading-tight font-certificate tracking-wide">{edu.degree}</h3>
+
+                {/* Subject */}
+                {edu.subject && <p className="text-center text-sm text-[#5a5a5a] dark:text-[#c9a84c]/55 mt-2 font-sans italic">in {edu.subject}</p>}
+
+                {/* Logo */}
+                {edu.logo && (
+                  <div className="flex justify-center my-5">
+                    <img src={edu.logo} alt={edu.institution} className="w-14 h-14 md:w-16 md:h-16 rounded-full object-contain opacity-70 dark:opacity-60" onError={(e) => {(e.target as HTMLImageElement).style.display = 'none'}} />
+                  </div>
+                )}
+
+                {/* Simple line */}
+                <div className="flex justify-center my-4">
+                  <div className="w-12 h-px bg-[#c9a84c]/40 dark:bg-[#c9a84c]/25" />
+                </div>
+
+                {/* Year and Signatory */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mt-1">
+                  <div className="text-left">
+                    {/* Signatory - Cloister Black */}
+                    {edu.signatory && <p className="text-[10px] text-[#8a7a5a] dark:text-[#c9a84c]/45 font-certificate">{edu.signatory}</p>}
+                  </div>
+                  <div className="text-center">
+                    {edu.year && <p className="text-xs font-semibold text-[#1a1a2e] dark:text-[#c9a84c] font-sans tracking-widest">{edu.year}</p>}
+                  </div>
+                  <div className="text-right">
+                    <div className="w-7 h-7 rounded-full border border-[#c9a84c]/25 dark:border-[#c9a84c]/15 flex items-center justify-center">
+                      <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-[#c9a84c]/40 fill-current"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
     // Bangladesh / Default style
     return (
       <div className="bg-[#faf8f0] dark:bg-[#1a1816] rounded-sm overflow-hidden">

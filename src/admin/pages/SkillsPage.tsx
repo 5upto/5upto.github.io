@@ -104,7 +104,11 @@ export default function SkillsPage() {
           {/* Live Preview */}
           <div className="bg-[var(--bg-elevated)] rounded-xl p-4 flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${form.color}15` }}>
-              {form.label && <span className="text-sm font-bold" style={{ color: form.color }}>{form.label.charAt(0)}</span>}
+              {(() => {
+                const Icon = form.icon_name ? allIcons[form.icon_name] : null
+                return Icon ? <Icon size={24} style={{ color: form.color }} />
+                  : (form.label && <span className="text-sm font-bold" style={{ color: form.color }}>{form.label.charAt(0)}</span>)
+              })()}
             </div>
             <div>
               <p className="text-sm font-bold text-[var(--text-primary)]">{form.label || 'Skill Name'}</p>

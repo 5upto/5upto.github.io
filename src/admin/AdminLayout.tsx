@@ -1,6 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../hooks/useAuth'
+import { supabase } from '../lib/supabase'
+import type { Profile } from '../types/database'
 
 const sidebarItems = [
   { label: 'Dashboard', href: '/admin', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' },
@@ -18,7 +21,7 @@ const sidebarItems = [
   { label: 'Storage', href: '/admin/storage', icon: 'M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12' },
 ]
 
-function SidebarContent({ collapsed, onNavigate, currentPath, userEmail, onSignOut, onToggleCollapse, dark, onToggleTheme, showThemeToggle = true }: {
+function SidebarContent({ collapsed, onNavigate, currentPath, userEmail, onSignOut, onToggleCollapse, dark, onToggleTheme, showThemeToggle = true, avatarUrl }: {
   collapsed: boolean
   onNavigate: (href: string) => void
   currentPath: string
@@ -28,14 +31,26 @@ function SidebarContent({ collapsed, onNavigate, currentPath, userEmail, onSignO
   dark: boolean
   onToggleTheme: () => void
   showThemeToggle?: boolean
+  avatarUrl?: string
 }) {
+  const [showMenu, setShowMenu] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setShowMenu(false)
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   return (
     <div className="flex flex-col h-full">
       {/* Logo area */}
       <div className={`p-4 flex items-center ${collapsed ? 'justify-center' : 'gap-3'} border-b border-[var(--border)]`}>
         {!collapsed && (
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] text-[var(--text-muted)] truncate">{userEmail}</p>
+            <p className="text-sm font-semibold text-primary-400 font-display tracking-wide">Shawon's Space</p>
           </div>
         )}
         {!collapsed && showThemeToggle && (
@@ -80,14 +95,33 @@ function SidebarContent({ collapsed, onNavigate, currentPath, userEmail, onSignO
       </nav>
 
       {/* Bottom actions */}
-      <div className="p-3 border-t border-[var(--border)]">
-        <button onClick={onSignOut} title={collapsed ? 'Sign Out' : undefined}
-          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400 hover:bg-red-500/10 transition-all ${collapsed ? 'justify-center' : ''}`}>
-          <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>
-          {!collapsed && 'Sign Out'}
-        </button>
+      <div className="p-3 border-t border-[var(--border)]" ref={menuRef}>
+        <div className="relative">
+          <button onClick={() => setShowMenu(!showMenu)} title={collapsed ? 'Menu' : undefined}
+            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-all ${collapsed ? 'justify-center' : ''}`}>
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" />
+            ) : (
+              <div className="w-7 h-7 rounded-full bg-primary-500/20 text-primary-400 flex items-center justify-center text-xs font-semibold shrink-0">S</div>
+            )}
+            {!collapsed && <span className="truncate">{userEmail}</span>}
+          </button>
+          {showMenu && (
+            <div className={`absolute bottom-full mb-2 ${collapsed ? 'left-0' : 'left-0 right-0'} bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl shadow-xl py-1.5 z-50 min-w-[160px]`}>
+              <button onClick={() => { setShowMenu(false); window.open('/', '_blank') }}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                Go to Portfolio
+              </button>
+              <div className="my-1 border-t border-[var(--border)]" />
+              <button onClick={() => { setShowMenu(false); onSignOut() }}
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                Sign Out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -103,6 +137,11 @@ export default function AdminLayout() {
     const saved = localStorage.getItem('portfolio-theme')
     if (saved) return saved === 'dark'
     return window.matchMedia('(prefers-color-scheme: dark)').matches
+  })
+
+  const { data: profile } = useQuery({
+    queryKey: ['admin-sidebar-profile'],
+    queryFn: async () => { const { data, error } = await supabase.from('profile').select('avatar_url').limit(1).single(); if (error) throw error; return data as Profile },
   })
 
   useEffect(() => { setMobileOpen(false) }, [location.pathname])
@@ -140,12 +179,12 @@ export default function AdminLayout() {
 
       {/* Desktop sidebar */}
       <aside className={`${collapsed ? 'w-[72px]' : 'w-60'} hidden lg:flex flex-col fixed h-full border-r border-[var(--glass-border)] backdrop-blur-xl bg-[var(--glass-bg)] z-30 transition-all duration-300`}>
-        <SidebarContent collapsed={collapsed} onNavigate={(href) => navigate(href)} currentPath={location.pathname} userEmail={user?.email} onSignOut={handleSignOut} onToggleCollapse={() => setCollapsed(!collapsed)} dark={dark} onToggleTheme={() => setDark(!dark)} showThemeToggle={true} />
+        <SidebarContent collapsed={collapsed} onNavigate={(href) => navigate(href)} currentPath={location.pathname} userEmail={user?.email} onSignOut={handleSignOut} onToggleCollapse={() => setCollapsed(!collapsed)} dark={dark} onToggleTheme={() => setDark(!dark)} showThemeToggle={true} avatarUrl={profile?.avatar_url} />
       </aside>
 
       {/* Mobile sidebar */}
       <aside className={`lg:hidden fixed top-0 left-0 w-72 h-full z-50 shadow-2xl border-r border-[var(--border)] transition-transform duration-300 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{ background: dark ? 'rgba(15,23,42,0.95)' : 'rgba(255,255,255,0.98)', backdropFilter: 'blur(20px)' }}>
-        <SidebarContent collapsed={false} onNavigate={(href) => navigate(href)} currentPath={location.pathname} userEmail={user?.email} onSignOut={handleSignOut} onToggleCollapse={() => setMobileOpen(false)} dark={dark} onToggleTheme={() => setDark(!dark)} showThemeToggle={false} />
+        <SidebarContent collapsed={false} onNavigate={(href) => navigate(href)} currentPath={location.pathname} userEmail={user?.email} onSignOut={handleSignOut} onToggleCollapse={() => setMobileOpen(false)} dark={dark} onToggleTheme={() => setDark(!dark)} showThemeToggle={false} avatarUrl={profile?.avatar_url} />
       </aside>
 
       {/* Main content */}

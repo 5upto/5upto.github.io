@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
-import ParticleBackground from '../../components/ParticleBackground'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -36,7 +35,6 @@ export default function LoginPage() {
 
   return (
     <>
-      <ParticleBackground />
       <div className="min-h-screen flex flex-col items-center justify-center px-4 relative z-10" style={{ background: 'transparent' }}>
         <div className="w-full max-w-sm">
           {/* Theme toggle - centered above title */}

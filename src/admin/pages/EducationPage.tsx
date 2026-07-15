@@ -5,8 +5,9 @@ import type { Education } from '../../types/database'
 import FormDialog from '../components/FormDialog'
 import DeleteDialog from '../components/DeleteDialog'
 import Toast from '../components/Toast'
+import ImagePicker from '../components/ImagePicker'
 
-const empty = { degree: '', subject: '', institution: '', logo: '', year: '', style: 'bangladesh' as 'nit' | 'bangladesh', country_name: '', board_name: '', certificate_label: 'Certificate of', signatory: '', sort_order: 0 }
+const empty = { degree: '', subject: '', institution: '', logo: '', year: '', style: 'bangladesh' as 'nit' | 'bangladesh' | 'international', country_name: '', board_name: '', certificate_label: 'Certificate of', signatory: '', sort_order: 0 }
 
 export default function EducationPage() {
   const qc = useQueryClient()
@@ -95,6 +96,27 @@ export default function EducationPage() {
                   </div>
                 </div>
               </div>
+            ) : form.style === 'international' ? (
+              <div className="bg-[#fdfbf5] dark:bg-[#0f0e0c] rounded-lg p-4">
+                <div className="border border-[#c9a84c]/30 dark:border-[#c9a84c]/20 p-1">
+                  <div className="text-center p-3">
+                    {form.country_name && <p className="text-[8px] tracking-[0.2em] uppercase text-[#8a7a5a] font-sans">{form.country_name}</p>}
+                    {form.board_name && <p className="text-[9px] tracking-[0.1em] uppercase text-[#1a1a2e] dark:text-[#c9a84c]/60 font-medium mt-0.5 font-sans">{form.board_name}</p>}
+                    {form.institution && <p className="text-[11px] text-[#1a1a2e] dark:text-[#e0d5c0] mt-3 font-certificate">{form.institution}</p>}
+                    <div className="flex justify-center my-3"><div className="w-10 h-px bg-[#c9a84c]/40 dark:bg-[#c9a84c]/25" /></div>
+                    {form.certificate_label && <p className="text-[8px] text-[#8a7a5a] dark:text-[#c9a84c]/45 uppercase tracking-[0.2em] font-sans">{form.certificate_label}</p>}
+                    <h3 className="text-lg text-[#1a1a2e] dark:text-[#f0e6d0] mt-1 font-certificate tracking-wide">{form.degree || 'Degree'}</h3>
+                    {form.subject && <p className="text-[11px] text-[#5a5a5a] dark:text-[#c9a84c]/55 mt-1 font-sans">in {form.subject}</p>}
+                    {form.logo && <div className="flex justify-center my-3"><img src={form.logo} alt="" className="w-10 h-10 rounded-full object-contain opacity-70" /></div>}
+                    <div className="flex justify-center my-2"><div className="w-10 h-px bg-[#c9a84c]/40 dark:bg-[#c9a84c]/25" /></div>
+                    <div className="flex items-end justify-between mt-1">
+                      <div className="text-left">{form.signatory && <p className="text-[8px] text-[#8a7a5a] dark:text-[#c9a84c]/45 font-certificate">{form.signatory}</p>}</div>
+                      <div className="text-center">{form.year && <p className="text-[10px] font-semibold text-[#1a1a2e] dark:text-[#c9a84c] font-sans tracking-widest">{form.year}</p>}</div>
+                      <div className="text-right"><div className="w-5 h-5 rounded-full border border-[#c9a84c]/25 flex items-center justify-center mx-auto"><svg viewBox="0 0 24 24" className="w-2.5 h-2.5 text-[#c9a84c]/40 fill-current"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             ) : (
               <div className="bg-[#faf8f0] dark:bg-[#1a1816] rounded-lg p-4">
                 <div className="border border-[#c8b88a]/60 dark:border-[#5a4f3a]/60 p-3">
@@ -123,17 +145,18 @@ export default function EducationPage() {
 
           <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Certificate Style</label>
             <select value={form.style} onChange={e => {
-              const style = e.target.value as 'nit' | 'bangladesh'
+              const style = e.target.value as 'nit' | 'bangladesh' | 'international'
               setForm(f => ({
                 ...f, style,
-                country_name: style === 'nit' ? 'भारत सरकार · Government of India' : "Government of the People's Republic of Bangladesh",
-                board_name: style === 'nit' ? '' : 'Board of Intermediate and Secondary Education, Dhaka',
-                certificate_label: style === 'nit' ? 'Conferred the Degree of' : 'Certificate of',
-                signatory: style === 'nit' ? '— Registrar' : '— Controller of Examinations'
+                country_name: style === 'nit' ? 'भारत सरकार · Government of India' : style === 'international' ? '' : "Government of the People's Republic of Bangladesh",
+                board_name: style === 'nit' ? '' : style === 'international' ? '' : 'Board of Intermediate and Secondary Education, Dhaka',
+                certificate_label: style === 'nit' ? 'Conferred the Degree of' : style === 'international' ? 'This is to certify that' : 'Certificate of',
+                signatory: style === 'nit' ? '— Registrar' : style === 'international' ? '— Vice Chancellor' : '— Controller of Examinations'
               }))
             }} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)]">
-              <option value="bangladesh">Bangladesh Board</option>
-              <option value="nit">NIT / India</option>
+              <option value="bangladesh">Bangladesh</option>
+              <option value="nit">India</option>
+              <option value="international">International</option>
             </select></div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Degree *</label><input value={form.degree} onChange={e => setForm(f => ({...f, degree: e.target.value}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
@@ -143,7 +166,7 @@ export default function EducationPage() {
             <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Institution *</label><input value={form.institution} onChange={e => setForm(f => ({...f, institution: e.target.value}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
             <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Year</label><input value={form.year} onChange={e => setForm(f => ({...f, year: e.target.value}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
           </div>
-          <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Logo URL</label><input value={form.logo} onChange={e => setForm(f => ({...f, logo: e.target.value}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
+          <ImagePicker value={form.logo} onChange={v => setForm(f => ({...f, logo: v}))} bucket="logos" label="Institution Logo" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Country Name</label><input value={form.country_name} onChange={e => setForm(f => ({...f, country_name: e.target.value}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
             <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Board Name</label><input value={form.board_name} onChange={e => setForm(f => ({...f, board_name: e.target.value}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>

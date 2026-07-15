@@ -56,7 +56,7 @@ export interface Education {
   institution: string
   logo: string
   year: string
-  style: 'nit' | 'bangladesh'
+  style: 'nit' | 'bangladesh' | 'international'
   country_name: string
   board_name: string
   certificate_label: string
