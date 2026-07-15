@@ -5,9 +5,11 @@ export default function ParticleBackground() {
     const init = () => {
       const isDark = document.documentElement.classList.contains('dark')
 
+      const isMobile = window.innerWidth < 768
+
       window.particlesJS!('particles-js', {
         particles: {
-          number: { value: 160, density: { enable: true, value_area: 500 } },
+          number: { value: isMobile ? 40 : 160, density: { enable: true, value_area: isMobile ? 800 : 500 } },
           color: { value: isDark ? '#a5b4fc' : '#312e81' },
           shape: { type: 'circle' },
           opacity: {
@@ -21,7 +23,7 @@ export default function ParticleBackground() {
             anim: { enable: true, speed: 1, size_min: 1, sync: false },
           },
           line_linked: {
-            enable: true,
+            enable: !isMobile,
             distance: 120,
             color: isDark ? '#818cf8' : '#4338ca',
             opacity: 0.4,
@@ -40,8 +42,8 @@ export default function ParticleBackground() {
         interactivity: {
           detect_on: 'window',
           events: {
-            onhover: { enable: true, mode: 'repulse' },
-            onclick: { enable: true, mode: 'push' },
+            onhover: { enable: !isMobile, mode: 'repulse' },
+            onclick: { enable: !isMobile, mode: 'push' },
             resize: true,
           },
           modes: {
