@@ -20,11 +20,11 @@ export default function FormDialog({ open, onClose, title, children }: FormDialo
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
+    <div className="fixed inset-x-0 top-0 z-[100] flex items-end sm:items-center justify-center" style={{ height: '100dvh' }}>
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black/60 touch-none" onClick={onClose} onAuxClick={onClose} />
       {/* Modal */}
-      <div className="relative w-full sm:max-w-2xl max-h-[90vh] sm:max-h-[85vh] bg-white dark:bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--border)] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+      <div className="relative w-full sm:max-w-2xl max-h-[90dvh] sm:max-h-[85vh] bg-white dark:bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--border)] rounded-t-2xl sm:rounded-2xl shadow-2xl flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-[var(--border)] shrink-0">
           <h2 className="text-base sm:text-lg font-display font-bold text-[var(--text-primary)] truncate pr-2">{title}</h2>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors shrink-0">

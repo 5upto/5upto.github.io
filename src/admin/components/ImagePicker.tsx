@@ -144,9 +144,9 @@ function StorageModal({ open, onClose, images, loading, error, onSelect, bucket,
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center">
+    <div className="fixed inset-x-0 top-0 z-[200] flex items-center justify-center" style={{ height: '100dvh' }}>
       <div className="fixed inset-0 bg-black/60 touch-none" onClick={onClose} />
-      <div className="relative w-[calc(100%-2rem)] max-w-lg max-h-[80vh] bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--border)] rounded-2xl shadow-2xl flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
+      <div className="relative w-[calc(100%-2rem)] max-w-lg max-h-[80dvh] bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--border)] rounded-2xl shadow-2xl flex flex-col overflow-hidden" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border)] shrink-0">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-semibold text-[var(--text-primary)]">Storage — {bucket}</h3>
