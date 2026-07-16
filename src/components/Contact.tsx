@@ -3,7 +3,6 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useSocialLinks } from '../hooks/useSocialLinks'
 import { useProfile } from '../hooks/useProfile'
-import LoadingSpinner from './LoadingSpinner'
 import { platformIcons, platformHoverColors } from '../lib/socialIcons'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -12,8 +11,8 @@ export default function Contact() {
   const sectionRef = useRef<HTMLElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
   const iconsRef = useRef<HTMLDivElement>(null)
-  const { data: links, isLoading: linksLoading } = useSocialLinks()
-  const { data: profile, isLoading: profileLoading } = useProfile()
+  const { data: links } = useSocialLinks()
+  const { data: profile } = useProfile()
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -32,7 +31,7 @@ export default function Contact() {
     return () => ctx.revert()
   }, [])
 
-  if (linksLoading || profileLoading) return <LoadingSpinner />
+  if (!links || !profile) return null
 
   const getIcon = (platform: string) => {
     switch (platform) {

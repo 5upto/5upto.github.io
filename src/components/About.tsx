@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useProfile } from '../hooks/useProfile'
-import LoadingSpinner from './LoadingSpinner'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -11,7 +10,7 @@ export default function About() {
   const headingRef = useRef<HTMLHeadingElement>(null)
   const textRef = useRef<HTMLParagraphElement>(null)
   const statsRef = useRef<HTMLDivElement>(null)
-  const { data: profile, isLoading } = useProfile()
+  const { data: profile } = useProfile()
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -31,7 +30,6 @@ export default function About() {
     return () => ctx.revert()
   }, [])
 
-  if (isLoading) return <LoadingSpinner />
   if (!profile) return null
 
   return (

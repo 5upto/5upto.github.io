@@ -4,7 +4,6 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import ScrollStack, { ScrollStackItem } from './ScrollStack'
 import { useExperiences } from '../hooks/useExperiences'
-import LoadingSpinner from './LoadingSpinner'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -12,7 +11,7 @@ export default function Experience() {
   const sectionRef = useRef<HTMLElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
   const navigate = useNavigate()
-  const { data: experiences, isLoading } = useExperiences()
+  const { data: experiences } = useExperiences()
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -24,7 +23,7 @@ export default function Experience() {
     return () => ctx.revert()
   }, [])
 
-  if (isLoading) return <LoadingSpinner />
+  if (!experiences) return null
 
   return (
     <section ref={sectionRef} id="experience" className="py-24 px-4 relative">

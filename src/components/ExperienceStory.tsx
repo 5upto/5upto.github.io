@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useCallback } from 'react'
 import { useExperiences } from '../hooks/useExperiences'
-import LoadingSpinner from './LoadingSpinner'
 
 function getDominantColor(img: HTMLImageElement): string {
   const canvas = document.createElement('canvas')
@@ -39,15 +38,16 @@ export default function ExperienceStory() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const [imgColors, setImgColors] = useState<Record<string, string>>({})
-  const { data: experiences, isLoading } = useExperiences()
+  const { data: experiences } = useExperiences()
 
   const handleImageLoad = useCallback((company: string, e: React.SyntheticEvent<HTMLImageElement>) => {
     const color = getDominantColor(e.currentTarget)
     setImgColors(prev => ({ ...prev, [company]: color }))
   }, [])
 
-  if (isLoading) return <LoadingSpinner />
   const experience = experiences?.find((exp) => exp.slug === slug)
+
+  if (!experiences) return null
 
   if (!experience) {
     return (

@@ -18,16 +18,18 @@ export default function SocialLinksPage() {
   const [deleting, setDeleting] = useState<SocialLink | null>(null)
   const [form, setForm] = useState(empty)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const [dragIdx, setDragIdx] = useState<number | null>(null)
+  const [overIdx, setOverIdx] = useState<number | null>(null)
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['admin-social-links'],
-    queryFn: async () => { const { data, error } = await supabase.from('social_links').select('*').order('created_at', { ascending: false }); if (error) throw error; return data as SocialLink[] },
+    queryFn: async () => { const { data, error } = await supabase.from('social_links').select('*').order('sort_order'); if (error) throw error; return data as SocialLink[] },
   })
 
   const save = useMutation({
     mutationFn: async (d: typeof form) => {
       if (editing) { const { error } = await supabase.from('social_links').update(d).eq('id', editing.id); if (error) throw error }
-      else { const { error } = await supabase.from('social_links').insert(d); if (error) throw error }
+      else { const { error } = await supabase.from('social_links').insert({ ...d, sort_order: items.length }); if (error) throw error }
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin-social-links'] }); setDialogOpen(false); setEditing(null); setToast({ message: editing ? 'Updated' : 'Added', type: 'success' }) },
     onError: (e: any) => setToast({ message: e.message, type: 'error' }),
@@ -39,6 +41,39 @@ export default function SocialLinksPage() {
     onError: (e: any) => setToast({ message: e.message, type: 'error' }),
   })
 
+  const handleDragStart = (e: React.DragEvent, idx: number) => {
+    setDragIdx(idx)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleDragEnd = () => {
+    setDragIdx(null)
+    setOverIdx(null)
+  }
+
+  const handleDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    setOverIdx(idx)
+  }
+
+  const handleDrop = async (e: React.DragEvent, dropIdx: number) => {
+    e.preventDefault()
+    if (dragIdx === null || dragIdx === dropIdx) { setDragIdx(null); setOverIdx(null); return }
+    try {
+      const a = items[dragIdx]
+      const b = items[dropIdx]
+      await supabase.from('social_links').update({ sort_order: b.sort_order }).eq('id', a.id)
+      await supabase.from('social_links').update({ sort_order: a.sort_order }).eq('id', b.id)
+      qc.invalidateQueries({ queryKey: ['admin-social-links'] })
+      setToast({ message: 'Reordered', type: 'success' })
+    } catch (e: any) {
+      setToast({ message: e.message, type: 'error' })
+    }
+    setDragIdx(null)
+    setOverIdx(null)
+  }
+
   return (
     <div className="space-y-6">
       <Toast message={toast?.message} type={toast?.type} onClose={() => setToast(null)} />
@@ -46,25 +81,47 @@ export default function SocialLinksPage() {
         <div><h1 className="text-xl lg:text-2xl font-display font-bold text-[var(--text-primary)]">Social Links</h1><p className="text-sm text-[var(--text-muted)] mt-1">{items.length} links</p></div>
         <button onClick={() => { setEditing(null); setForm(empty); setDialogOpen(true) }} className="px-5 py-2.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl text-sm font-medium transition-all hover:shadow-lg hover:shadow-primary-500/25">+ Add Link</button>
       </div>
-      <div className="space-y-3">
-        {isLoading ? <div className="text-center py-12 text-[var(--text-muted)]">Loading...</div> : items.map(l => (
-          <div key={l.id} className="bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl rounded-xl p-4 hover:border-primary-500/30 transition-all">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 bg-[var(--bg-elevated)] rounded-xl flex items-center justify-center shrink-0">
-                <span className="fill-[var(--text-primary)]">{platformIcons[l.platform] || <FaGlobe size={22} className="fill-[var(--text-muted)]" />}</span>
+
+      {/* Drag & Drop Reorder */}
+      <div className="bg-[var(--glass-bg)] backdrop-blur-xl border border-[var(--border)] rounded-2xl p-4">
+        <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3">Drag to Reorder</p>
+        <div className="space-y-2">
+          {isLoading ? <div className="text-center py-12 text-[var(--text-muted)]">Loading...</div> : items.map((l, idx) => (
+            <div
+              key={l.id}
+              draggable
+              onDragStart={(e) => handleDragStart(e, idx)}
+              onDragEnd={handleDragEnd}
+              onDragOver={(e) => handleDragOver(e, idx)}
+              onDrop={(e) => handleDrop(e, idx)}
+              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 cursor-grab active:cursor-grabbing transition-all ${
+                overIdx === idx ? 'bg-primary-600/10 border border-primary-500/30 scale-[1.02]' : 'bg-[var(--bg-elevated)] border border-transparent'
+              } ${dragIdx === idx ? 'opacity-50 scale-95' : ''}`}
+            >
+              <svg className="w-4 h-4 text-[var(--text-muted)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+              </svg>
+              <span className="text-[10px] text-[var(--text-muted)] w-4 text-center">{idx + 1}</span>
+              <div className="w-8 h-8 bg-[var(--bg-card)] rounded-lg flex items-center justify-center shrink-0">
+                <span className="fill-[var(--text-primary)]">{platformIcons[l.platform] || <FaGlobe size={18} className="fill-[var(--text-muted)]" />}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-bold text-[var(--text-primary)]">{l.platform}</h3>
-                <p className="text-xs text-[var(--text-muted)] truncate">{l.url}</p>
+                <span className="text-sm font-medium text-[var(--text-primary)]">{l.platform}</span>
+                <p className="text-[10px] text-[var(--text-muted)] truncate">{l.url}</p>
               </div>
-              <div className="flex gap-2 shrink-0">
-                <button onClick={() => { setEditing(l); setForm({ platform: l.platform, url: l.url, label: l.label, icon_svg: l.icon_svg ?? '' }); setDialogOpen(true) }} className="p-2 rounded-lg hover:bg-[var(--bg-elevated)] text-primary-400"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
-                <button onClick={() => { setDeleting(l); setDeleteOpen(true) }} className="p-2 rounded-lg hover:bg-red-500/10 text-red-400"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+              <div className="flex gap-1 ml-2">
+                <button onClick={(e) => { e.stopPropagation(); setEditing(l); setForm({ platform: l.platform, url: l.url, label: l.label, icon_svg: l.icon_svg ?? '' }); setDialogOpen(true) }} className="w-6 h-6 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--bg-card)] transition-colors">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                </button>
+                <button onClick={(e) => { e.stopPropagation(); setDeleting(l); setDeleteOpen(true) }} className="w-6 h-6 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:bg-red-500/10 hover:text-red-400 transition-colors">
+                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
+
       <FormDialog open={dialogOpen} onClose={() => setDialogOpen(false)} title={editing ? 'Edit Social Link' : 'Add Social Link'}>
         <div className="space-y-4">
           <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-2">Platform</label>

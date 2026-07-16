@@ -1,17 +1,17 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useGallery } from '../hooks/useGallery'
-import LoadingSpinner from './LoadingSpinner'
 
 export default function GalleryStory() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
-  const { data: stories, isLoading } = useGallery()
+  const { data: stories } = useGallery()
 
   useEffect(() => { window.scrollTo(0, 0) }, [slug])
 
-  if (isLoading) return <LoadingSpinner />
   const story = stories?.find((s) => s.slug === slug)
+
+  if (!stories) return null
 
   if (!story) {
     return (

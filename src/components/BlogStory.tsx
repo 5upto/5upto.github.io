@@ -3,13 +3,12 @@ import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { slugify, estimateReadTime } from './BlogsPage'
 import { useBlogs } from '../hooks/useBlogs'
-import LoadingSpinner from './LoadingSpinner'
 
 export default function BlogStory() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const contentRef = useRef<HTMLDivElement>(null)
-  const { data: blogs, isLoading } = useBlogs()
+  const { data: blogs } = useBlogs()
 
   useEffect(() => { window.scrollTo(0, 0) }, [slug])
 
@@ -23,8 +22,9 @@ export default function BlogStory() {
     }
   }, [slug])
 
-  if (isLoading) return <LoadingSpinner />
   const blog = blogs?.find((b) => b.slug === slug)
+
+  if (!blogs) return null
 
   if (!blog) {
     return (

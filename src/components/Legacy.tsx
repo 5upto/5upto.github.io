@@ -1,5 +1,4 @@
 import { useLegacyLogos } from '../hooks/useLegacyLogos'
-import LoadingSpinner from './LoadingSpinner'
 
 interface LegacyProps {
   onBack: () => void
@@ -7,9 +6,9 @@ interface LegacyProps {
 }
 
 export default function Legacy({ onBack, onSelect }: LegacyProps) {
-  const { data: items, isLoading } = useLegacyLogos()
+  const { data: items } = useLegacyLogos()
 
-  if (isLoading) return <LoadingSpinner />
+  if (!items) return null
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg-primary)] relative z-10 px-4">

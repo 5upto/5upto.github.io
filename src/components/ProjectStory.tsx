@@ -1,17 +1,17 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useProjects } from '../hooks/useProjects'
-import LoadingSpinner from './LoadingSpinner'
 
 export default function ProjectStory() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
-  const { data: projects, isLoading } = useProjects()
+  const { data: projects } = useProjects()
 
   useEffect(() => { window.scrollTo(0, 0) }, [slug])
 
-  if (isLoading) return <LoadingSpinner />
   const project = projects?.find((p) => p.slug === slug)
+
+  if (!projects) return null
 
   if (!project) {
     return (

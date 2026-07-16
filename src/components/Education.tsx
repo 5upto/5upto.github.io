@@ -3,7 +3,6 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import ScrollStack, { ScrollStackItem } from './ScrollStack'
 import { useEducation } from '../hooks/useEducation'
-import LoadingSpinner from './LoadingSpinner'
 import { FaAws } from 'react-icons/fa'
 import { SiIeee, SiElsevier, SiAcm, SiArxiv, SiGooglecloud, SiCisco, SiComptia, SiLinuxfoundation, SiHashicorp } from 'react-icons/si'
 import { GrOracle } from 'react-icons/gr'
@@ -56,7 +55,7 @@ function getCertProvider(certName: string) {
 export default function Education() {
   const sectionRef = useRef<HTMLElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
-  const { data, isLoading } = useEducation()
+  const { data } = useEducation()
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -68,7 +67,6 @@ export default function Education() {
     return () => ctx.revert()
   }, [])
 
-  if (isLoading) return <LoadingSpinner />
   if (!data) return null
 
   const { education, certifications, publications } = data

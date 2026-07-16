@@ -4,7 +4,6 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import ScrollStack, { ScrollStackItem } from './ScrollStack'
 import { useBlogs } from '../hooks/useBlogs'
-import LoadingSpinner from './LoadingSpinner'
 import type { Blog, ContentBlock } from '../types/database'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -30,7 +29,7 @@ export default function BlogsPage() {
   const navigate = useNavigate()
   const sectionRef = useRef<HTMLElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
-  const { data: blogs, isLoading } = useBlogs()
+  const { data: blogs } = useBlogs()
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -42,7 +41,7 @@ export default function BlogsPage() {
     return () => ctx.revert()
   }, [])
 
-  if (isLoading) return <LoadingSpinner />
+  if (!blogs) return null
 
   return (
     <section ref={sectionRef} id="blog" className="min-h-screen py-24 px-4 relative">

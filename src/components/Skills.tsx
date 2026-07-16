@@ -3,7 +3,6 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import LogoLoop from './LogoLoop'
 import { useSkills } from '../hooks/useSkills'
-import LoadingSpinner from './LoadingSpinner'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -54,7 +53,7 @@ function getIcon(skill: { label: string; icon_name?: string }): React.ComponentT
 export default function Skills() {
   const sectionRef = useRef<HTMLElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
-  const { data: skills, isLoading } = useSkills()
+  const { data: skills } = useSkills()
   const iconsLoaded = useAllIcons()
 
   useEffect(() => {
@@ -67,7 +66,7 @@ export default function Skills() {
     return () => ctx.revert()
   }, [])
 
-  if (isLoading || !iconsLoaded) return <LoadingSpinner />
+  if (!skills || !iconsLoaded) return null
 
   const categories = [
     { label: 'Languages', category: 'languages' as const, speed: 50 },

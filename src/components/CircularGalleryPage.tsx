@@ -3,12 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import gsap from 'gsap'
 import CircularGallery from './CircularGallery'
 import { useGallery } from '../hooks/useGallery'
-import LoadingSpinner from './LoadingSpinner'
 
 export default function CircularGalleryPage() {
   const navigate = useNavigate()
   const headingRef = useRef<HTMLHeadingElement>(null)
-  const { data: stories, isLoading } = useGallery()
+  const { data: stories } = useGallery()
 
   const galleryImages = (stories ?? []).map(s => ({
     image: s.image.replace('/1200/800', '/800/600'),
@@ -29,7 +28,7 @@ export default function CircularGalleryPage() {
     }
   }, [])
 
-  if (isLoading) return <LoadingSpinner />
+  if (!stories) return null
 
   return (
     <section className="min-h-screen py-24 px-4 relative">

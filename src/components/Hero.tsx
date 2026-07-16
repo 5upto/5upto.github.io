@@ -2,12 +2,11 @@ import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import ProfileCard from './ProfileCard'
 import { useProfile } from '../hooks/useProfile'
-import LoadingSpinner from './LoadingSpinner'
 
 export default function Hero() {
   const containerRef = useRef<HTMLElement>(null)
   const textRef = useRef<HTMLDivElement>(null)
-  const { data: profile, isLoading } = useProfile()
+  const { data: profile } = useProfile()
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
@@ -21,7 +20,6 @@ export default function Hero() {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
   }
 
-  if (isLoading) return <LoadingSpinner />
   if (!profile) return null
 
   return (
