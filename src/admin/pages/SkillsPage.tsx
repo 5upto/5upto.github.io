@@ -99,7 +99,17 @@ export default function SkillsPage() {
         )
       })}
 
-      <FormDialog open={dialogOpen} onClose={() => setDialogOpen(false)} title={editing ? 'Edit Skill' : 'Add Skill'}>
+      <FormDialog 
+        open={dialogOpen} 
+        onClose={() => setDialogOpen(false)} 
+        title={editing ? 'Edit Skill' : 'Add Skill'}
+        footer={
+          <div className="flex justify-end gap-3">
+            <button onClick={() => setDialogOpen(false)} className="px-4 py-2 text-sm text-[var(--text-muted)]">Cancel</button>
+            <button onClick={() => save.mutate(form)} disabled={save.isPending || !form.label} className="px-6 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium">{save.isPending ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
+          </div>
+        }
+      >
         <div className="space-y-4">
           {/* Live Preview */}
           <div className="bg-[var(--bg-elevated)] rounded-xl p-4 flex items-center gap-3">
@@ -128,10 +138,6 @@ export default function SkillsPage() {
               <select value={form.category} onChange={e => setForm(f => ({...f, category: e.target.value as any}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)]">
                 <option value="languages">Languages</option><option value="web">Web</option><option value="databases">Databases</option>
               </select></div>
-          </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border)]">
-            <button onClick={() => setDialogOpen(false)} className="px-4 py-2 text-sm text-[var(--text-muted)]">Cancel</button>
-            <button onClick={() => save.mutate(form)} disabled={save.isPending || !form.label} className="px-6 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium">{save.isPending ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
           </div>
         </div>
       </FormDialog>

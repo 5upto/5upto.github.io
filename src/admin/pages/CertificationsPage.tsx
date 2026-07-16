@@ -325,7 +325,17 @@ export default function CertificationsPage() {
         })}
       </div>
 
-      <FormDialog open={dialogOpen} onClose={() => setDialogOpen(false)} title={editing ? 'Edit Certification' : 'Add Certification'}>
+      <FormDialog 
+        open={dialogOpen} 
+        onClose={() => setDialogOpen(false)} 
+        title={editing ? 'Edit Certification' : 'Add Certification'}
+        footer={
+          <div className="flex justify-end gap-3">
+            <button onClick={() => setDialogOpen(false)} className="px-4 py-2 text-sm text-[var(--text-muted)]">Cancel</button>
+            <button onClick={() => save.mutate(form)} disabled={save.isPending || !form.title} className="px-6 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium">{save.isPending ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
+          </div>
+        }
+      >
         <div className="space-y-4">
           {/* Live Card Preview */}
           <CertPreview format={form.format} title={form.title} certId={form.certId} />
@@ -377,10 +387,6 @@ export default function CertificationsPage() {
             <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Cert ID</label>
               <input value={form.certId} onChange={e => setForm(f => ({...f, certId: e.target.value}))} placeholder="e.g. AZ-900"
                 className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
-          </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border)]">
-            <button onClick={() => setDialogOpen(false)} className="px-4 py-2 text-sm text-[var(--text-muted)]">Cancel</button>
-            <button onClick={() => save.mutate(form)} disabled={save.isPending || !form.title} className="px-6 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium">{save.isPending ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
           </div>
         </div>
       </FormDialog>

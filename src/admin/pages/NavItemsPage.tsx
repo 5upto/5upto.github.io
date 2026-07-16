@@ -5,6 +5,7 @@ import type { NavItem } from '../../types/database'
 import FormDialog from '../components/FormDialog'
 import DeleteDialog from '../components/DeleteDialog'
 import Toast from '../components/Toast'
+import { useTouchReorder } from '../hooks/useTouchReorder'
 
 const emptyNav = { label: '', href: '', sort_order: 0 }
 
@@ -16,13 +17,27 @@ export default function NavItemsPage() {
   const [deleting, setDeleting] = useState<NavItem | null>(null)
   const [form, setForm] = useState(emptyNav)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
-  const [dragIdx, setDragIdx] = useState<number | null>(null)
-  const [overIdx, setOverIdx] = useState<number | null>(null)
+  const desktopDragIdx = useRef<number | null>(null)
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['admin-nav-items'],
     queryFn: async () => { const { data, error } = await supabase.from('nav_items').select('*').order('sort_order'); if (error) throw error; return data as NavItem[] },
   })
+
+  const handleReorder = async (from: number, to: number) => {
+    try {
+      const a = items[from]
+      const b = items[to]
+      await supabase.from('nav_items').update({ sort_order: b.sort_order }).eq('id', a.id)
+      await supabase.from('nav_items').update({ sort_order: a.sort_order }).eq('id', b.id)
+      qc.invalidateQueries({ queryKey: ['admin-nav-items'] })
+      setToast({ message: 'Reordered', type: 'success' })
+    } catch (e: any) {
+      setToast({ message: e.message, type: 'error' })
+    }
+  }
+
+  const { dragIdx, overIdx, touchHandlers } = useTouchReorder(items.length, handleReorder)
 
   const save = useMutation({
     mutationFn: async (d: typeof form) => {
@@ -40,36 +55,22 @@ export default function NavItemsPage() {
   })
 
   const handleDragStart = (e: React.DragEvent, idx: number) => {
-    setDragIdx(idx)
+    desktopDragIdx.current = idx
     e.dataTransfer.effectAllowed = 'move'
   }
 
-  const handleDragEnd = () => {
-    setDragIdx(null)
-    setOverIdx(null)
-  }
+  const handleDragEnd = () => { desktopDragIdx.current = null }
 
-  const handleDragOver = (e: React.DragEvent, idx: number) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
-    setOverIdx(idx)
   }
 
   const handleDrop = async (e: React.DragEvent, dropIdx: number) => {
     e.preventDefault()
-    if (dragIdx === null || dragIdx === dropIdx) { setDragIdx(null); setOverIdx(null); return }
-    try {
-      const a = items[dragIdx]
-      const b = items[dropIdx]
-      await supabase.from('nav_items').update({ sort_order: b.sort_order }).eq('id', a.id)
-      await supabase.from('nav_items').update({ sort_order: a.sort_order }).eq('id', b.id)
-      qc.invalidateQueries({ queryKey: ['admin-nav-items'] })
-      setToast({ message: 'Reordered', type: 'success' })
-    } catch (e: any) {
-      setToast({ message: e.message, type: 'error' })
-    }
-    setDragIdx(null)
-    setOverIdx(null)
+    const from = desktopDragIdx.current
+    if (from !== null && from !== dropIdx) handleReorder(from, dropIdx)
+    desktopDragIdx.current = null
   }
 
   return (
@@ -112,11 +113,13 @@ export default function NavItemsPage() {
               draggable
               onDragStart={(e) => handleDragStart(e, idx)}
               onDragEnd={handleDragEnd}
-              onDragOver={(e) => handleDragOver(e, idx)}
+              onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, idx)}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 cursor-grab active:cursor-grabbing transition-all ${
+              {...touchHandlers}
+              data-idx={idx}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 cursor-grab active:cursor-grabbing select-none touch-none transition-all ${
                 overIdx === idx ? 'bg-primary-600/10 border border-primary-500/30 scale-[1.02]' : 'bg-[var(--bg-elevated)] border border-transparent'
-              } ${dragIdx === idx ? 'opacity-50 scale-95' : ''}`}
+              } ${dragIdx === idx || desktopDragIdx.current === idx ? 'opacity-50 scale-95' : ''}`}
             >
               <svg className="w-4 h-4 text-[var(--text-muted)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
@@ -137,7 +140,17 @@ export default function NavItemsPage() {
         </div>
       </div>
 
-      <FormDialog open={dialogOpen} onClose={() => setDialogOpen(false)} title={editing ? 'Edit Nav Item' : 'Add Nav Item'}>
+      <FormDialog 
+        open={dialogOpen} 
+        onClose={() => setDialogOpen(false)} 
+        title={editing ? 'Edit Nav Item' : 'Add Nav Item'}
+        footer={
+          <div className="flex justify-end gap-3">
+            <button onClick={() => setDialogOpen(false)} className="px-4 py-2 text-sm text-[var(--text-muted)]">Cancel</button>
+            <button onClick={() => save.mutate(form)} disabled={save.isPending || !form.label || !form.href} className="px-6 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium">{save.isPending ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
+          </div>
+        }
+      >
         <div className="space-y-4">
           <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Label *</label>
             <input value={form.label} onChange={e => setForm(f => ({...f, label: e.target.value}))} placeholder="Home, About, Skills..." className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
@@ -145,10 +158,6 @@ export default function NavItemsPage() {
             <input value={form.href} onChange={e => setForm(f => ({...f, href: e.target.value}))} placeholder="#hero or /blog" className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
           <div className="bg-[var(--bg-elevated)] rounded-xl p-3">
             <p className="text-[10px] text-[var(--text-muted)]">Examples: #hero, #about, /blog, /gallery</p>
-          </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border)]">
-            <button onClick={() => setDialogOpen(false)} className="px-4 py-2 text-sm text-[var(--text-muted)]">Cancel</button>
-            <button onClick={() => save.mutate(form)} disabled={save.isPending || !form.label || !form.href} className="px-6 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium">{save.isPending ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
           </div>
         </div>
       </FormDialog>

@@ -200,7 +200,17 @@ export default function PublicationsPage() {
         })}
       </div>
 
-      <FormDialog open={dialogOpen} onClose={() => setDialogOpen(false)} title={editing ? 'Edit Publication' : 'Add Publication'}>
+      <FormDialog 
+        open={dialogOpen} 
+        onClose={() => setDialogOpen(false)} 
+        title={editing ? 'Edit Publication' : 'Add Publication'}
+        footer={
+          <div className="flex justify-end gap-3">
+            <button onClick={() => setDialogOpen(false)} className="px-4 py-2 text-sm text-[var(--text-muted)]">Cancel</button>
+            <button onClick={() => save.mutate(form)} disabled={save.isPending || !form.title} className="px-6 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium">{save.isPending ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
+          </div>
+        }
+      >
         <div className="space-y-4">
           {/* DOI Fetch */}
           {!editing && (
@@ -283,11 +293,6 @@ export default function PublicationsPage() {
           <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Keywords</label>
             <div className="flex gap-2 mb-2"><input value={keywordInput} onChange={e => setKeywordInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addKeyword())} placeholder="Keyword" className="flex-1 px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50" /><button type="button" onClick={addKeyword} className="px-3 py-2 bg-primary-600 text-white rounded-lg text-xs">Add</button></div>
             <div className="flex flex-wrap gap-1">{form.keywords.map((k, i) => <span key={i} className="text-xs px-2 py-1 bg-primary-600/10 text-primary-400 rounded-lg flex items-center gap-1">{k}<button type="button" onClick={() => setForm(f => ({...f, keywords: f.keywords.filter((_, j) => j !== i)}))} className="text-red-400 ml-1">×</button></span>)}</div></div>
-
-          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border)]">
-            <button onClick={() => setDialogOpen(false)} className="px-4 py-2 text-sm text-[var(--text-muted)]">Cancel</button>
-            <button onClick={() => save.mutate(form)} disabled={save.isPending || !form.title} className="px-6 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium">{save.isPending ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
-          </div>
         </div>
       </FormDialog>
       <DeleteDialog open={deleteOpen} onClose={() => setDeleteOpen(false)} onConfirm={() => deleting && del.mutate(deleting.id)} title="Publication" loading={del.isPending} />

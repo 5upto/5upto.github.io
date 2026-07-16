@@ -70,7 +70,17 @@ export default function EducationPage() {
         ))}
       </div>
 
-      <FormDialog open={dialogOpen} onClose={() => setDialogOpen(false)} title={editing ? 'Edit Education' : 'Add Education'}>
+      <FormDialog 
+        open={dialogOpen} 
+        onClose={() => setDialogOpen(false)} 
+        title={editing ? 'Edit Education' : 'Add Education'}
+        footer={
+          <div className="flex justify-end gap-3">
+            <button onClick={() => setDialogOpen(false)} className="px-4 py-2 text-sm text-[var(--text-muted)]">Cancel</button>
+            <button onClick={() => save.mutate(form)} disabled={save.isPending || !form.degree || !form.institution} className="px-6 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium">{save.isPending ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
+          </div>
+        }
+      >
         <div className="space-y-4">
           {/* Live Preview */}
           <div className="bg-[var(--bg-elevated)] rounded-xl p-4">
@@ -175,10 +185,6 @@ export default function EducationPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Certificate Label</label><input value={form.certificate_label} onChange={e => setForm(f => ({...f, certificate_label: e.target.value}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
             <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Signatory</label><input value={form.signatory} onChange={e => setForm(f => ({...f, signatory: e.target.value}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
-          </div>
-          <div className="flex justify-end gap-3 pt-4 border-t border-[var(--border)]">
-            <button onClick={() => setDialogOpen(false)} className="px-4 py-2 text-sm text-[var(--text-muted)]">Cancel</button>
-            <button onClick={() => save.mutate(form)} disabled={save.isPending || !form.degree || !form.institution} className="px-6 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium">{save.isPending ? 'Saving...' : editing ? 'Update' : 'Create'}</button>
           </div>
         </div>
       </FormDialog>
