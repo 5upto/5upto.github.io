@@ -218,10 +218,10 @@ export default function PublicationsPage() {
               <label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-2">Quick Add via DOI</label>
               <div className="flex gap-2">
                 <input value={doiInput} onChange={e => setDoiInput(e.target.value)} placeholder="10.1109/ICITIIT64777.2025.11040288"
-                  className="flex-1 px-3 py-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-lg text-sm" />
+                  className="flex-1 min-w-0 px-3 py-2 bg-[var(--bg-card)] border border-[var(--border)] rounded-lg text-sm" />
                 <button type="button" onClick={() => fetchFromDOI(doiInput)} disabled={fetchingDOI || !doiInput.trim()}
-                  className="px-4 py-2 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white rounded-lg text-xs font-medium whitespace-nowrap">
-                  {fetchingDOI ? 'Fetching...' : 'Fetch Info'}
+                  className="shrink-0 px-4 py-2 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white rounded-lg text-xs font-medium">
+                  {fetchingDOI ? 'Fetching...' : 'Fetch'}
                 </button>
               </div>
               <p className="text-[10px] text-[var(--text-muted)] mt-1.5">Enter a DOI to auto-fill title, authors, conference, and more</p>

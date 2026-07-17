@@ -133,7 +133,7 @@ function CertPreview({ format, title, certId }: { format: string; title: string;
   // Cisco card design
   if (format === 'Cisco') {
     return (
-      <div className="bg-white dark:bg-[#049fd9]/5 rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#049fd9]/20">
+      <div className="bg-white dark:bg-[#0a1628] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#049fd9]/30">
         <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
           <div className="w-[92px] h-[92px] flex items-center justify-center"><SiCisco size={64} style={{ color: '#049FD9' }} /></div>
           <div>
@@ -153,7 +153,7 @@ function CertPreview({ format, title, certId }: { format: string; title: string;
   // CompTIA card design
   if (format === 'CompTIA') {
     return (
-      <div className="bg-white dark:bg-[#e8112d]/5 rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#e8112d]/20">
+      <div className="bg-white dark:bg-[#1a0a0c] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#e8112d]/30">
         <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
           <div className="w-[92px] h-[92px] flex items-center justify-center"><SiComptia size={64} style={{ color: '#E8112D' }} /></div>
           <div>
@@ -173,7 +173,7 @@ function CertPreview({ format, title, certId }: { format: string; title: string;
   // Oracle card design
   if (format === 'Oracle') {
     return (
-      <div className="bg-white dark:bg-[#c74634]/5 rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#c74634]/20">
+      <div className="bg-white dark:bg-[#1a0e0d] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#c74634]/30">
         <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
           <div className="w-[92px] h-[92px] flex items-center justify-center"><GrOracle size={64} style={{ color: '#C74634' }} /></div>
           <div>
@@ -193,7 +193,7 @@ function CertPreview({ format, title, certId }: { format: string; title: string;
   // Linux Foundation card design
   if (format === 'Linux Foundation') {
     return (
-      <div className="bg-white dark:bg-[#fcc624]/5 rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#fcc624]/20">
+      <div className="bg-white dark:bg-[#1a1a10] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#fcc624]/30">
         <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
           <div className="w-[92px] h-[92px] flex items-center justify-center"><SiLinuxfoundation size={64} style={{ color: '#FCC624' }} /></div>
           <div>
@@ -213,7 +213,7 @@ function CertPreview({ format, title, certId }: { format: string; title: string;
   // HashiCorp card design
   if (format === 'HashiCorp') {
     return (
-      <div className="bg-white dark:bg-black/20 rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#e04e39]/20">
+      <div className="bg-white dark:bg-[#1a0f0d] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#e04e39]/30">
         <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
           <div className="w-[92px] h-[92px] flex items-center justify-center"><SiHashicorp size={64} style={{ color: '#e04e39' }} /></div>
           <div>
@@ -232,9 +232,16 @@ function CertPreview({ format, title, certId }: { format: string; title: string;
 
   // Default
   return (
-    <div className="bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl rounded-xl p-5 text-center">
-      <h3 className="text-base font-bold text-[var(--text-primary)]">{title || 'Certification Title'}</h3>
-      {certId && <p className="text-xs text-[var(--text-muted)] mt-1 font-mono">{certId}</p>}
+    <div className="bg-white dark:bg-[#1a1a2e] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#2a2a2a]">
+      <div className="h-1.5 bg-gradient-to-r from-primary-500 to-accent-500" />
+      <div className="p-5 text-center">
+        <h3 className="text-base font-bold text-[#1a1a2a] dark:text-[#e0e0e8]">{title || 'Certification Title'}</h3>
+        {certId && <p className="text-xs text-[#6a7a8a] dark:text-[#7a8a9a] mt-1 font-mono">{certId}</p>}
+        <div className="flex items-center justify-center gap-1.5 mt-2.5">
+          <svg viewBox="0 0 16 16" className="w-3 h-3 fill-[#00a84e]"><path d="M8 1a7 7 0 110 14A7 7 0 018 1zm3.36 4.65a.5.5 0 00-.71 0L7 9.29 5.35 7.65a.5.5 0 10-.7.7l2 2c.2.2.5.2.7 0l4-4a.5.5 0 000-.7z"/></svg>
+          <span className="text-[10px] md:text-[11px] text-[#6a7a8a] dark:text-[#7a8a9a]">Verified Credential</span>
+        </div>
+      </div>
     </div>
   )
 }

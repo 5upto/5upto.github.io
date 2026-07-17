@@ -86,14 +86,14 @@ export default function Education() {
                   </div>
                   <div className="md:w-[70%] text-center md:text-left py-6 px-4 md:pl-0 md:pr-6">
                     {edu.country_name && <p className="text-[10px] tracking-[0.15em] uppercase text-[#5a6a8a] dark:text-[#7a8aaa] font-medium">{edu.country_name}</p>}
-                    <p className="text-xs tracking-[0.08em] uppercase text-[#1a237e] dark:text-[#7a8adf] font-bold mt-0.5">{edu.institution}</p>
+                    <p className="text-xs tracking-[0.08em] text-[#1a237e] dark:text-[#7a8adf] font-bold mt-0.5 font-certificate">{edu.institution}</p>
                     <div className="w-10 h-px bg-[#1a237e]/30 dark:bg-[#5a6abf]/30 mx-auto md:mx-0 my-3" />
                     {edu.certificate_label && <p className="text-[10px] text-[#8a9aaa] dark:text-[#7a8aaa] uppercase tracking-wider">{edu.certificate_label}</p>}
-                    <h3 className="text-lg md:text-xl font-bold text-[#1a1a2a] dark:text-[#d0d8e8] mt-1 leading-tight">{edu.degree}</h3>
+                    <h3 className="text-lg md:text-xl font-bold text-[#1a1a2a] dark:text-[#d0d8e8] mt-1 leading-tight font-certificate">{edu.degree}</h3>
                     {edu.subject && <p className="text-xs text-[#5a6a7a] dark:text-[#8a9aaa] mt-1">in <span className="font-medium">{edu.subject}</span></p>}
                     <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mt-4">
-                      <span className="text-xs text-[#1a237e] dark:text-[#7a8adf] font-bold">{edu.year}</span>
-                      {edu.signatory && <span className="text-[9px] text-[#8a9aaa] dark:text-[#6a7a8a]">{edu.signatory}</span>}
+                      <span className="text-xs text-[#1a237e] dark:text-[#7a8adf] font-bold font-certificate">{edu.year}</span>
+                      {edu.signatory && <span className="text-[9px] text-[#8a9aaa] dark:text-[#6a7a8a] font-certificate">{edu.signatory}</span>}
                     </div>
                   </div>
                 </div>
@@ -197,7 +197,7 @@ export default function Education() {
   }
 
   return (
-    <section ref={sectionRef} id="education" className="py-16 md:py-20 px-4 relative">
+    <section ref={sectionRef} id="education" className="py-16 md:py-20 pb-8 md:pb-10 px-4 relative">
       <h2 ref={headingRef} className="section-heading text-center mb-8 md:mb-10">
         <span className="gradient-text">Education</span>
       </h2>
@@ -312,7 +312,7 @@ export default function Education() {
             if (cert.name.startsWith('Cisco Certified')) {
               return (
                 <ScrollStackItem key={cert.id} itemClassName="!h-auto !p-0 !rounded-xl overflow-hidden !bg-transparent !border-none !shadow-none">
-                  <div className="bg-white dark:bg-[#049fd9]/5 rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#049fd9]/20 w-full">
+                  <div className="bg-white dark:bg-[#0a1628] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#049fd9]/30 w-full">
                     <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
                       <div className="shrink-0 w-[92px] h-[92px] flex items-center justify-center">
                         <SiCisco size={64} style={{ color: '#049FD9' }} />
@@ -336,7 +336,7 @@ export default function Education() {
             if (cert.name.startsWith('CompTIA')) {
               return (
                 <ScrollStackItem key={cert.id} itemClassName="!h-auto !p-0 !rounded-xl overflow-hidden !bg-transparent !border-none !shadow-none">
-                  <div className="bg-white dark:bg-[#e8112d]/5 rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#e8112d]/20 w-full">
+                  <div className="bg-white dark:bg-[#1a0a0c] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#e8112d]/30 w-full">
                     <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
                       <div className="shrink-0 w-[92px] h-[92px] flex items-center justify-center">
                         <SiComptia size={64} style={{ color: '#E8112D' }} />
@@ -360,7 +360,7 @@ export default function Education() {
             if (cert.name.startsWith('Oracle Certified')) {
               return (
                 <ScrollStackItem key={cert.id} itemClassName="!h-auto !p-0 !rounded-xl overflow-hidden !bg-transparent !border-none !shadow-none">
-                  <div className="bg-white dark:bg-[#c74634]/5 rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#c74634]/20 w-full">
+                  <div className="bg-white dark:bg-[#1a0e0d] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#c74634]/30 w-full">
                     <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
                       <div className="shrink-0 w-[92px] h-[92px] flex items-center justify-center">
                         <GrOracle size={64} style={{ color: '#C74634' }} />
@@ -384,7 +384,7 @@ export default function Education() {
             if (cert.name.startsWith('Linux Foundation')) {
               return (
                 <ScrollStackItem key={cert.id} itemClassName="!h-auto !p-0 !rounded-xl overflow-hidden !bg-transparent !border-none !shadow-none">
-                  <div className="bg-white dark:bg-[#fcc624]/5 rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#fcc624]/20 w-full">
+                  <div className="bg-white dark:bg-[#1a1a10] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#fcc624]/30 w-full">
                     <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
                       <div className="shrink-0 w-[92px] h-[92px] flex items-center justify-center">
                         <SiLinuxfoundation size={64} style={{ color: '#FCC624' }} />
@@ -408,7 +408,7 @@ export default function Education() {
             if (cert.name.startsWith('HashiCorp')) {
               return (
                 <ScrollStackItem key={cert.id} itemClassName="!h-auto !p-0 !rounded-xl overflow-hidden !bg-transparent !border-none !shadow-none">
-                  <div className="bg-white dark:bg-black/20 rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#e04e39]/20 w-full">
+                  <div className="bg-white dark:bg-[#1a0f0d] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#e04e39]/30 w-full">
                     <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
                       <div className="shrink-0 w-[92px] h-[92px] flex items-center justify-center">
                         <SiHashicorp size={64} style={{ color: '#e04e39' }} />
@@ -431,21 +431,28 @@ export default function Education() {
             // Default format
             return (
               <ScrollStackItem key={cert.id} itemClassName="!h-auto !p-0 !rounded-xl overflow-hidden !bg-transparent !border-none !shadow-none">
-                <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5 w-full">
-                  <h3 className="text-base md:text-lg font-bold text-[var(--text-primary)] leading-snug">{cert.name}</h3>
+                <div className="bg-white dark:bg-[#1a1a2e] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#2a2a2a] w-full">
+                  <div className="h-1.5 bg-gradient-to-r from-primary-500 to-accent-500" />
+                  <div className="px-6 md:px-8 py-6 md:py-7">
+                    <h3 className="text-base md:text-lg font-bold text-[#1a1a2a] dark:text-[#e0e0e8] leading-snug">{cert.name}</h3>
+                    <div className="flex items-center justify-center gap-1.5 mt-2.5">
+                      <svg viewBox="0 0 16 16" className="w-3 h-3 fill-[#00a84e]"><path d="M8 1a7 7 0 110 14A7 7 0 018 1zm3.36 4.65a.5.5 0 00-.71 0L7 9.29 5.35 7.65a.5.5 0 10-.7.7l2 2c.2.2.5.2.7 0l4-4a.5.5 0 000-.7z"/></svg>
+                      <span className="text-[10px] md:text-[11px] text-[#6a7a8a] dark:text-[#7a8a9a]">Verified Credential</span>
+                    </div>
+                  </div>
                 </div>
               </ScrollStackItem>
             )
           })}
         </ScrollStack>
 
-        <div className="mt-12 md:mt-16">
+        <div className="mt-8 md:mt-10">
           <h2 className="section-heading text-center mb-8 md:mb-10">
             <span className="gradient-text">Publications</span>
           </h2>
-          <div className="mt-6 space-y-6">
+          <ScrollStack useWindowScroll={true} itemDistance={60} itemScale={0.03} itemStackDistance={25} stackPosition="15%" baseScale={0.88}>
             {publications.map((publication) => { const pub = getPublisher(publication); const PubIcon = pub.icon; return (
-            <div key={publication.id} className="bg-white dark:bg-[#121212] rounded-xl overflow-hidden border border-[#d0d0d0] dark:border-[#2a2a2a]">
+            <ScrollStackItem key={publication.id} itemClassName="!h-auto !p-0 !rounded-2xl bg-white dark:bg-[#121212] border border-[#d0d0d0] dark:border-[#2a2a2a] overflow-hidden">
               <div className="h-1.5" style={{ background: pub.color }} />
               <div className="px-6 md:px-8 py-6 md:py-7">
                 <div className="flex items-center gap-2 mb-3">
@@ -493,9 +500,9 @@ export default function Education() {
                   </a>
                 </div>
               </div>
-            </div>
+            </ScrollStackItem>
             )})}
-          </div>
+          </ScrollStack>
         </div>
       </div>
     </section>

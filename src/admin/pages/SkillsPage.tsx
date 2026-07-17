@@ -131,7 +131,7 @@ export default function SkillsPage() {
             const colors: Record<string, string> = { SiPython: '#3776AB', FaJava: '#ED8B00', SiCplusplus: '#00599C', SiJavascript: '#F7DF1E', SiTypescript: '#3178C6', SiReact: '#61DAFB', SiNodedotjs: '#339933', SiPostgresql: '#4169E1', SiMongodb: '#47A248', SiDocker: '#2496ED', SiTailwindcss: '#06B6D4', SiFastapi: '#009688', SiDjango: '#092E20', SiTensorflow: '#FF6F00', SiPytorch: '#EE4C2C', SiGit: '#F05032' }
             setForm(f => ({...f, icon_name: iconName, color: colors[iconName] || f.color}))
           }} />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Color</label>
               <div className="flex gap-2"><input type="color" value={form.color} onChange={e => setForm(f => ({...f, color: e.target.value}))} className="w-10 h-10 rounded-lg cursor-pointer border border-[var(--border)]" /><input value={form.color} onChange={e => setForm(f => ({...f, color: e.target.value}))} className="flex-1 px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)]" /></div></div>
             <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Category</label>
