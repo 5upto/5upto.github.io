@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { MdCheck, MdClose } from 'react-icons/md'
 
 interface ToastProps {
   message: string | undefined
@@ -22,9 +23,9 @@ export default function Toast({ message, type, onClose }: ToastProps) {
     }`}>
       <div className="flex items-center gap-2">
         {type === 'success' ? (
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+          <MdCheck className="w-4 h-4" />
         ) : (
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          <MdClose className="w-4 h-4" />
         )}
         <span>{message}</span>
         <button onClick={onClose} className="ml-2 opacity-70 hover:opacity-100">✕</button>

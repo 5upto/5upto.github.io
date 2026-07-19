@@ -7,6 +7,7 @@ import DeleteDialog from '../components/DeleteDialog'
 import Toast from '../components/Toast'
 import { platformIcons } from '../../lib/socialIcons'
 import { FaGlobe } from 'react-icons/fa'
+import { MdDragIndicator, MdEdit, MdDelete } from 'react-icons/md'
 import { useTouchReorder } from '../hooks/useTouchReorder'
 
 const empty = { platform: '', url: '', label: '', icon_svg: '' }
@@ -101,9 +102,7 @@ export default function SocialLinksPage() {
                 overIdx === idx ? 'bg-primary-600/10 border border-primary-500/30 scale-[1.02]' : 'bg-[var(--bg-elevated)] border border-transparent'
               } ${dragIdx === idx || desktopDragIdx.current === idx ? 'opacity-50 scale-95' : ''}`}
             >
-              <svg className="w-4 h-4 text-[var(--text-muted)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
-              </svg>
+              <MdDragIndicator className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
               <span className="text-[10px] text-[var(--text-muted)] w-4 text-center">{idx + 1}</span>
               <div className="w-8 h-8 bg-[var(--bg-card)] rounded-lg flex items-center justify-center shrink-0">
                 <span className="fill-[var(--text-primary)]">{platformIcons[l.platform] || <FaGlobe size={18} className="fill-[var(--text-muted)]" />}</span>
@@ -114,10 +113,10 @@ export default function SocialLinksPage() {
               </div>
               <div className="flex gap-1 ml-2">
                 <button onClick={(e) => { e.stopPropagation(); setEditing(l); setForm({ platform: l.platform, url: l.url, label: l.label, icon_svg: l.icon_svg ?? '' }); setDialogOpen(true) }} className="w-6 h-6 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--bg-card)] transition-colors">
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                  <MdEdit className="w-3 h-3" />
                 </button>
                 <button onClick={(e) => { e.stopPropagation(); setDeleting(l); setDeleteOpen(true) }} className="w-6 h-6 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:bg-red-500/10 hover:text-red-400 transition-colors">
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  <MdDelete className="w-3 h-3" />
                 </button>
               </div>
             </div>

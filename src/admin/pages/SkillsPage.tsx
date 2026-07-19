@@ -6,6 +6,7 @@ import FormDialog from '../components/FormDialog'
 import DeleteDialog from '../components/DeleteDialog'
 import IconPicker from '../components/IconPicker'
 import Toast from '../components/Toast'
+import { MdClose } from 'react-icons/md'
 
 const empty: { label: string; color: string; icon_name: string; category: 'languages' | 'web' | 'databases' } = { label: '', color: '#000000', icon_name: '', category: 'web' }
 
@@ -89,7 +90,7 @@ export default function SkillsPage() {
                     {IconComp ? <IconComp size={16} style={{ color: skill.color }} /> : <span className="w-3 h-3 rounded-full shrink-0" style={{ background: skill.color }} />}
                     <span className="text-sm text-[var(--text-secondary)]">{skill.label}</span>
                     <button onClick={(e) => { e.stopPropagation(); setDeleting(skill); setDeleteOpen(true) }} className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-red-400 hover:text-red-300 transition-all">
-                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                      <MdClose className="w-3 h-3" />
                     </button>
                   </div>
                 )

@@ -7,6 +7,7 @@ import FormDialog from '../components/FormDialog'
 import DeleteDialog from '../components/DeleteDialog'
 import Toast from '../components/Toast'
 import { publisherIcons } from '../../components/PublisherIcons'
+import { MdDelete } from 'react-icons/md'
 
 const pubFormats = [
   { name: 'IEEE', color: '#006699', icon: publisherIcons.IEEE },
@@ -191,7 +192,7 @@ export default function PublicationsPage() {
                     </div>
                   </div>
                   <button onClick={(e) => { e.stopPropagation(); setDeleting(p); setDeleteOpen(true) }} className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-red-500/10 text-red-400 transition-all shrink-0">
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    <MdDelete className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>

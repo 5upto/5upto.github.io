@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../lib/supabase'
 import Toast from '../components/Toast'
+import { MdCloudUpload, MdImage } from 'react-icons/md'
 
 const buckets = ['avatars', 'logos', 'projects', 'gallery', 'blogs']
 
@@ -76,7 +77,7 @@ export default function StoragePage() {
           {buckets.map(b => <option key={b} value={b}>{b}</option>)}
         </select>
         <label className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl text-sm font-medium cursor-pointer transition-all hover:shadow-lg hover:shadow-primary-500/25">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+          <MdCloudUpload className="w-4 h-4" />
           {uploading ? 'Uploading...' : 'Upload File'}
           <input type="file" className="hidden" accept="image/*" onChange={uploadFile} disabled={uploading} />
         </label>
@@ -87,7 +88,7 @@ export default function StoragePage() {
         <div className="text-center py-12 text-[var(--text-muted)] text-sm">Loading files...</div>
       ) : images.length === 0 ? (
         <div className="text-center py-12 bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl rounded-xl">
-          <svg className="w-12 h-12 mx-auto text-[var(--text-muted)] mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+          <MdImage className="w-12 h-12 mx-auto text-[var(--text-muted)] mb-3" />
           <p className="text-sm text-[var(--text-muted)]">No images in {selectedBucket}</p>
         </div>
       ) : (

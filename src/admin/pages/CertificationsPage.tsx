@@ -8,6 +8,7 @@ import Toast from '../components/Toast'
 import { FaAws } from 'react-icons/fa'
 import { SiGooglecloud, SiCisco, SiComptia, SiLinuxfoundation, SiHashicorp } from 'react-icons/si'
 import { GrOracle } from 'react-icons/gr'
+import { MdDelete, MdCheckCircle } from 'react-icons/md'
 
 const certFormats = [
   { name: 'Microsoft', prefix: 'Microsoft Certified:', color: '#0078d4', suggestions: [
@@ -80,7 +81,7 @@ function CertPreview({ format, title, certId }: { format: string; title: string;
               <span className="text-[10px] md:text-[11px] text-[#0078d4]/60 font-medium">Associate</span>
             </div>
             <div className="flex items-center justify-center gap-1.5 mt-2.5">
-              <svg viewBox="0 0 16 16" className="w-3 h-3 fill-[#00a84e]"><path d="M8 1a7 7 0 110 14A7 7 0 018 1zm3.36 4.65a.5.5 0 00-.71 0L7 9.29 5.35 7.65a.5.5 0 10-.7.7l2 2c.2.2.5.2.7 0l4-4a.5.5 0 000-.7z"/></svg>
+              <MdCheckCircle className="w-3 h-3 text-[#00a84e]" />
               <span className="text-[10px] md:text-[11px] text-[#6a7a8a]">Verified Credential</span>
             </div>
           </div>
@@ -100,7 +101,7 @@ function CertPreview({ format, title, certId }: { format: string; title: string;
             <h3 className="text-base md:text-lg font-bold text-[#232f3e] dark:text-white leading-snug mt-2">{title || 'Certification Title'}</h3>
             {certId && <p className="text-[11px] md:text-xs text-[#6a7a8a] font-mono mt-2">{certId}</p>}
             <div className="flex items-center justify-center gap-1.5 mt-2.5">
-              <svg viewBox="0 0 16 16" className="w-3 h-3 fill-[#00a84e]"><path d="M8 1a7 7 0 110 14A7 7 0 018 1zm3.36 4.65a.5.5 0 00-.71 0L7 9.29 5.35 7.65a.5.5 0 10-.7.7l2 2c.2.2.5.2.7 0l4-4a.5.5 0 000-.7z"/></svg>
+              <MdCheckCircle className="w-3 h-3 text-[#00a84e]" />
               <span className="text-[10px] md:text-[11px] text-[#6a7a8a]">Verified Credential</span>
             </div>
           </div>
@@ -121,7 +122,7 @@ function CertPreview({ format, title, certId }: { format: string; title: string;
             <h3 className="text-base md:text-lg font-bold text-[#1a1a2a] dark:text-white leading-snug mt-2">{title || 'Certification Title'}</h3>
             {certId && <p className="text-[11px] md:text-xs text-[#6a7a8a] font-mono mt-2">{certId}</p>}
             <div className="flex items-center justify-center gap-1.5 mt-2.5">
-              <svg viewBox="0 0 16 16" className="w-3 h-3 fill-[#00a84e]"><path d="M8 1a7 7 0 110 14A7 7 0 018 1zm3.36 4.65a.5.5 0 00-.71 0L7 9.29 5.35 7.65a.5.5 0 10-.7.7l2 2c.2.2.5.2.7 0l4-4a.5.5 0 000-.7z"/></svg>
+              <MdCheckCircle className="w-3 h-3 text-[#00a84e]" />
               <span className="text-[10px] md:text-[11px] text-[#6a7a8a]">Verified Credential</span>
             </div>
           </div>
@@ -141,7 +142,7 @@ function CertPreview({ format, title, certId }: { format: string; title: string;
             <h3 className="text-base md:text-lg font-bold text-[#049FD9] leading-snug mt-2">{title || 'Certification Title'}</h3>
             {certId && <p className="text-[11px] md:text-xs text-[#6a7a8a] font-mono mt-2">{certId}</p>}
             <div className="flex items-center justify-center gap-1.5 mt-2.5">
-              <svg viewBox="0 0 16 16" className="w-3 h-3 fill-[#00a84e]"><path d="M8 1a7 7 0 110 14A7 7 0 018 1zm3.36 4.65a.5.5 0 00-.71 0L7 9.29 5.35 7.65a.5.5 0 10-.7.7l2 2c.2.2.5.2.7 0l4-4a.5.5 0 000-.7z"/></svg>
+              <MdCheckCircle className="w-3 h-3 text-[#00a84e]" />
               <span className="text-[10px] md:text-[11px] text-[#6a7a8a]">Verified Credential</span>
             </div>
           </div>
@@ -161,7 +162,7 @@ function CertPreview({ format, title, certId }: { format: string; title: string;
             <h3 className="text-base md:text-lg font-bold text-[#E8112D] leading-snug mt-2">{title || 'Certification Title'}</h3>
             {certId && <p className="text-[11px] md:text-xs text-[#6a7a8a] font-mono mt-2">{certId}</p>}
             <div className="flex items-center justify-center gap-1.5 mt-2.5">
-              <svg viewBox="0 0 16 16" className="w-3 h-3 fill-[#00a84e]"><path d="M8 1a7 7 0 110 14A7 7 0 018 1zm3.36 4.65a.5.5 0 00-.71 0L7 9.29 5.35 7.65a.5.5 0 10-.7.7l2 2c.2.2.5.2.7 0l4-4a.5.5 0 000-.7z"/></svg>
+              <MdCheckCircle className="w-3 h-3 text-[#00a84e]" />
               <span className="text-[10px] md:text-[11px] text-[#6a7a8a]">Verified Credential</span>
             </div>
           </div>
@@ -181,7 +182,7 @@ function CertPreview({ format, title, certId }: { format: string; title: string;
             <h3 className="text-base md:text-lg font-bold text-[#C74634] leading-snug mt-2">{title || 'Certification Title'}</h3>
             {certId && <p className="text-[11px] md:text-xs text-[#6a7a8a] font-mono mt-2">{certId}</p>}
             <div className="flex items-center justify-center gap-1.5 mt-2.5">
-              <svg viewBox="0 0 16 16" className="w-3 h-3 fill-[#00a84e]"><path d="M8 1a7 7 0 110 14A7 7 0 018 1zm3.36 4.65a.5.5 0 00-.71 0L7 9.29 5.35 7.65a.5.5 0 10-.7.7l2 2c.2.2.5.2.7 0l4-4a.5.5 0 000-.7z"/></svg>
+              <MdCheckCircle className="w-3 h-3 text-[#00a84e]" />
               <span className="text-[10px] md:text-[11px] text-[#6a7a8a]">Verified Credential</span>
             </div>
           </div>
@@ -201,7 +202,7 @@ function CertPreview({ format, title, certId }: { format: string; title: string;
             <h3 className="text-base md:text-lg font-bold text-[#333] dark:text-white leading-snug mt-2">{title || 'Certification Title'}</h3>
             {certId && <p className="text-[11px] md:text-xs text-[#6a7a8a] font-mono mt-2">{certId}</p>}
             <div className="flex items-center justify-center gap-1.5 mt-2.5">
-              <svg viewBox="0 0 16 16" className="w-3 h-3 fill-[#00a84e]"><path d="M8 1a7 7 0 110 14A7 7 0 018 1zm3.36 4.65a.5.5 0 00-.71 0L7 9.29 5.35 7.65a.5.5 0 10-.7.7l2 2c.2.2.5.2.7 0l4-4a.5.5 0 000-.7z"/></svg>
+              <MdCheckCircle className="w-3 h-3 text-[#00a84e]" />
               <span className="text-[10px] md:text-[11px] text-[#6a7a8a]">Verified Credential</span>
             </div>
           </div>
@@ -221,7 +222,7 @@ function CertPreview({ format, title, certId }: { format: string; title: string;
             <h3 className="text-base md:text-lg font-bold text-[#e04e39] leading-snug mt-2">{title || 'Certification Title'}</h3>
             {certId && <p className="text-[11px] md:text-xs text-[#6a7a8a] font-mono mt-2">{certId}</p>}
             <div className="flex items-center justify-center gap-1.5 mt-2.5">
-              <svg viewBox="0 0 16 16" className="w-3 h-3 fill-[#00a84e]"><path d="M8 1a7 7 0 110 14A7 7 0 018 1zm3.36 4.65a.5.5 0 00-.71 0L7 9.29 5.35 7.65a.5.5 0 10-.7.7l2 2c.2.2.5.2.7 0l4-4a.5.5 0 000-.7z"/></svg>
+              <MdCheckCircle className="w-3 h-3 text-[#00a84e]" />
               <span className="text-[10px] md:text-[11px] text-[#6a7a8a]">Verified Credential</span>
             </div>
           </div>
@@ -238,7 +239,7 @@ function CertPreview({ format, title, certId }: { format: string; title: string;
         <h3 className="text-base font-bold text-[#1a1a2a] dark:text-[#e0e0e8]">{title || 'Certification Title'}</h3>
         {certId && <p className="text-xs text-[#6a7a8a] dark:text-[#7a8a9a] mt-1 font-mono">{certId}</p>}
         <div className="flex items-center justify-center gap-1.5 mt-2.5">
-          <svg viewBox="0 0 16 16" className="w-3 h-3 fill-[#00a84e]"><path d="M8 1a7 7 0 110 14A7 7 0 018 1zm3.36 4.65a.5.5 0 00-.71 0L7 9.29 5.35 7.65a.5.5 0 10-.7.7l2 2c.2.2.5.2.7 0l4-4a.5.5 0 000-.7z"/></svg>
+          <MdCheckCircle className="w-3 h-3 text-[#00a84e]" />
           <span className="text-[10px] md:text-[11px] text-[#6a7a8a] dark:text-[#7a8a9a]">Verified Credential</span>
         </div>
       </div>
@@ -324,7 +325,7 @@ export default function CertificationsPage() {
                   {match && <p className="text-xs text-[var(--text-muted)] mt-0.5 font-mono">{match[3]}</p>}
                 </div>
                 <button onClick={(e) => { e.stopPropagation(); setDeleting(c); setDeleteOpen(true) }} className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-red-500/10 text-red-400 transition-all shrink-0">
-                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  <MdDelete className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>

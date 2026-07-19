@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { MdClose } from 'react-icons/md'
 
 interface FormDialogProps {
   open: boolean
@@ -45,9 +46,7 @@ export default function FormDialog({ open, onClose, title, children, footer }: F
         <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-[var(--border)] shrink-0">
           <h2 className="text-base sm:text-lg font-display font-bold text-[var(--text-primary)] truncate pr-2">{title}</h2>
           <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors shrink-0">
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <MdClose className="w-5 h-5" />
           </button>
         </div>
         <div className="p-4 sm:p-6 pb-8 sm:pb-10 overflow-y-auto overscroll-contain flex-1 min-h-0">

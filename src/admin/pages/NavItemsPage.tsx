@@ -5,6 +5,7 @@ import type { NavItem } from '../../types/database'
 import FormDialog from '../components/FormDialog'
 import DeleteDialog from '../components/DeleteDialog'
 import Toast from '../components/Toast'
+import { MdClose, MdAdd, MdEdit, MdDelete, MdDragIndicator } from 'react-icons/md'
 import { useTouchReorder } from '../hooks/useTouchReorder'
 
 const emptyNav = { label: '', href: '', sort_order: 0 }
@@ -92,12 +93,12 @@ export default function NavItemsPage() {
             <div key={item.id} className="group relative flex items-center gap-1 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-full px-4 py-2 transition-all hover:border-primary-500/50 hover:shadow-md">
               <span className="text-sm font-medium text-[var(--text-secondary)]">{item.label}</span>
               <button onClick={() => { setDeleting(item); setDeleteOpen(true) }} className="ml-1 w-4 h-4 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/20">
-                <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
+                <MdClose className="w-2.5 h-2.5" />
               </button>
             </div>
           ))}
           <button onClick={() => { setEditing(null); setForm(emptyNav); setDialogOpen(true) }} className="flex items-center gap-1 bg-primary-600/10 border border-dashed border-primary-500/30 rounded-full px-4 py-2 text-sm font-medium text-primary-400 hover:bg-primary-600/20 transition-all">
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+            <MdAdd className="w-3 h-3" />
             Add
           </button>
         </div>
@@ -121,18 +122,16 @@ export default function NavItemsPage() {
                 overIdx === idx ? 'bg-primary-600/10 border border-primary-500/30 scale-[1.02]' : 'bg-[var(--bg-elevated)] border border-transparent'
               } ${dragIdx === idx || desktopDragIdx.current === idx ? 'opacity-50 scale-95' : ''}`}
             >
-              <svg className="w-4 h-4 text-[var(--text-muted)] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
-              </svg>
+              <MdDragIndicator className="w-4 h-4 text-[var(--text-muted)] shrink-0" />
               <span className="text-[10px] text-[var(--text-muted)] w-4 text-center">{idx + 1}</span>
               <span className="text-sm text-[var(--text-secondary)] flex-1 truncate">{item.label}</span>
               <span className="text-[10px] text-[var(--text-muted)] hidden sm:inline">{item.href}</span>
               <div className="flex gap-1 ml-2">
                 <button onClick={(e) => { e.stopPropagation(); setEditing(item); setForm({ label: item.label, href: item.href, sort_order: item.sort_order }); setDialogOpen(true) }} className="w-6 h-6 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:bg-[var(--bg-card)] transition-colors">
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                  <MdEdit className="w-3 h-3" />
                 </button>
                 <button onClick={(e) => { e.stopPropagation(); setDeleting(item); setDeleteOpen(true) }} className="w-6 h-6 rounded-lg flex items-center justify-center text-[var(--text-muted)] hover:bg-red-500/10 hover:text-red-400 transition-colors">
-                  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                  <MdDelete className="w-3 h-3" />
                 </button>
               </div>
             </div>
