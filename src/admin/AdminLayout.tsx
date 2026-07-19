@@ -151,11 +151,18 @@ export default function AdminLayout() {
   const location = useLocation()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const [dark, setDark] = useState(() => {
     const saved = localStorage.getItem('portfolio-theme')
     if (saved) return saved === 'dark'
     return window.matchMedia('(prefers-color-scheme: dark)').matches
   })
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 20)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   const { data: profile } = useQuery({
     queryKey: ['admin-sidebar-profile'],
@@ -174,22 +181,35 @@ export default function AdminLayout() {
   return (
     <div className="min-h-screen relative z-10" style={{ background: 'transparent' }}>
       {/* Mobile top bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 flex items-center px-4 z-40">
-        <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 -ml-2 rounded-xl hover:bg-[var(--bg-elevated)] text-[var(--text-muted)]">
-          {mobileOpen ? (
-            <MdClose className="w-5 h-5" />
-          ) : (
-            <MdMenuOpen className="w-5 h-5" />
-          )}
-        </button>
-        {/* Theme toggle */}
-        <button onClick={() => setDark(!dark)} className="ml-auto p-2 rounded-xl hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] transition-colors">
-          {dark ? (
-            <MdLightMode className="w-5 h-5" />
-          ) : (
-            <MdDarkMode className="w-5 h-5" />
-          )}
-        </button>
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 px-4 pt-3">
+        <div className="flex items-center h-11 transition-all duration-300"
+          style={{
+            gap: scrolled ? '4px' : '0',
+            justifyContent: 'space-between',
+            background: scrolled ? 'color-mix(in srgb, var(--bg-card) 80%, transparent)' : 'transparent',
+            backdropFilter: scrolled ? 'blur(16px) saturate(180%)' : 'none',
+            WebkitBackdropFilter: scrolled ? 'blur(16px) saturate(180%)' : 'none',
+            border: scrolled ? '1px solid color-mix(in srgb, var(--border) 50%, transparent)' : '1px solid transparent',
+            boxShadow: scrolled ? '0 4px 30px rgba(0,0,0,0.06)' : 'none',
+            borderRadius: scrolled ? '9999px' : '16px',
+            padding: scrolled ? '0 6px' : '0',
+          }}>
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-full hover:bg-[var(--bg-elevated)] text-[var(--text-muted)]">
+            {mobileOpen ? (
+              <MdClose className="w-5 h-5" />
+            ) : (
+              <MdMenu className="w-5 h-5" />
+            )}
+          </button>
+          {/* Theme toggle */}
+          <button onClick={() => setDark(!dark)} className="p-2 rounded-full hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] transition-colors">
+            {dark ? (
+              <MdLightMode className="w-5 h-5" />
+            ) : (
+              <MdDarkMode className="w-5 h-5" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Mobile overlay */}
