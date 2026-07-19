@@ -12,6 +12,12 @@ import { MdEdit, MdDelete } from 'react-icons/md'
 
 const empty = { role: '', company: '', logo: '', location: '', period: '', slug: '', points: [] as string[], story: '' }
 
+const F = ({ l, v, onChange, ph, ta, r }: { l: string; v: string; onChange: (s: string) => void; ph?: string; ta?: boolean; r?: number }) => (
+  <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">{l}</label>
+    {ta ? <textarea value={v} onChange={e => onChange(e.target.value)} rows={r||3} placeholder={ph} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 resize-y" />
+    : <input value={v} onChange={e => onChange(e.target.value)} placeholder={ph} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500" />}</div>
+)
+
 export default function ExperiencesPage() {
   const qc = useQueryClient()
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -43,11 +49,6 @@ export default function ExperiencesPage() {
 
   const openAdd = () => { setEditing(null); setForm(empty); setDialogOpen(true) }
   const openEdit = (e: Experience) => { setEditing(e); setForm({ role: e.role, company: e.company, logo: e.logo, location: e.location, period: e.period, slug: e.slug, points: e.points, story: e.story }); setDialogOpen(true) }
-  const F = ({ l, v, onChange, ph, ta, r }: { l: string; v: string; onChange: (s: string) => void; ph?: string; ta?: boolean; r?: number }) => (
-    <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">{l}</label>
-      {ta ? <textarea value={v} onChange={e => onChange(e.target.value)} rows={r||3} placeholder={ph} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 resize-y" />
-      : <input value={v} onChange={e => onChange(e.target.value)} placeholder={ph} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500" />}</div>
-  )
 
   return (
     <div className="space-y-6">

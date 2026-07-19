@@ -6,6 +6,19 @@ import ImagePicker from '../components/ImagePicker'
 import Toast from '../components/Toast'
 import { MdPerson, MdEdit, MdImage } from 'react-icons/md'
 
+const InputField = ({ label, value, onChange, placeholder, textarea, rows }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; textarea?: boolean; rows?: number }) => (
+  <div>
+    <label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">{label}</label>
+    {textarea ? (
+      <textarea value={value} onChange={(e) => onChange(e.target.value)} rows={rows || 3} placeholder={placeholder}
+        className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all resize-y" />
+    ) : (
+      <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
+        className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all" />
+    )}
+  </div>
+)
+
 export default function ProfilePage() {
   const queryClient = useQueryClient()
   const [form, setForm] = useState({ name: '', title: '', handle: '', tagline: '', status: '', location: '', bio: '', avatar_url: '', about_highlights: [] as { label: string; value: string }[] })
@@ -30,19 +43,6 @@ export default function ProfilePage() {
     onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['admin-profile'] }); setToast({ message: 'Profile saved!', type: 'success' }) },
     onError: (e: any) => setToast({ message: `Failed: ${e.message}`, type: 'error' }),
   })
-
-  const InputField = ({ label, value, onChange, placeholder, textarea, rows }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; textarea?: boolean; rows?: number }) => (
-    <div>
-      <label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">{label}</label>
-      {textarea ? (
-        <textarea value={value} onChange={(e) => onChange(e.target.value)} rows={rows || 3} placeholder={placeholder}
-          className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all resize-y" />
-      ) : (
-        <input value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
-          className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all" />
-      )}
-    </div>
-  )
 
   const tabs = [
     { id: 'basic' as const, label: 'Basic Info', icon: <MdPerson className="w-4 h-4" /> },
