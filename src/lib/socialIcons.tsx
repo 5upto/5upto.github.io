@@ -1,5 +1,5 @@
 import { FaLinkedin, FaGithub, FaFacebook, FaInstagram, FaYoutube, FaDiscord, FaTwitch, FaTelegram, FaGlobe, FaEnvelope } from 'react-icons/fa'
-import { SiLeetcode, SiX, SiGmail, SiGooglescholar } from 'react-icons/si'
+import { SiLeetcode, SiX, SiGmail, SiGooglescholar, SiLetterboxd } from 'react-icons/si'
 
 export const platformIcons: Record<string, React.ReactNode> = {
   Email: <SiGmail size={20} />,
@@ -15,6 +15,7 @@ export const platformIcons: Record<string, React.ReactNode> = {
   Twitch: <FaTwitch size={20} />,
   Telegram: <FaTelegram size={20} />,
   Website: <FaGlobe size={20} />,
+  Letterboxd: <SiLetterboxd size={20} />,
 }
 
 export const platformHoverColors: Record<string, string> = {
@@ -31,4 +32,5 @@ export const platformHoverColors: Record<string, string> = {
   'Google Scholar': 'hover:text-blue-400',
   LeetCode: 'leetcode-hover',
   Website: 'hover:text-green-400',
+  Letterboxd: 'hover:text-[#00E054]',
 }
