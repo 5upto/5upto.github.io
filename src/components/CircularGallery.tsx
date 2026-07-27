@@ -302,6 +302,7 @@ class App {
     this.scroll.target = (this.scroll.position ?? 0) + distance
   }
   onTouchUp(e: MouseEvent | TouchEvent) {
+    if (!this.isDown) return
     const elapsed = Date.now() - this.startTime
     const endX = 'changedTouches' in e ? e.changedTouches[0].clientX : e.clientX
     const distance = Math.abs(this.start - endX)
