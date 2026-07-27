@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect } from 'react'
 const iconModules = {
   si: () => import('react-icons/si'),
   fa: () => import('react-icons/fa'),
+  di: () => import('react-icons/di'),
 }
 
 interface IconPickerProps {
@@ -51,6 +52,7 @@ const popularIcons = [
   { name: 'SiJenkins', label: 'Jenkins', color: '#D24939' },
   { name: 'SiNginx', label: 'nginx', color: '#009639' },
   { name: 'SiSocketdotio', label: 'Socket.io', color: '#010101' },
+  { name: 'DiYeoman', label: 'Yeoman', color: '#563E81' },
 ]
 
 export default function IconPicker({ value, onChange }: IconPickerProps) {
@@ -66,13 +68,15 @@ export default function IconPicker({ value, onChange }: IconPickerProps) {
     if (Object.keys(icons).length > 0) return
     setLoading(true)
     try {
-      const [siModule, faModule] = await Promise.all([
+      const [siModule, faModule, diModule] = await Promise.all([
         iconModules.si(),
         iconModules.fa(),
+        iconModules.di(),
       ])
       const siIcons = (siModule as any).default || siModule
       const faIcons = (faModule as any).default || faModule
-      setIcons({ ...siIcons, ...faIcons })
+      const diIcons = (diModule as any).default || diModule
+      setIcons({ ...siIcons, ...faIcons, ...diIcons })
     } catch (e) {
       console.error('Failed to load icons:', e)
     }

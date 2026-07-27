@@ -22,6 +22,7 @@ const labelToIcon: Record<string, string> = {
   Dask: 'SiDask', Polars: 'SiPolars', 'Scikit-learn': 'SiScikitlearn', OpenCV: 'SiOpencv',
   Plotly: 'SiPlotly', tqdm: 'SiTqdm', SciPy: 'SiScipy', MLflow: 'SiMlflow', LangChain: 'SiLangchain',
   PostgreSQL: 'SiPostgresql', MySQL: 'SiMysql', MongoDB: 'SiMongodb', SQLite: 'SiSqlite', Firebase: 'SiFirebase',
+  Yeoman: 'DiYeoman',
 }
 
 function useAllIcons() {
@@ -32,8 +33,9 @@ function useAllIcons() {
     Promise.all([
       import('react-icons/si'),
       import('react-icons/fa'),
-    ]).then(([si, fa]) => {
-      Object.assign(allIcons, si, fa)
+      import('react-icons/di'),
+    ]).then(([si, fa, di]) => {
+      Object.assign(allIcons, si, fa, di)
       setLoaded(true)
     })
   }, [loaded])

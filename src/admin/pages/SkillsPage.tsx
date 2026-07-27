@@ -22,8 +22,9 @@ function useAllIcons() {
     Promise.all([
       import('react-icons/si'),
       import('react-icons/fa'),
-    ]).then(([si, fa]) => {
-      Object.assign(allIcons, si, fa)
+      import('react-icons/di'),
+    ]).then(([si, fa, di]) => {
+      Object.assign(allIcons, si, fa, di)
       iconsLoaded = true
       setLoaded(true)
     })
