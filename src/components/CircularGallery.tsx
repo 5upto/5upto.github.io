@@ -240,8 +240,8 @@ class App {
   screen!: { width: number; height: number }; viewport!: { width: number; height: number }
   raf: number = 0; onItemClick?: (index: number) => void
   boundOnResize!: () => void; boundOnWheel!: (e: Event) => void
-  boundOnTouchDown!: (e: MouseEvent | TouchEvent) => void; boundOnTouchMove!: (e: MouseEvent | TouchEvent) => void
-  boundOnTouchUp!: (e: MouseEvent | TouchEvent) => void; boundOnKeyDown!: (e: KeyboardEvent) => void
+  boundOnPointerDown!: (e: PointerEvent) => void; boundOnPointerMove!: (e: PointerEvent) => void
+  boundOnPointerUp!: (e: PointerEvent) => void; boundOnKeyDown!: (e: KeyboardEvent) => void
   isDown: boolean = false; start: number = 0; startTime: number = 0
 
   constructor(container: HTMLElement, { items, bend = 1, textColor = '#ffffff', borderRadius = 0, font = 'bold 30px Figtree', scrollSpeed = 2, scrollEase = 0.05, onItemClick }: AppConfig) {
@@ -291,21 +291,19 @@ class App {
     const rawIndex = Math.round(Math.abs(this.scroll.target) / width) % halfLen
     return rawIndex
   }
-  onTouchDown(e: MouseEvent | TouchEvent) {
+  onTouchDown(e: PointerEvent) {
     this.isDown = true; this.scroll.position = this.scroll.current; this.startTime = Date.now()
-    this.start = 'touches' in e ? e.touches[0].clientX : e.clientX
+    this.start = e.clientX
   }
-  onTouchMove(e: MouseEvent | TouchEvent) {
+  onTouchMove(e: PointerEvent) {
     if (!this.isDown) return
-    const x = 'touches' in e ? e.touches[0].clientX : e.clientX
-    const distance = (this.start - x) * (this.scrollSpeed * 0.025)
+    const distance = (this.start - e.clientX) * (this.scrollSpeed * 0.025)
     this.scroll.target = (this.scroll.position ?? 0) + distance
   }
-  onTouchUp(e: MouseEvent | TouchEvent) {
+  onTouchUp(e: PointerEvent) {
     if (!this.isDown) return
     const elapsed = Date.now() - this.startTime
-    const endX = 'changedTouches' in e ? e.changedTouches[0].clientX : e.clientX
-    const distance = Math.abs(this.start - endX)
+    const distance = Math.abs(this.start - e.clientX)
     this.isDown = false
     if (elapsed < 300 && distance < 10 && this.onItemClick) {
       this.onItemClick(this.getActiveIndex())
@@ -347,20 +345,21 @@ class App {
   }
   addEventListeners() {
     this.boundOnResize = this.onResize.bind(this); this.boundOnWheel = this.onWheel.bind(this)
-    this.boundOnTouchDown = this.onTouchDown.bind(this); this.boundOnTouchMove = this.onTouchMove.bind(this)
-    this.boundOnTouchUp = this.onTouchUp.bind(this); this.boundOnKeyDown = this.onKeyDown.bind(this)
+    this.boundOnPointerDown = this.onTouchDown.bind(this); this.boundOnPointerMove = this.onTouchMove.bind(this)
+    this.boundOnPointerUp = this.onTouchUp.bind(this); this.boundOnKeyDown = this.onKeyDown.bind(this)
     window.addEventListener('resize', this.boundOnResize); window.addEventListener('mousewheel', this.boundOnWheel)
-    window.addEventListener('wheel', this.boundOnWheel); window.addEventListener('mousedown', this.boundOnTouchDown)
-    window.addEventListener('mousemove', this.boundOnTouchMove); window.addEventListener('mouseup', this.boundOnTouchUp)
-    window.addEventListener('touchstart', this.boundOnTouchDown); window.addEventListener('touchmove', this.boundOnTouchMove)
-    window.addEventListener('touchend', this.boundOnTouchUp); this.container?.addEventListener('keydown', this.boundOnKeyDown)
+    window.addEventListener('wheel', this.boundOnWheel)
+    window.addEventListener('pointerdown', this.boundOnPointerDown)
+    window.addEventListener('pointermove', this.boundOnPointerMove)
+    window.addEventListener('pointerup', this.boundOnPointerUp)
+    this.container?.addEventListener('keydown', this.boundOnKeyDown)
   }
   destroy() {
     window.cancelAnimationFrame(this.raf); window.removeEventListener('resize', this.boundOnResize)
     window.removeEventListener('mousewheel', this.boundOnWheel); window.removeEventListener('wheel', this.boundOnWheel)
-    window.removeEventListener('mousedown', this.boundOnTouchDown); window.removeEventListener('mousemove', this.boundOnTouchMove)
-    window.removeEventListener('mouseup', this.boundOnTouchUp); window.removeEventListener('touchstart', this.boundOnTouchDown)
-    window.removeEventListener('touchmove', this.boundOnTouchMove); window.removeEventListener('touchend', this.boundOnTouchUp)
+    window.removeEventListener('pointerdown', this.boundOnPointerDown)
+    window.removeEventListener('pointermove', this.boundOnPointerMove)
+    window.removeEventListener('pointerup', this.boundOnPointerUp)
     if (this.renderer && this.renderer.gl && this.renderer.gl.canvas.parentNode)
       this.renderer.gl.canvas.parentNode.removeChild(this.renderer.gl.canvas as HTMLCanvasElement)
     if (this.container) this.container.removeEventListener('keydown', this.boundOnKeyDown)
