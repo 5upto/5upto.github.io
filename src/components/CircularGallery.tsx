@@ -294,6 +294,7 @@ class App {
   onTouchDown(e: PointerEvent) {
     this.isDown = true; this.scroll.position = this.scroll.current; this.startTime = Date.now()
     this.start = e.clientX
+    this.container.setPointerCapture(e.pointerId)
   }
   onTouchMove(e: PointerEvent) {
     if (!this.isDown) return
@@ -349,20 +350,20 @@ class App {
     this.boundOnPointerUp = this.onTouchUp.bind(this); this.boundOnKeyDown = this.onKeyDown.bind(this)
     window.addEventListener('resize', this.boundOnResize); window.addEventListener('mousewheel', this.boundOnWheel)
     window.addEventListener('wheel', this.boundOnWheel)
-    window.addEventListener('pointerdown', this.boundOnPointerDown)
-    window.addEventListener('pointermove', this.boundOnPointerMove)
-    window.addEventListener('pointerup', this.boundOnPointerUp)
-    this.container?.addEventListener('keydown', this.boundOnKeyDown)
+    this.container.addEventListener('pointerdown', this.boundOnPointerDown)
+    this.container.addEventListener('pointermove', this.boundOnPointerMove)
+    this.container.addEventListener('pointerup', this.boundOnPointerUp)
+    this.container.addEventListener('keydown', this.boundOnKeyDown)
   }
   destroy() {
     window.cancelAnimationFrame(this.raf); window.removeEventListener('resize', this.boundOnResize)
     window.removeEventListener('mousewheel', this.boundOnWheel); window.removeEventListener('wheel', this.boundOnWheel)
-    window.removeEventListener('pointerdown', this.boundOnPointerDown)
-    window.removeEventListener('pointermove', this.boundOnPointerMove)
-    window.removeEventListener('pointerup', this.boundOnPointerUp)
+    this.container.removeEventListener('pointerdown', this.boundOnPointerDown)
+    this.container.removeEventListener('pointermove', this.boundOnPointerMove)
+    this.container.removeEventListener('pointerup', this.boundOnPointerUp)
+    this.container.removeEventListener('keydown', this.boundOnKeyDown)
     if (this.renderer && this.renderer.gl && this.renderer.gl.canvas.parentNode)
       this.renderer.gl.canvas.parentNode.removeChild(this.renderer.gl.canvas as HTMLCanvasElement)
-    if (this.container) this.container.removeEventListener('keydown', this.boundOnKeyDown)
   }
 }
 

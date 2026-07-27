@@ -45,14 +45,12 @@ export default function BlogsPage() {
 
   return (
     <section ref={sectionRef} id="blog" className="min-h-screen py-24 px-4 relative">
-      <div className="max-w-4xl mx-auto">
-        <button onClick={() => navigate('/')} className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors mb-10 group">
-          <svg className="w-4 h-4 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          <span className="text-sm font-medium">Back</span>
-        </button>
-      </div>
+      <button onClick={() => navigate('/')} className="absolute top-6 left-6 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-2 z-20">
+        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        </svg>
+        <span className="text-sm font-medium">Back</span>
+      </button>
       <h2 ref={headingRef} className="section-heading text-center mb-12">
         <span className="gradient-text">Blog</span>
       </h2>
