@@ -39,9 +39,13 @@ export default function Lanyard({
   lanyardWidth = 1,
 }: LanyardProps) {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768)
+  const [phoneLandscape, setPhoneLandscape] = useState(() => typeof window !== 'undefined' && window.innerWidth > window.innerHeight && window.innerHeight < 600)
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768)
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+      setPhoneLandscape(window.innerWidth > window.innerHeight && window.innerHeight < 600)
+    }
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
   }, [])
@@ -96,14 +100,15 @@ export default function Lanyard({
       >
         <ambientLight intensity={Math.PI} />
         <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
-          <Band
-            isMobile={isMobile}
-            frontImage={frontImage}
-            backImage={backImage}
-            imageFit={imageFit}
-            lanyardImage={lanyardImage}
-            lanyardWidth={lanyardWidth}
-          />
+            <Band
+              isMobile={isMobile}
+              phoneLandscape={phoneLandscape}
+              frontImage={frontImage}
+              backImage={backImage}
+              imageFit={imageFit}
+              lanyardImage={lanyardImage}
+              lanyardWidth={lanyardWidth}
+            />
         </Physics>
         <Environment blur={0.75}>
           <Lightformer
@@ -144,6 +149,7 @@ function Band({
   maxSpeed = 50,
   minSpeed = 0,
   isMobile = false,
+  phoneLandscape = false,
   frontImage = null,
   backImage = null,
   imageFit = 'cover',
@@ -266,7 +272,7 @@ function Band({
       dir.copy(vec).sub(state.camera.position).normalize()
       vec.add(dir.multiplyScalar(state.camera.position.length()))
       ;[card, j1, j2, j3, fixed].forEach(ref => ref.current?.wakeUp())
-      card.current?.setNextKinematicTranslation({ x: vec.x - dragged.x, y: vec.y - dragged.y, z: vec.z - dragged.z })
+      card.current?.setNextKinematicTranslation({ x: vec.x - dragged.x, y: Math.min(vec.y - dragged.y, 4.5), z: vec.z - dragged.z })
     }
     if (fixed.current) {
       ;[j1, j2].forEach(ref => {
@@ -297,7 +303,7 @@ function Band({
 
   return (
     <>
-      <group position={[isMobile ? 0 : 5, isMobile ? 5 : 4.5, 0]}>
+      <group position={[phoneLandscape ? 3 : (isMobile ? 0 : 5), isMobile ? 5 : 4.5, 0]}>
         <RigidBody ref={fixed} {...segmentProps} type="fixed" />
         <RigidBody position={[0.5, 0, 0]} ref={j1} {...segmentProps}>
           <BallCollider args={[0.1]} />
@@ -346,7 +352,7 @@ function Band({
           useMap
           map={texture}
           repeat={[-4, 1]}
-          lineWidth={isMobile ? lanyardWidth * 1.4 : lanyardWidth * 0.7}
+          lineWidth={phoneLandscape ? lanyardWidth * 0.7 : (isMobile ? lanyardWidth * 1.4 : lanyardWidth * 0.7)}
         />
       </mesh>
     </>
