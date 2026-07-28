@@ -30,7 +30,7 @@ export default function Experience() {
       <h2 ref={headingRef} className="section-heading text-center mb-12">
         Experience
       </h2>
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <ScrollStack useWindowScroll={true} itemDistance={120} itemScale={0.03} itemStackDistance={25} stackPosition="15%" baseScale={0.88}>
           {(experiences ?? []).map((exp) => (
             <ScrollStackItem key={exp.id} itemClassName="!h-auto !p-6 md:!p-8 !rounded-2xl bg-[var(--bg-card)] border border-[var(--border)] cursor-pointer">

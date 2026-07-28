@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import ProfileCard from './ProfileCard'
+import ParticleBackground from './ParticleBackground'
 import { useProfile } from '../hooks/useProfile'
 
 export default function Hero() {
@@ -28,7 +29,8 @@ export default function Hero() {
       id="hero"
       className="relative min-h-screen flex items-start lg:items-center justify-center overflow-hidden px-4 pt-20 pb-12 lg:py-12"
     >
-      <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
+      <ParticleBackground />
+      <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
         <div ref={textRef} className="flex-1 text-center lg:text-left">
           <p className="text-primary-400 font-display text-base md:text-lg mb-4 tracking-[0.2em] uppercase opacity-80">
             {profile.title}
@@ -66,7 +68,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce z-10">
         <svg className="w-6 h-6 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
         </svg>

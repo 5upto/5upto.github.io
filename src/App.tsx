@@ -11,7 +11,7 @@ import Contact from './components/Contact'
 import Legacy from './components/Legacy'
 import ProjectStory from './components/ProjectStory'
 import ExperienceStory from './components/ExperienceStory'
-import ParticleBackground from './components/ParticleBackground'
+
 import CircularGalleryPage from './components/CircularGalleryPage'
 import GalleryStory from './components/GalleryStory'
 import BlogsPage from './components/BlogsPage'
@@ -87,7 +87,6 @@ export default function App() {
 
   return (
     <>
-      <ParticleBackground />
       <Routes>
         <Route path="/" element={<HomePage logo={logo} onLogoClick={handleLogoClick} />} />
         <Route path="/legacy" element={<LegacyPage onSelect={handleLegacySelect} />} />

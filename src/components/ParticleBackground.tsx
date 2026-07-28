@@ -9,7 +9,7 @@ export default function ParticleBackground() {
 
       window.particlesJS!('particles-js', {
         particles: {
-          number: { value: isMobile ? 80 : 160, density: { enable: true, value_area: isMobile ? 600 : 500 } },
+          number: { value: isMobile ? 80 : 120, density: { enable: true, value_area: isMobile ? 600 : 500 } },
           color: { value: isDark ? '#a5b4fc' : '#312e81' },
           shape: { type: 'circle' },
           opacity: {
@@ -24,7 +24,7 @@ export default function ParticleBackground() {
           },
           line_linked: {
             enable: true,
-            distance: 120,
+            distance: 180,
             color: isDark ? '#818cf8' : '#4338ca',
             opacity: 0.4,
             width: 1,
@@ -47,7 +47,7 @@ export default function ParticleBackground() {
             resize: true,
           },
           modes: {
-            repulse: { distance: 80, duration: 0.4 },
+            repulse: { distance: 180, duration: 0.4 },
             push: { particles_nb: 3 },
           },
         },
@@ -84,5 +84,5 @@ export default function ParticleBackground() {
     }
   }, [])
 
-  return <div id="particles-js" className="fixed inset-0 z-0 pointer-events-none" />
+  return <div id="particles-js" className="absolute inset-0 z-0 pointer-events-none" />
 }
