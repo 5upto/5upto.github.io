@@ -201,12 +201,12 @@ export default function Hero() {
     >
       <ParticleBackground />
       {front && <Lanyard frontImage={front} backImage={back} lanyardImage={band} position={[0, 0, 28]} fov={18} transparent />}
-      <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-16 pointer-events-none">
-        <div ref={textRef} className="hidden lg:block w-full lg:w-1/2 text-left pointer-events-auto">
+      <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-8 md:gap-16 pointer-events-none">
+        <div ref={textRef} className="hidden md:block w-full md:w-1/2 text-left pointer-events-auto">
           <p className="text-primary-400 font-display text-base md:text-lg mb-4 tracking-[0.2em] uppercase opacity-80">
             {profile.title}
           </p>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold mb-4 leading-tight">
+          <h1 className="text-5xl md:text-6xl font-display font-bold mb-4 leading-tight">
             {profile.name.split(' ')[0]}{' '}
             <span className="gradient-text">{profile.name.split(' ').slice(1).join(' ')}</span>
           </h1>
@@ -230,7 +230,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="lg:hidden absolute bottom-20 left-0 right-0 flex flex-col items-center gap-4 pointer-events-auto z-10">
+      <div className="md:hidden absolute bottom-20 left-0 right-0 flex flex-col items-center gap-4 pointer-events-auto z-10">
         <p className="text-[var(--text-muted)] text-sm text-center px-6 leading-relaxed">
           {profile.tagline}
         </p>
@@ -248,7 +248,7 @@ export default function Hero() {
         </button>
       </div>
 
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce z-10 hidden lg:block">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce z-10 hidden md:block">
         <svg className="w-6 h-6 text-[var(--text-muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
         </svg>

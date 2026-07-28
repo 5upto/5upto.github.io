@@ -24,16 +24,17 @@
   }
   .vertical-timeline--two-columns .vertical-timeline-element-content .vertical-timeline-element-date {
     position: absolute;
-    width: 100%;
-    left: 110%;
-    top: 4px;
-    font-size: 0.7rem !important;
+    left: 130%;
+    width: auto;
+    white-space: nowrap;
+    top: 6px;
+    font-size: 0.65rem !important;
     text-align: left;
   }
   .vertical-timeline--two-columns .vertical-timeline-element:nth-child(even):not(.vertical-timeline-element--left) .vertical-timeline-element-content .vertical-timeline-element-date,
   .vertical-timeline--two-columns .vertical-timeline-element--right .vertical-timeline-element-content .vertical-timeline-element-date {
     left: auto;
-    right: 110%;
+    right: 130%;
     text-align: right;
   }
   .vertical-timeline--two-columns .vertical-timeline-element-content-arrow {
