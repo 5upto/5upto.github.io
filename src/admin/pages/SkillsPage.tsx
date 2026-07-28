@@ -1,22 +1,23 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core'
+import { SortableContext, useSortable, horizontalListSortingStrategy } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { supabase } from '../../lib/supabase'
 import type { Skill } from '../../types/database'
 import FormDialog from '../components/FormDialog'
 import DeleteDialog from '../components/DeleteDialog'
 import IconPicker from '../components/IconPicker'
 import Toast from '../components/Toast'
-import { MdClose } from 'react-icons/md'
+import { MdClose, MdDragIndicator } from 'react-icons/md'
 
 const empty: { label: string; color: string; icon_name: string; category: 'languages' | 'web' | 'databases' } = { label: '', color: '#000000', icon_name: '', category: 'web' }
 
-// Load all icons dynamically
 const allIcons: Record<string, React.ComponentType<any>> = {}
 let iconsLoaded = false
 
 function useAllIcons() {
   const [loaded, setLoaded] = useState(iconsLoaded)
-
   useEffect(() => {
     if (loaded) return
     Promise.all([
@@ -29,8 +30,26 @@ function useAllIcons() {
       setLoaded(true)
     })
   }, [loaded])
-
   return loaded
+}
+
+function SortableSkill({ skill, onEdit, onDelete }: { skill: Skill; onEdit: (s: Skill) => void; onDelete: (s: Skill) => void }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: skill.id })
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }
+  const IconComp = skill.icon_name ? allIcons[skill.icon_name] : null
+
+  return (
+    <div ref={setNodeRef} style={style} className="group bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl rounded-xl px-3 py-2 flex items-center gap-2 hover:border-primary-500/30 transition-all cursor-pointer" onClick={() => onEdit(skill)}>
+      <button className="cursor-grab active:cursor-grabbing text-[var(--text-muted)] hover:text-[var(--text-secondary)] touch-none" {...attributes} {...listeners}>
+        <MdDragIndicator className="w-3.5 h-3.5" />
+      </button>
+      {IconComp ? <IconComp size={16} style={{ color: skill.color }} /> : <span className="w-3 h-3 rounded-full shrink-0" style={{ background: skill.color }} />}
+      <span className="text-sm text-[var(--text-secondary)]">{skill.label}</span>
+      <button onClick={(e) => { e.stopPropagation(); onDelete(skill) }} className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-red-400 hover:text-red-300 transition-all">
+        <MdClose className="w-3 h-3" />
+      </button>
+    </div>
+  )
 }
 
 export default function SkillsPage() {
@@ -44,7 +63,11 @@ export default function SkillsPage() {
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['admin-skills'],
-    queryFn: async () => { const { data, error } = await supabase.from('skills').select('*').order('category').order('created_at', { ascending: false }); if (error) throw error; return data as Skill[] },
+    queryFn: async () => {
+      const { data, error } = await supabase.from('skills').select('*').order('category').order('sort_order')
+      if (error) throw error
+      return data as Skill[]
+    },
   })
 
   const save = useMutation({
@@ -62,11 +85,37 @@ export default function SkillsPage() {
     onError: (e: any) => setToast({ message: e.message, type: 'error' }),
   })
 
+  const reorder = useMutation({
+    mutationFn: async (updates: { id: string; sort_order: number }[]) => {
+      await Promise.all(updates.map(u => supabase.from('skills').update({ sort_order: u.sort_order }).eq('id', u.id)))
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-skills'] }),
+  })
+
   const categories = [
     { key: 'languages' as const, label: 'Languages', color: 'blue' },
     { key: 'web' as const, label: 'Web Technologies', color: 'purple' },
     { key: 'databases' as const, label: 'Databases', color: 'green' },
   ]
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
+
+  const handleDragEnd = (catKey: string, event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const catItems = items.filter(s => s.category === catKey)
+    const oldIndex = catItems.findIndex(s => s.id === active.id)
+    const newIndex = catItems.findIndex(s => s.id === over.id)
+    if (oldIndex === -1 || newIndex === -1) return
+    const reordered = [...catItems]
+    const [moved] = reordered.splice(oldIndex, 1)
+    reordered.splice(newIndex, 0, moved)
+    const updates = reordered.map((s, i) => ({ id: s.id, sort_order: i + 1 }))
+    qc.setQueryData<Skill[]>(['admin-skills'], prev =>
+      prev?.map(s => s.category === catKey ? { ...s, sort_order: updates.find(u => u.id === s.id)?.sort_order ?? s.sort_order } : s) ?? prev
+    )
+    reorder.mutate(updates)
+  }
 
   const iconsLoaded = useAllIcons()
 
@@ -83,27 +132,22 @@ export default function SkillsPage() {
         return (
           <div key={cat.key}>
             <h2 className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider mb-3">{cat.label} ({catItems.length})</h2>
-            <div className="flex flex-wrap gap-2">
-              {catItems.map(skill => {
-                const IconComp = skill.icon_name ? allIcons[skill.icon_name] : null
-                return (
-                  <div key={skill.id} className="group bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl rounded-xl px-3 py-2 flex items-center gap-2 hover:border-primary-500/30 transition-all cursor-pointer" onClick={() => { setEditing(skill); setForm({ label: skill.label, color: skill.color, icon_name: skill.icon_name || '', category: skill.category }); setDialogOpen(true) }}>
-                    {IconComp ? <IconComp size={16} style={{ color: skill.color }} /> : <span className="w-3 h-3 rounded-full shrink-0" style={{ background: skill.color }} />}
-                    <span className="text-sm text-[var(--text-secondary)]">{skill.label}</span>
-                    <button onClick={(e) => { e.stopPropagation(); setDeleting(skill); setDeleteOpen(true) }} className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-red-400 hover:text-red-300 transition-all">
-                      <MdClose className="w-3 h-3" />
-                    </button>
-                  </div>
-                )
-              })}
-            </div>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={(e) => handleDragEnd(cat.key, e)}>
+              <SortableContext items={catItems.map(s => s.id)} strategy={horizontalListSortingStrategy}>
+                <div className="flex flex-wrap gap-2">
+                  {catItems.map(skill => (
+                    <SortableSkill key={skill.id} skill={skill} onEdit={(s) => { setEditing(s); setForm({ label: s.label, color: s.color, icon_name: s.icon_name || '', category: s.category }); setDialogOpen(true) }} onDelete={(s) => { setDeleting(s); setDeleteOpen(true) }} />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
           </div>
         )
       })}
 
-      <FormDialog 
-        open={dialogOpen} 
-        onClose={() => setDialogOpen(false)} 
+      <FormDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
         title={editing ? 'Edit Skill' : 'Add Skill'}
         footer={
           <div className="flex justify-end gap-3">
@@ -113,7 +157,6 @@ export default function SkillsPage() {
         }
       >
         <div className="space-y-4">
-          {/* Live Preview */}
           <div className="bg-[var(--bg-elevated)] rounded-xl p-4 flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${form.color}15` }}>
               {(() => {

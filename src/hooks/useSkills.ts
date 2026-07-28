@@ -9,7 +9,7 @@ export function useSkills() {
       const { data, error } = await supabase
         .from('skills')
         .select('*')
-        .order('created_at', { ascending: false })
+        .order('category').order('sort_order')
       if (error) throw error
       return data as Skill[]
     },
