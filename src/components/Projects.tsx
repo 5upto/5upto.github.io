@@ -57,7 +57,7 @@ export default function Projects() {
                       <span className="text-[10px] text-[var(--text-muted)] bg-[var(--bg-elevated)] px-2 py-0.5 rounded-full">{project.org}</span>
                     )}
                   </div>
-                  <ul className="space-y-1.5 mb-4">
+                  <ul className="space-y-1.5 mb-4 hidden md:block">
                     {project.points.slice(0, 3).map((point, i) => (
                       <li key={i} className="text-[var(--text-muted)] text-xs leading-relaxed flex gap-2">
                         <span className="text-primary-500 mt-0.5 shrink-0">•</span>

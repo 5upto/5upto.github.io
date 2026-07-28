@@ -1,0 +1,78 @@
+@media (min-width: 640px) and (max-width: 1169px) {
+  .vertical-timeline.vertical-timeline--two-columns::before {
+    left: 50%;
+    margin-left: -2px;
+  }
+  .vertical-timeline--two-columns .vertical-timeline-element-icon {
+    left: 50%;
+    width: 40px !important;
+    height: 40px !important;
+    margin-left: -20px !important;
+  }
+  .vertical-timeline--two-columns .vertical-timeline-element-content {
+    margin-left: 0;
+    padding: 1.2em;
+    width: 42%;
+  }
+  .vertical-timeline--two-columns .vertical-timeline-element:nth-child(odd):not(.vertical-timeline-element--right) .vertical-timeline-element-content,
+  .vertical-timeline--two-columns .vertical-timeline-element--left .vertical-timeline-element-content {
+    float: left;
+  }
+  .vertical-timeline--two-columns .vertical-timeline-element:nth-child(even):not(.vertical-timeline-element--left) .vertical-timeline-element-content,
+  .vertical-timeline--two-columns .vertical-timeline-element--right .vertical-timeline-element-content {
+    float: right;
+  }
+  .vertical-timeline--two-columns .vertical-timeline-element-content .vertical-timeline-element-date {
+    position: absolute;
+    width: 100%;
+    left: 110%;
+    top: 4px;
+    font-size: 0.7rem !important;
+    text-align: left;
+  }
+  .vertical-timeline--two-columns .vertical-timeline-element:nth-child(even):not(.vertical-timeline-element--left) .vertical-timeline-element-content .vertical-timeline-element-date,
+  .vertical-timeline--two-columns .vertical-timeline-element--right .vertical-timeline-element-content .vertical-timeline-element-date {
+    left: auto;
+    right: 110%;
+    text-align: right;
+  }
+  .vertical-timeline--two-columns .vertical-timeline-element-content-arrow {
+    top: 18px;
+    left: 100%;
+    transform: rotate(180deg);
+  }
+  .vertical-timeline--two-columns .vertical-timeline-element:nth-child(even):not(.vertical-timeline-element--left) .vertical-timeline-element-content-arrow,
+  .vertical-timeline--two-columns .vertical-timeline-element--right .vertical-timeline-element-content-arrow {
+    left: auto;
+    right: 100%;
+    transform: rotate(0deg);
+  }
+  .vertical-timeline-element-content p,
+  .vertical-timeline-element-content li {
+    font-size: 0.75rem !important;
+  }
+  .vertical-timeline-element-content h3 {
+    font-size: 1rem !important;
+  }
+  .vertical-timeline--animate .vertical-timeline-element-content.bounce-in {
+    -webkit-animation: cd-bounce-2 0.6s;
+    -moz-animation: cd-bounce-2 0.6s;
+    animation: cd-bounce-2 0.6s;
+  }
+  .vertical-timeline--two-columns.vertical-timeline--animate .vertical-timeline-element:nth-child(even):not(.vertical-timeline-element--left) .vertical-timeline-element-content.bounce-in,
+  .vertical-timeline--two-columns.vertical-timeline--animate .vertical-timeline-element--right .vertical-timeline-element-content.bounce-in {
+    -webkit-animation: cd-bounce-2-inverse 0.6s;
+    -moz-animation: cd-bounce-2-inverse 0.6s;
+    animation: cd-bounce-2-inverse 0.6s;
+  }
+}
+
+@media (max-width: 639px) {
+  .vertical-timeline-element-content {
+    padding: 1rem !important;
+  }
+  .vertical-timeline-element-icon {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}
