@@ -9,7 +9,7 @@ export default function ParticleBackground() {
 
       window.particlesJS!('particles-js', {
         particles: {
-          number: { value: isMobile ? 80 : 120, density: { enable: true, value_area: isMobile ? 600 : 500 } },
+          number: { value: isMobile ? 80 : 110, density: { enable: true, value_area: isMobile ? 800 : 700 } },
           color: { value: isDark ? '#a5b4fc' : '#312e81' },
           shape: { type: 'circle' },
           opacity: {
@@ -24,7 +24,7 @@ export default function ParticleBackground() {
           },
           line_linked: {
             enable: true,
-            distance: 180,
+            distance: 210,
             color: isDark ? '#818cf8' : '#4338ca',
             opacity: 0.4,
             width: 1,
