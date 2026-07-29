@@ -75,5 +75,6 @@
   .vertical-timeline-element-icon {
     width: 32px !important;
     height: 32px !important;
+    left: 4px !important;
   }
 }

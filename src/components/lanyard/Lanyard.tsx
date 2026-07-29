@@ -40,6 +40,8 @@ export default function Lanyard({
 }: LanyardProps) {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768)
   const [phoneLandscape, setPhoneLandscape] = useState(() => typeof window !== 'undefined' && window.innerWidth > window.innerHeight && window.innerHeight < 600)
+  const wrapperRef = useRef<HTMLDivElement>(null!)
+  const scrollYRef = useRef(0)
 
   useEffect(() => {
     const handleResize = () => {
@@ -50,8 +52,41 @@ export default function Lanyard({
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
+  useEffect(() => {
+    const el = wrapperRef.current
+    if (!el) return
+    const prevent = (e: TouchEvent) => {
+      if (!el.contains(e.target as Node)) return
+      e.preventDefault()
+      scrollYRef.current = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollYRef.current}px`
+      document.body.style.left = '0'
+      document.body.style.right = '0'
+    }
+    const unlock = () => {
+      if (document.body.style.position !== 'fixed') return
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.left = ''
+      document.body.style.right = ''
+      window.scrollTo(0, scrollYRef.current)
+    }
+    document.addEventListener('touchstart', prevent, { passive: false, capture: true })
+    document.addEventListener('touchmove', prevent, { passive: false, capture: true })
+    document.addEventListener('touchend', unlock, { passive: true })
+    document.addEventListener('touchcancel', unlock, { passive: true })
+    return () => {
+      document.removeEventListener('touchstart', prevent, { capture: true })
+      document.removeEventListener('touchmove', prevent, { capture: true })
+      document.removeEventListener('touchend', unlock)
+      document.removeEventListener('touchcancel', unlock)
+      unlock()
+    }
+  }, [])
+
   return (
-    <div className="lanyard-wrapper">
+    <div ref={wrapperRef} className="lanyard-wrapper">
       <Canvas
         camera={{ position: position, fov: fov }}
         dpr={[2, 2]}
@@ -241,16 +276,14 @@ function Band({
       ;[j1, j2].forEach(ref => {
         if (!ref.current.lerped) ref.current.lerped = new THREE.Vector3().copy(ref.current.translation())
         const clampedDistance = Math.max(0.1, Math.min(1, ref.current.lerped.distanceTo(ref.current.translation())))
-        ref.current.lerped.lerp(
-          ref.current.translation(),
-          delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed))
-        )
+        const rate = dragged ? Math.min(delta * 8, 0.15) : delta * (minSpeed + clampedDistance * (maxSpeed - minSpeed))
+        ref.current.lerped.lerp(ref.current.translation(), rate)
       })
       if (!card.current.lerped) card.current.lerped = new THREE.Vector3().copy(card.current.translation())
-      card.current.lerped.lerp(card.current.translation(), Math.min(1, delta * 20))
+      card.current.lerped.lerp(card.current.translation(), Math.min(1, delta * (dragged ? 30 : 20)))
       curve.points[0].copy(card.current.lerped)
-      const offset = new THREE.Vector3(0, 1.5, 0).applyQuaternion(card.current.rotation())
-      curve.points[0].add(offset)
+      const off = new THREE.Vector3(0, 1.5, 0).applyQuaternion(card.current.rotation())
+      curve.points[0].add(off)
       curve.points[1].copy(j2.current.lerped)
       curve.points[2].copy(j1.current.lerped)
       curve.points[3].copy(fixed.current.translation())
@@ -284,8 +317,12 @@ function Band({
             position={[0, -1.2, -0.05]}
             onPointerOver={() => hover(true)}
             onPointerOut={() => hover(false)}
-            onPointerUp={e => (e.target.releasePointerCapture(e.pointerId), drag(false))}
+            onPointerUp={e => {
+              e.target.releasePointerCapture(e.pointerId)
+              drag(false)
+            }}
             onPointerDown={e => {
+              e.nativeEvent.preventDefault()
               e.target.setPointerCapture(e.pointerId)
               drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())))
             }}
