@@ -171,6 +171,21 @@ function useIdCardImages(profile: any, currentExp: any) {
   return images
 }
 
+function HoverWord({ en, bn, className }: { en: string; bn: string; className?: string }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <span
+      className={className}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ display: 'inline-block', minWidth: '3.5ch', cursor: 'pointer', position: 'relative' }}
+    >
+      <span style={{ opacity: hovered ? 0 : 1, transition: 'opacity .25s' }}>{en}</span>
+      <span style={{ position: 'absolute', inset: 0, opacity: hovered ? 1 : 0, transition: 'opacity .25s', fontFamily: 'Kohinoor Bangla, Kohinoor, sans-serif' }}>{bn}</span>
+    </span>
+  )
+}
+
 export default function Hero() {
   const containerRef = useRef<HTMLElement>(null)
   const textRef = useRef<HTMLDivElement>(null)
@@ -206,7 +221,8 @@ export default function Hero() {
           <p className="text-primary-400 font-display text-base landscape:text-lg md:text-lg mb-4 tracking-[0.2em] uppercase opacity-80">
             {profile.title}
           </p>
-          <h1 className="text-5xl landscape:text-6xl md:text-6xl font-display font-bold mb-4 leading-tight">
+          <h1 className="text-5xl landscape:text-6xl md:text-6xl font-display font-bold mb-4 leading-tight" style={{ whiteSpace: 'nowrap' }}>
+            <HoverWord en="I'm" bn="আমি" />{' '}
             {profile.name.split(' ')[0]}{' '}
             <span className="gradient-text">{profile.name.split(' ').slice(1).join(' ')}</span>
           </h1>
