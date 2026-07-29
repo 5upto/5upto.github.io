@@ -50,45 +50,8 @@ export default function Lanyard({
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  const wrapperRef = useRef<HTMLDivElement>(null!)
-  const scrollYRef = useRef(0)
-
-  useEffect(() => {
-    const el = wrapperRef.current
-    if (!el) return
-    const prevent = (e: TouchEvent) => {
-      if (!el.contains(e.target as Node)) return
-      e.preventDefault()
-      scrollYRef.current = window.scrollY
-      document.body.style.position = 'fixed'
-      document.body.style.top = `-${scrollYRef.current}px`
-      document.body.style.left = '0'
-      document.body.style.right = '0'
-    }
-    const unlock = () => {
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.left = ''
-      document.body.style.right = ''
-      window.scrollTo(0, scrollYRef.current)
-    }
-    el.style.touchAction = 'none'
-    document.addEventListener('touchstart', prevent, { passive: false, capture: true })
-    document.addEventListener('touchmove', prevent, { passive: false, capture: true })
-    document.addEventListener('touchend', unlock, { passive: true })
-    document.addEventListener('touchcancel', unlock, { passive: true })
-    return () => {
-      el.style.touchAction = ''
-      document.removeEventListener('touchstart', prevent, { capture: true })
-      document.removeEventListener('touchmove', prevent, { capture: true })
-      document.removeEventListener('touchend', unlock)
-      document.removeEventListener('touchcancel', unlock)
-      unlock()
-    }
-  }, [])
-
   return (
-    <div ref={wrapperRef} className="lanyard-wrapper">
+    <div className="lanyard-wrapper">
       <Canvas
         camera={{ position: position, fov: fov }}
         dpr={[2, 2]}
@@ -272,7 +235,7 @@ function Band({
       dir.copy(vec).sub(state.camera.position).normalize()
       vec.add(dir.multiplyScalar(state.camera.position.length()))
       ;[card, j1, j2, j3, fixed].forEach(ref => ref.current?.wakeUp())
-      card.current?.setNextKinematicTranslation({ x: vec.x - dragged.x, y: Math.min(vec.y - dragged.y, 4.5), z: vec.z - dragged.z })
+      card.current?.setNextKinematicTranslation({ x: vec.x - dragged.x, y: vec.y - dragged.y, z: vec.z - dragged.z })
     }
     if (fixed.current) {
       ;[j1, j2].forEach(ref => {
@@ -323,7 +286,6 @@ function Band({
             onPointerOut={() => hover(false)}
             onPointerUp={e => (e.target.releasePointerCapture(e.pointerId), drag(false))}
             onPointerDown={e => {
-              e.nativeEvent.preventDefault()
               e.target.setPointerCapture(e.pointerId)
               drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())))
             }}
