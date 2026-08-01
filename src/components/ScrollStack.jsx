@@ -23,7 +23,11 @@ const ScrollStack = ({
   rotationAmount = 0,
   blurAmount = 0,
   useWindowScroll = false,
-  onStackComplete = undefined
+  onStackComplete = undefined,
+  perspective = 0,
+  rotateXAmount = 0,
+  rotateYAmount = 0,
+  opacityEnd = 1
 }) => {
   const scrollerRef = useRef(null);
   const stackCompletedRef = useRef(false);
@@ -102,14 +106,26 @@ const ScrollStack = ({
         translateY = pinEnd - cardTop + stackPx + itemStackDistance * i;
       }
 
+      const rotX = rotateXAmount ? -rotateXAmount * t : 0;
+      const rotY = rotateYAmount ? rotateYAmount * t : 0;
+      const rotZ = rotationAmount ? rotationAmount * t * i : 0;
+
+      const opacity = 1 - (1 - opacityEnd) * Math.max(0, Math.min(1, (t - 0.2) / 0.8));
+
       const key = i;
       const roundedY = Math.round(translateY * 100) / 100;
       const roundedScale = Math.round(scale * 1000) / 1000;
+      const roundedRotX = Math.round(rotX * 100) / 100;
+      const roundedRotY = Math.round(rotY * 100) / 100;
+      const roundedRotZ = Math.round(rotZ * 100) / 100;
+      const roundedOpacity = Math.round(opacity * 100) / 100;
       const last = lastTransformsRef.current.get(key);
 
-      if (!last || Math.abs(last.y - roundedY) > 0.1 || Math.abs(last.s - roundedScale) > 0.001) {
-        card.style.transform = `translate3d(0, ${roundedY}px, 0) scale(${roundedScale})`;
-        lastTransformsRef.current.set(key, { y: roundedY, s: roundedScale });
+      const rotStr = `rotateX(${roundedRotX}deg) rotateY(${roundedRotY}deg) rotateZ(${roundedRotZ}deg)`;
+      if (!last || Math.abs(last.y - roundedY) > 0.1 || Math.abs(last.s - roundedScale) > 0.001 || Math.abs(last.rx - roundedRotX) > 0.1 || Math.abs(last.ry - roundedRotY) > 0.1 || Math.abs(last.rz - roundedRotZ) > 0.1 || Math.abs(last.o - roundedOpacity) > 0.01) {
+        card.style.transform = `translate3d(0, ${roundedY}px, 0) scale(${roundedScale}) ${rotStr}`;
+        card.style.opacity = roundedOpacity;
+        lastTransformsRef.current.set(key, { y: roundedY, s: roundedScale, rx: roundedRotX, ry: roundedRotY, rz: roundedRotZ, o: roundedOpacity });
       }
 
       if (i === cards.length - 1) {
@@ -134,7 +150,10 @@ const ScrollStack = ({
     onStackComplete,
     calculateProgress,
     parsePercentage,
-    getScrollData
+    getScrollData,
+    rotateXAmount,
+    rotateYAmount,
+    opacityEnd
   ]);
 
   const handleScroll = useCallback(() => {
@@ -246,10 +265,10 @@ const ScrollStack = ({
   ]);
 
   return (
-    <div
-      ref={scrollerRef}
-      className={`${useWindowScroll ? '' : 'scroll-stack-scroller'} ${className}`.trim()}
-    >
+      <div
+        ref={scrollerRef}
+        className={`${useWindowScroll ? '' : 'scroll-stack-scroller'} ${className}`.trim()}
+      >
       <div className="scroll-stack-inner">
         {children}
         <div className="scroll-stack-end" />

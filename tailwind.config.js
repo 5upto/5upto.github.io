@@ -10,6 +10,7 @@ export default {
       screens: {
         'landscape': { 'raw': '(orientation: landscape)' },
         'portrait': { 'raw': '(orientation: portrait)' },
+        'portrait-mobile': { 'raw': '(orientation: portrait) and (max-width: 767px)' },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
