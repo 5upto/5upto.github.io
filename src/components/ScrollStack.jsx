@@ -34,6 +34,8 @@ const ScrollStack = ({
   const lenisRef = useRef(null);
   const cardsRef = useRef([]);
   const lastTransformsRef = useRef(new Map());
+  const positionsRef = useRef([]);
+  const endTopRef = useRef(0);
 
   const calculateProgress = useCallback((scrollTop, start, end) => {
     if (scrollTop < start) return 0;
@@ -65,6 +67,23 @@ const ScrollStack = ({
     }
   }, [useWindowScroll]);
 
+  const measurePositions = useCallback(() => {
+    const cards = cardsRef.current;
+    if (!cards.length) return;
+    const endEl = scrollerRef.current?.querySelector('.scroll-stack-end');
+    if (useWindowScroll) {
+      cards.forEach((card, i) => {
+        positionsRef.current[i] = card.getBoundingClientRect().top + window.scrollY;
+      });
+      endTopRef.current = endEl ? endEl.getBoundingClientRect().top + window.scrollY : 0;
+    } else {
+      cards.forEach((card, i) => {
+        positionsRef.current[i] = card.offsetTop;
+      });
+      endTopRef.current = endEl ? endEl.offsetTop : 0;
+    }
+  }, [useWindowScroll]);
+
   const updateCardTransforms = useCallback(() => {
     const cards = cardsRef.current;
     if (!cards.length) return;
@@ -72,20 +91,15 @@ const ScrollStack = ({
     const { scrollTop, containerHeight } = getScrollData();
     const stackPx = parsePercentage(stackPosition, containerHeight);
     const endPx = parsePercentage(scaleEndPosition, containerHeight);
-    const endEl = scrollerRef.current?.querySelector('.scroll-stack-end');
-    const endTop = endEl
-      ? (useWindowScroll ? endEl.getBoundingClientRect().top + window.scrollY : endEl.offsetTop)
-      : 0;
+    const endTop = endTopRef.current;
 
     cards.forEach((card, i) => {
-      let cardTop;
-      if (useWindowScroll) {
-        const rect = card.getBoundingClientRect();
-        const visualTop = rect.top + window.scrollY;
-        const prevY = lastTransformsRef.current.get(i)?.y || 0;
-        cardTop = visualTop - prevY;
-      } else {
-        cardTop = card.offsetTop;
+      let cardTop = positionsRef.current[i];
+      if (cardTop == null) {
+        cardTop = useWindowScroll
+          ? card.getBoundingClientRect().top + window.scrollY
+          : card.offsetTop;
+        positionsRef.current[i] = cardTop;
       }
 
       const triggerStart = cardTop - stackPx - itemStackDistance * i;
@@ -153,7 +167,8 @@ const ScrollStack = ({
     getScrollData,
     rotateXAmount,
     rotateYAmount,
-    opacityEnd
+    opacityEnd,
+    measurePositions
   ]);
 
   const handleScroll = useCallback(() => {
@@ -168,7 +183,7 @@ const ScrollStack = ({
     cardsRef.current = cards;
     const transformsCache = lastTransformsRef.current;
 
-    // Initialize card styles only (no position caching — read live each frame)
+    // Initialize card styles
     cards.forEach((card, i) => {
       if (i < cards.length - 1) {
         card.style.marginBottom = `${itemDistance}px`;
@@ -179,6 +194,10 @@ const ScrollStack = ({
       card.style.transform = 'translateZ(0)';
       card.style.zIndex = `${i + 1}`;
     });
+
+    measurePositions();
+    window.addEventListener('resize', measurePositions);
+    window.addEventListener('load', measurePositions);
 
     if (useWindowScroll) {
       lenisCount++;
@@ -248,6 +267,10 @@ const ScrollStack = ({
       stackCompletedRef.current = false;
       cardsRef.current = [];
       transformsCache.clear();
+      positionsRef.current = [];
+      endTopRef.current = 0;
+      window.removeEventListener('resize', measurePositions);
+      window.removeEventListener('load', measurePositions);
     };
   }, [
     itemDistance,
@@ -261,7 +284,8 @@ const ScrollStack = ({
     blurAmount,
     useWindowScroll,
     onStackComplete,
-    handleScroll
+    handleScroll,
+    measurePositions
   ]);
 
   return (
