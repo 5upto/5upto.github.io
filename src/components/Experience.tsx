@@ -128,7 +128,7 @@ export default function Experience() {
   if (!experiences?.length) return null
 
   return (
-    <section ref={sectionRef} id="experience" className="relative pb-24 pt-24 px-4">
+    <section ref={sectionRef} id="experience" className="relative pb-12 pt-24 px-4">
       <h2 ref={headingRef} className="section-heading text-center mb-12 px-4">
         Experience
       </h2>

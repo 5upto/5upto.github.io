@@ -18,13 +18,13 @@
 }
 
 .scroll-stack-inner {
-  padding: 20vh 5rem 6rem;
+  padding: 20vh 5rem 20rem;
   min-height: 100vh;
 }
 
 @media (max-width: 768px) {
   .scroll-stack-inner {
-    padding: 15vh 1.5rem 10rem;
+    padding: 15vh 1.5rem 30rem;
   }
   .scroll-stack-card {
     padding: 1.5rem;
@@ -36,7 +36,7 @@
 
 @media (max-width: 480px) {
   .scroll-stack-inner {
-    padding: 12vh 0.75rem 10rem;
+    padding: 12vh 0.75rem 30rem;
   }
   .scroll-stack-card {
     padding: 1rem;
