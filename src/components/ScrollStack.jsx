@@ -198,6 +198,11 @@ const ScrollStack = ({
     measurePositions();
     window.addEventListener('resize', measurePositions);
     window.addEventListener('load', measurePositions);
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(measurePositions).catch(() => {});
+    }
+    const resizeObserver = new ResizeObserver(measurePositions);
+    cards.forEach(card => resizeObserver.observe(card));
 
     if (useWindowScroll) {
       lenisCount++;
@@ -269,6 +274,7 @@ const ScrollStack = ({
       transformsCache.clear();
       positionsRef.current = [];
       endTopRef.current = 0;
+      resizeObserver.disconnect();
       window.removeEventListener('resize', measurePositions);
       window.removeEventListener('load', measurePositions);
     };
