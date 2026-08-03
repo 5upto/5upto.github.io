@@ -146,7 +146,6 @@ export default function Experience() {
           itemStackDistance={30}
           stackPosition="15%"
           baseScale={0.88}
-          blurAmount={0.5}
           opacityEnd={1}
         >
           {experiences.map((exp, i) => {

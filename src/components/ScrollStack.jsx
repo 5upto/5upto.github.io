@@ -19,18 +19,13 @@ const ScrollStack = ({
   stackPosition = '20%',
   scaleEndPosition = '10%',
   baseScale = 0.85,
-  scaleDuration = 0.5,
   rotationAmount = 0,
-  blurAmount = 0,
   useWindowScroll = false,
-  onStackComplete = undefined,
-  perspective = 0,
   rotateXAmount = 0,
   rotateYAmount = 0,
   opacityEnd = 1
 }) => {
   const scrollerRef = useRef(null);
-  const stackCompletedRef = useRef(false);
   const lenisRef = useRef(null);
   const cardsRef = useRef([]);
   const lastTransformsRef = useRef(new Map());
@@ -73,7 +68,8 @@ const ScrollStack = ({
     const endEl = scrollerRef.current?.querySelector('.scroll-stack-end');
     if (useWindowScroll) {
       cards.forEach((card, i) => {
-        positionsRef.current[i] = card.getBoundingClientRect().top + window.scrollY;
+        const appliedY = lastTransformsRef.current.get(i)?.y || 0;
+        positionsRef.current[i] = card.getBoundingClientRect().top + window.scrollY - appliedY;
       });
       endTopRef.current = endEl ? endEl.getBoundingClientRect().top + window.scrollY : 0;
     } else {
@@ -91,30 +87,30 @@ const ScrollStack = ({
     const { scrollTop, containerHeight } = getScrollData();
     const stackPx = parsePercentage(stackPosition, containerHeight);
     const endPx = parsePercentage(scaleEndPosition, containerHeight);
-    const endTop = endTopRef.current;
+    const pinEnd = endTopRef.current - containerHeight / 2;
 
     cards.forEach((card, i) => {
       let cardTop = positionsRef.current[i];
       if (cardTop == null) {
+        const appliedY = lastTransformsRef.current.get(i)?.y || 0;
         cardTop = useWindowScroll
-          ? card.getBoundingClientRect().top + window.scrollY
+          ? card.getBoundingClientRect().top + window.scrollY - appliedY
           : card.offsetTop;
         positionsRef.current[i] = cardTop;
       }
 
       const triggerStart = cardTop - stackPx - itemStackDistance * i;
-      const triggerEnd = cardTop - endPx;
-      const pinStart = cardTop - stackPx - itemStackDistance * i;
-      const pinEnd = endTop - containerHeight / 2;
+      if (scrollTop < triggerStart - itemStackDistance || scrollTop > pinEnd + containerHeight) {
+        return;
+      }
 
+      const triggerEnd = cardTop - endPx;
       const t = calculateProgress(scrollTop, triggerStart, triggerEnd);
       const targetScale = baseScale + i * itemScale;
       const scale = 1 - t * (1 - targetScale);
 
       let translateY = 0;
-      const isPinned = scrollTop >= pinStart && scrollTop <= pinEnd;
-
-      if (isPinned) {
+      if (scrollTop >= triggerStart && scrollTop <= pinEnd) {
         translateY = scrollTop - cardTop + stackPx + itemStackDistance * i;
       } else if (scrollTop > pinEnd) {
         translateY = pinEnd - cardTop + stackPx + itemStackDistance * i;
@@ -126,30 +122,19 @@ const ScrollStack = ({
 
       const opacity = 1 - (1 - opacityEnd) * Math.max(0, Math.min(1, (t - 0.2) / 0.8));
 
-      const key = i;
       const roundedY = Math.round(translateY * 100) / 100;
       const roundedScale = Math.round(scale * 1000) / 1000;
       const roundedRotX = Math.round(rotX * 100) / 100;
       const roundedRotY = Math.round(rotY * 100) / 100;
       const roundedRotZ = Math.round(rotZ * 100) / 100;
       const roundedOpacity = Math.round(opacity * 100) / 100;
-      const last = lastTransformsRef.current.get(key);
+      const last = lastTransformsRef.current.get(i);
 
       const rotStr = `rotateX(${roundedRotX}deg) rotateY(${roundedRotY}deg) rotateZ(${roundedRotZ}deg)`;
-      if (!last || Math.abs(last.y - roundedY) > 0.1 || Math.abs(last.s - roundedScale) > 0.001 || Math.abs(last.rx - roundedRotX) > 0.1 || Math.abs(last.ry - roundedRotY) > 0.1 || Math.abs(last.rz - roundedRotZ) > 0.1 || Math.abs(last.o - roundedOpacity) > 0.01) {
+      if (!last || last.y !== roundedY || last.s !== roundedScale || last.rx !== roundedRotX || last.ry !== roundedRotY || last.rz !== roundedRotZ || last.o !== roundedOpacity) {
         card.style.transform = `translate3d(0, ${roundedY}px, 0) scale(${roundedScale}) ${rotStr}`;
         card.style.opacity = roundedOpacity;
-        lastTransformsRef.current.set(key, { y: roundedY, s: roundedScale, rx: roundedRotX, ry: roundedRotY, rz: roundedRotZ, o: roundedOpacity });
-      }
-
-      if (i === cards.length - 1) {
-        const inView = scrollTop >= pinStart && scrollTop <= pinEnd;
-        if (inView && !stackCompletedRef.current) {
-          stackCompletedRef.current = true;
-          onStackComplete?.();
-        } else if (!inView && stackCompletedRef.current) {
-          stackCompletedRef.current = false;
-        }
+        lastTransformsRef.current.set(i, { y: roundedY, s: roundedScale, rx: roundedRotX, ry: roundedRotY, rz: roundedRotZ, o: roundedOpacity });
       }
     });
   }, [
@@ -159,9 +144,7 @@ const ScrollStack = ({
     scaleEndPosition,
     baseScale,
     rotationAmount,
-    blurAmount,
     useWindowScroll,
-    onStackComplete,
     calculateProgress,
     parsePercentage,
     getScrollData,
@@ -269,7 +252,6 @@ const ScrollStack = ({
       } else if (lenisRef.current) {
         lenisRef.current.destroy();
       }
-      stackCompletedRef.current = false;
       cardsRef.current = [];
       transformsCache.clear();
       positionsRef.current = [];
@@ -285,11 +267,8 @@ const ScrollStack = ({
     stackPosition,
     scaleEndPosition,
     baseScale,
-    scaleDuration,
     rotationAmount,
-    blurAmount,
     useWindowScroll,
-    onStackComplete,
     handleScroll,
     measurePositions
   ]);
