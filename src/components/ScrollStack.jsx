@@ -100,27 +100,36 @@ const ScrollStack = ({
       }
 
       const triggerStart = cardTop - stackPx - itemStackDistance * i;
-      if (scrollTop < triggerStart - itemStackDistance || scrollTop > pinEnd + containerHeight) {
-        return;
-      }
-
       const triggerEnd = cardTop - endPx;
-      const t = calculateProgress(scrollTop, triggerStart, triggerEnd);
-      const targetScale = baseScale + i * itemScale;
-      const scale = 1 - t * (1 - targetScale);
 
-      let translateY = 0;
-      if (scrollTop >= triggerStart && scrollTop <= pinEnd) {
-        translateY = scrollTop - cardTop + stackPx + itemStackDistance * i;
-      } else if (scrollTop > pinEnd) {
-        translateY = pinEnd - cardTop + stackPx + itemStackDistance * i;
+      let translateY;
+      let scale;
+      let rotX = 0;
+      let rotY = 0;
+      let rotZ = 0;
+      let opacity = 1;
+
+      if (scrollTop < triggerStart) {
+        // Scrolled above the stack: restore the natural state so cards
+        // are never left stuck in a stacked position.
+        translateY = 0;
+        scale = 1;
+      } else {
+        const t = calculateProgress(scrollTop, triggerStart, triggerEnd);
+        const targetScale = baseScale + i * itemScale;
+        scale = 1 - t * (1 - targetScale);
+
+        if (scrollTop <= pinEnd) {
+          translateY = scrollTop - cardTop + stackPx + itemStackDistance * i;
+        } else {
+          translateY = pinEnd - cardTop + stackPx + itemStackDistance * i;
+        }
+
+        rotX = rotateXAmount ? -rotateXAmount * t : 0;
+        rotY = rotateYAmount ? rotateYAmount * t : 0;
+        rotZ = rotationAmount ? rotationAmount * t * i : 0;
+        opacity = 1 - (1 - opacityEnd) * Math.max(0, Math.min(1, (t - 0.2) / 0.8));
       }
-
-      const rotX = rotateXAmount ? -rotateXAmount * t : 0;
-      const rotY = rotateYAmount ? rotateYAmount * t : 0;
-      const rotZ = rotationAmount ? rotationAmount * t * i : 0;
-
-      const opacity = 1 - (1 - opacityEnd) * Math.max(0, Math.min(1, (t - 0.2) / 0.8));
 
       const roundedY = Math.round(translateY * 100) / 100;
       const roundedScale = Math.round(scale * 1000) / 1000;
@@ -158,6 +167,11 @@ const ScrollStack = ({
     updateCardTransforms();
   }, [updateCardTransforms]);
 
+  const recompute = useCallback(() => {
+    measurePositions();
+    updateCardTransforms();
+  }, [measurePositions, updateCardTransforms]);
+
   useLayoutEffect(() => {
     const scroller = scrollerRef.current;
     if (!scroller) return;
@@ -178,13 +192,13 @@ const ScrollStack = ({
       card.style.zIndex = `${i + 1}`;
     });
 
-    measurePositions();
-    window.addEventListener('resize', measurePositions);
-    window.addEventListener('load', measurePositions);
+    recompute();
+    window.addEventListener('resize', recompute);
+    window.addEventListener('load', recompute);
     if (document.fonts?.ready) {
-      document.fonts.ready.then(measurePositions).catch(() => {});
+      document.fonts.ready.then(recompute).catch(() => {});
     }
-    const resizeObserver = new ResizeObserver(measurePositions);
+    const resizeObserver = new ResizeObserver(recompute);
     cards.forEach(card => resizeObserver.observe(card));
 
     if (useWindowScroll) {
@@ -257,8 +271,8 @@ const ScrollStack = ({
       positionsRef.current = [];
       endTopRef.current = 0;
       resizeObserver.disconnect();
-      window.removeEventListener('resize', measurePositions);
-      window.removeEventListener('load', measurePositions);
+      window.removeEventListener('resize', recompute);
+      window.removeEventListener('load', recompute);
     };
   }, [
     itemDistance,
@@ -270,7 +284,7 @@ const ScrollStack = ({
     rotationAmount,
     useWindowScroll,
     handleScroll,
-    measurePositions
+    recompute
   ]);
 
   return (

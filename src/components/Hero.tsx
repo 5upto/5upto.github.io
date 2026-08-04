@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import gsap from 'gsap'
 import Lanyard from './lanyard/Lanyard'
 import ParticleBackground from './ParticleBackground'
@@ -171,17 +171,153 @@ function useIdCardImages(profile: any, currentExp: any) {
   return images
 }
 
-function HoverWord({ en, bn, className }: { en: string; bn: string; className?: string }) {
-  const [hovered, setHovered] = useState(false)
+function NameReveal({ en, bn }: { en: ReactNode[]; bn: ReactNode[] }) {
+  const boxRef = useRef<HTMLSpanElement>(null)
+  const clipRef = useRef<HTMLSpanElement>(null)
+  const ellipseRef = useRef<SVGRectElement>(null)
+  const clipId = useId()
+  const stateRef = useRef({
+    tx: -300,
+    ty: -300,
+    x: -300,
+    y: -300,
+    vx: 0,
+    vy: 0,
+    r: 0,
+    tr: 0,
+  })
+  const rafRef = useRef(0)
+  const OVERSHOOT = 80
+  const WORD_GAP = '0.35em'
+  const marginFor = (i: number) =>
+    i < en.length - 1 ? (i === 0 ? '0.65em' : WORD_GAP) : undefined
+
+  const update = useCallback(() => {
+    rafRef.current = 0
+    const ell = ellipseRef.current
+    const s = stateRef.current
+    if (!ell) return
+
+    const prevX = s.x
+    const prevY = s.y
+
+    // Balloon-like lag: chase the cursor with soft inertia.
+    s.x += (s.tx - s.x) * 0.22
+    s.y += (s.ty - s.y) * 0.22
+
+    // Smoothed frame velocity (decays to rest when idle).
+    const dvx = s.x - prevX
+    const dvy = s.y - prevY
+    s.vx += (dvx - s.vx) * 0.3
+    s.vy += (dvy - s.vy) * 0.3
+
+    // Reveal radius (grows on hover, collapses on leave).
+    const diff = s.tr - s.r
+    if (Math.abs(diff) > 0.5) s.r += diff * 0.2
+    else s.r = s.tr
+
+    // Pill (capsule) that stretches along the direction of movement,
+    // keeping rounded ends and parallel sides instead of a pointed ellipse.
+    const speed = Math.hypot(s.vx, s.vy)
+    const stretch = Math.min(1, speed / 14)
+    const angle = speed > 0.01 ? Math.atan2(s.vy, s.vx) : 0
+    const lead = 24 * stretch
+    const cx = s.x + Math.cos(angle) * lead + OVERSHOOT
+    const cy = s.y + Math.sin(angle) * lead + OVERSHOOT
+    const halfLen = s.r * (1 + stretch * 1.0)
+    const halfWid = s.r
+
+    ell.setAttribute('x', String(cx - halfLen))
+    ell.setAttribute('y', String(cy - halfWid))
+    ell.setAttribute('width', String(Math.max(0.02, halfLen * 2)))
+    ell.setAttribute('height', String(Math.max(0.02, halfWid * 2)))
+    ell.setAttribute('rx', String(Math.max(0.01, halfWid)))
+    ell.setAttribute('ry', String(Math.max(0.01, halfWid)))
+    ell.setAttribute('transform', `rotate(${(angle * 180) / Math.PI} ${cx} ${cy})`)
+
+    const chasing = Math.abs(s.tx - s.x) > 0.5 || Math.abs(s.ty - s.y) > 0.5
+    const growing = Math.abs(s.tr - s.r) > 0.5
+    const moving = speed > 0.05
+    if (chasing || growing || moving) {
+      rafRef.current = requestAnimationFrame(update)
+    }
+  }, [])
+
+  const schedule = useCallback(() => {
+    if (!rafRef.current) rafRef.current = requestAnimationFrame(update)
+  }, [update])
+
+  const handleMove = useCallback(
+    (e: React.MouseEvent<HTMLSpanElement>) => {
+      const rect = boxRef.current?.getBoundingClientRect()
+      if (!rect) return
+      stateRef.current.tx = e.clientX - rect.left
+      stateRef.current.ty = e.clientY - rect.top
+      stateRef.current.tr = 58
+      schedule()
+    },
+    [schedule]
+  )
+
+  const handleLeave = useCallback(() => {
+    stateRef.current.tr = 0
+    stateRef.current.vx = 0
+    stateRef.current.vy = 0
+    schedule()
+  }, [schedule])
+
+  useEffect(() => () => cancelAnimationFrame(rafRef.current), [])
+
   return (
     <span
-      className={className}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{ display: 'inline-block', minWidth: '3.5ch', cursor: 'pointer', position: 'relative' }}
+      ref={boxRef}
+      className="relative inline-block max-w-full cursor-crosshair"
+      onMouseMove={handleMove}
+      onMouseLeave={handleLeave}
     >
-      <span style={{ opacity: hovered ? 0 : 1, transition: 'opacity .25s' }}>{en}</span>
-      <span style={{ position: 'absolute', inset: 0, opacity: hovered ? 1 : 0, transition: 'opacity .25s', fontFamily: 'Kohinoor Bangla, Kohinoor, sans-serif' }}>{bn}</span>
+      <span className="flex whitespace-nowrap">
+        {en.map((word, i) => (
+          <span key={i} style={{ marginRight: marginFor(i) }}>{word}</span>
+        ))}
+      </span>
+      <span
+        ref={clipRef}
+        aria-hidden
+        className="absolute bg-black text-white dark:bg-white dark:text-black"
+        style={{
+          left: -OVERSHOOT,
+          right: -OVERSHOOT,
+          top: -OVERSHOOT,
+          bottom: -OVERSHOOT,
+          padding: OVERSHOOT,
+          display: 'flex',
+          clipPath: `url(#${clipId})`,
+        }}
+      >
+        {en.map((word, i) => (
+          <span key={i} className="relative" style={{ whiteSpace: 'nowrap', marginRight: marginFor(i) }}>
+            <span style={{ visibility: 'hidden' }}>{word}</span>
+            <span
+              className="absolute"
+              style={{
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {bn[i]}
+            </span>
+          </span>
+        ))}
+      </span>
+      <svg aria-hidden className="absolute w-0 h-0 overflow-hidden">
+        <defs>
+          <clipPath id={clipId} clipPathUnits="userSpaceOnUse">
+            <rect ref={ellipseRef} x="0" y="0" width="0" height="0" rx="0" ry="0" />
+          </clipPath>
+        </defs>
+      </svg>
     </span>
   )
 }
@@ -221,10 +357,19 @@ export default function Hero() {
           <p className="text-primary-400 font-display text-base landscape:text-lg md:text-lg mb-4 tracking-[0.2em] uppercase opacity-80">
             {profile.title}
           </p>
-          <h1 className="text-5xl landscape:text-6xl md:text-6xl font-display font-bold mb-4 leading-tight" style={{ whiteSpace: 'nowrap' }}>
-            <HoverWord en="I'm" bn="আমি" />{' '}
-            {profile.name.split(' ')[0]}{' '}
-            <span className="gradient-text">{profile.name.split(' ').slice(1).join(' ')}</span>
+          <h1 className="text-5xl landscape:text-6xl md:text-6xl font-display font-bold mb-4 leading-tight">
+            <NameReveal
+              en={[
+                "I'm",
+                profile.name.split(' ')[0],
+                <span className="gradient-text" key="rest">{profile.name.split(' ').slice(1).join(' ')}</span>,
+              ]}
+              bn={[
+                <span key="am" style={{ fontFamily: 'Kohinoor Bangla, Kohinoor, sans-serif', fontSize: '0.95em' }}>আমি</span>,
+                profile.name.split(' ')[0],
+                <span key="rest">{profile.name.split(' ').slice(1).join(' ')}</span>,
+              ]}
+            />
           </h1>
           <p className="text-[var(--text-muted)] text-base landscape:text-lg md:text-lg leading-relaxed mb-10">
             {profile.tagline}

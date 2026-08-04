@@ -291,7 +291,7 @@ export default function Navbar({ logo, onLogoClick, items }: NavbarProps) {
                     >
                       <span
                         className="hover-circle absolute left-1/2 bottom-0 rounded-full z-[1] block pointer-events-none"
-                        style={{ background: 'var(--accent)', willChange: 'transform' }}
+                        style={{ background: 'var(--text-primary)', willChange: 'transform' }}
                         aria-hidden="true"
                         ref={el => { circleRefs.current[i] = el }}
                       />
@@ -301,7 +301,7 @@ export default function Navbar({ logo, onLogoClick, items }: NavbarProps) {
                         </span>
                         <span
                           className="pill-label-hover absolute left-0 top-0 z-[3] inline-block"
-                          style={{ color: '#fff', willChange: 'transform, opacity' }}
+                          style={{ color: 'var(--bg-primary)', willChange: 'transform, opacity' }}
                           aria-hidden="true"
                         >
                           {item.label}

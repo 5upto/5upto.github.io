@@ -173,7 +173,7 @@ export default function Experience() {
                     }}
                   >
                     {exp.logo ? (
-                      <img src={exp.logo} alt={exp.company} className="w-full h-full object-contain rounded-full p-0.5 md:p-1" />
+                      <img src={exp.logo} alt={exp.company} className="w-full h-full object-cover rounded-full p-0.5 md:p-1" />
                     ) : (
                       <span className="w-full h-full flex items-center justify-center text-[10px] md:text-xs font-bold text-primary-500">
                         {exp.company.charAt(0)}
