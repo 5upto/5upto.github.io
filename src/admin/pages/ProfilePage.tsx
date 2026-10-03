@@ -6,6 +6,7 @@ import ImagePicker from '../components/ImagePicker'
 import Toast from '../components/Toast'
 import { useJobTitle } from '../../hooks/useJobTitle'
 import { useExperiences } from '../../hooks/useExperiences'
+import { useAbout } from '../../hooks/useAbout'
 import { MdPerson, MdEdit, MdImage, MdWork } from 'react-icons/md'
 
 const InputField = ({ label, value, onChange, placeholder, textarea, rows }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string; textarea?: boolean; rows?: number }) => (
@@ -35,6 +36,7 @@ export default function ProfilePage() {
   const jobTitle = useJobTitle()
   const { data: experiences } = useExperiences()
   const latestExp = experiences?.[0] ?? null
+  const about = useAbout()
 
   useEffect(() => {
     if (profile) setForm({ name: profile.name, handle: profile.handle, tagline: profile.tagline, status: profile.status, location: profile.location, bio: profile.bio, avatar_url: profile.avatar_url, nav_avatar_url: profile.nav_avatar_url ?? '', about_highlights: profile.about_highlights })
@@ -130,19 +132,30 @@ export default function ProfilePage() {
 
         {activeTab === 'about' && (
           <div className="space-y-4">
-            <InputField label="Bio" value={form.bio} onChange={(v) => setForm(f => ({ ...f, bio: v }))} textarea rows={5}
-              placeholder="Write a brief bio about yourself..." />
+            <InputField label="Bio" value={form.bio} onChange={(v) => setForm(f => ({ ...f, bio: v }))} textarea rows={3}
+              placeholder="Fallback bio, only shown if you have no experiences, education or other content yet..." />
+            <p className="text-xs text-[var(--text-muted)] -mt-1">
+              This is only a fallback. The About section text is generated automatically from your experiences,
+              education, certifications, publications and projects.
+            </p>
+
             <div className="bg-[var(--bg-elevated)] rounded-xl p-4">
-              <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3">About Highlights</p>
-              <p className="text-xs text-[var(--text-muted)] mb-3">These are auto-calculated from your actual content and displayed on the portfolio homepage.</p>
-              <div className="grid grid-cols-2 gap-2">
-                {form.about_highlights.map((h, i) => (
-                  <div key={i} className="flex items-center gap-2 bg-[var(--bg-card)] rounded-lg px-3 py-2">
+              <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3">Live Preview</p>
+              <p className="text-xs text-[var(--text-muted)] mb-3">Exactly what visitors see on the homepage right now.</p>
+              <p className="text-sm text-[var(--text-primary)] leading-relaxed bg-[var(--bg-card)] rounded-lg p-3 border border-[var(--border)]">
+                {about.paragraph || 'Add an experience, education entry, certification or project to generate this automatically.'}
+              </p>
+              <div className="grid grid-cols-2 gap-2 mt-3">
+                {about.highlights.map((h) => (
+                  <div key={h.label} className="flex items-center gap-2 bg-[var(--bg-card)] rounded-lg px-3 py-2">
                     <span className="text-lg font-bold gradient-text">{h.value}</span>
                     <span className="text-xs text-[var(--text-muted)]">{h.label}</span>
                   </div>
                 ))}
               </div>
+              <p className="text-xs text-[var(--text-muted)] mt-3">
+                Numbers are counted live from your records. Update an experience and both refresh automatically.
+              </p>
             </div>
           </div>
         )}

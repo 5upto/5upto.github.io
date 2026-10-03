@@ -48,3 +48,29 @@ export function parseDateField(text: string): number {
 export function sortByDate<T>(items: T[], dateField: keyof T): T[] {
   return [...items].sort((a, b) => parseDateField(String(b[dateField])) - parseDateField(String(a[dateField])))
 }
+
+export type DateRange = { start: number; end: number }
+
+/**
+ * Parses an experience period into a concrete start/end range.
+ * "Jun 2026 – Present" resolves `end` to now, so ongoing roles keep counting up.
+ * A single month/year ("Jun 2025") counts as zero-length and is skipped by callers.
+ */
+export function parsePeriodRange(text: string): DateRange | null {
+  if (!text) return null
+  const t = text.trim()
+
+  // Split on the first dash that is not part of a date range like "21–22 February 2025".
+  const rangeMatch = t.match(/^(.+?)\s*[–—-]\s*(.+)$/)
+  if (rangeMatch) {
+    const start = parseMonthYear(rangeMatch[1])
+    if (start === null) return null
+    const endRaw = rangeMatch[2]
+    const end = /present|current|now|ongoing/i.test(endRaw) ? Date.now() : parseMonthYear(endRaw)
+    return { start, end: end === null ? start : Math.max(start, end) }
+  }
+
+  const single = parseMonthYear(t)
+  if (single === null) return null
+  return { start: single, end: single }
+}

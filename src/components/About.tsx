@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { useProfile } from '../hooks/useProfile'
+import { useAbout } from '../hooks/useAbout'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -10,7 +10,7 @@ export default function About() {
   const headingRef = useRef<HTMLHeadingElement>(null)
   const textRef = useRef<HTMLParagraphElement>(null)
   const statsRef = useRef<HTMLDivElement>(null)
-  const { data: profile } = useProfile()
+  const { paragraph, highlights } = useAbout()
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -30,7 +30,7 @@ export default function About() {
     return () => ctx.revert()
   }, [])
 
-  if (!profile) return null
+  if (!paragraph) return null
 
   return (
     <section ref={sectionRef} id="about" className="py-24 px-4 relative">
@@ -39,10 +39,10 @@ export default function About() {
           About <span className="gradient-text">Me</span>
         </h2>
         <p ref={textRef} className="text-[var(--text-muted)] text-lg leading-relaxed max-w-3xl mx-auto text-center mb-16">
-          {profile.bio}
+          {paragraph}
         </p>
         <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          {profile.about_highlights.map((item) => (
+          {highlights.map((item) => (
             <div key={item.label} className="card text-center">
               <div className="text-3xl font-display font-bold gradient-text mb-1">{item.value}</div>
               <div className="text-[var(--text-muted)] text-sm">{item.label}</div>
