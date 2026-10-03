@@ -18,6 +18,7 @@ import BlogStory from './components/BlogStory'
 import { useNavItems } from './hooks/useNavItems'
 import { useProfile } from './hooks/useProfile'
 import { useJobTitle } from './hooks/useJobTitle'
+import { useScrollRestoration } from './hooks/useScrollRestoration'
 import LoadingSpinner from './components/LoadingSpinner'
 
 const AdminLayout = lazy(() => import('./admin/AdminLayout'))
@@ -98,6 +99,7 @@ export default function App() {
   const { data: profile, isFetched } = useProfile()
   const name = profile?.name ?? ''
   const jobTitle = useJobTitle()
+  useScrollRestoration()
 
   // Navbar logo + favicon image: navbar avatar, else lanyard avatar, else the legacy jersey.
   const logoUrl = isFetched ? profile?.nav_avatar_url || profile?.avatar_url || FALLBACK_LOGO : ''
@@ -114,8 +116,9 @@ export default function App() {
 
   const handleLogoClick = () => {
     if (window.location.pathname !== '/') {
-      navigate('/')
-      window.scrollTo(0, 0)
+      // scrollTop hint tells useScrollRestoration to go to the top instead of
+      // restoring wherever the homepage was last left.
+      navigate('/', { state: { scrollTop: 0 } })
     } else {
       window.scrollTo({ top: 0, behavior: 'smooth' })
     }

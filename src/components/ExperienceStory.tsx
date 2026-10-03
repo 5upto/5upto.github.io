@@ -1,38 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { useState, useCallback } from 'react'
 import { useExperiences } from '../hooks/useExperiences'
-
-function getDominantColor(img: HTMLImageElement): string {
-  const canvas = document.createElement('canvas')
-  const ctx = canvas.getContext('2d')
-  if (!ctx) return 'var(--bg-elevated)'
-  canvas.width = img.naturalWidth
-  canvas.height = img.naturalHeight
-  ctx.drawImage(img, 0, 0)
-  const corners = [
-    [0, 0], [canvas.width - 1, 0], [0, canvas.height - 1],
-    [canvas.width - 1, canvas.height - 1], [Math.floor(canvas.width / 2), 0],
-    [0, Math.floor(canvas.height / 2)], [canvas.width - 1, Math.floor(canvas.height / 2)],
-    [Math.floor(canvas.width / 2), canvas.height - 1],
-  ]
-  const colorCounts = new Map<string, number>()
-  for (const [x, y] of corners) {
-    const [r, g, b, a] = ctx.getImageData(x, y, 1, 1).data
-    if (a < 128) continue
-    const qr = Math.round(r / 8) * 8
-    const qg = Math.round(g / 8) * 8
-    const qb = Math.round(b / 8) * 8
-    const key = `${qr},${qg},${qb}`
-    colorCounts.set(key, (colorCounts.get(key) || 0) + 1)
-  }
-  let maxCount = 0
-  let dominant = '128,128,128'
-  for (const [color, count] of colorCounts) {
-    if (count > maxCount) { maxCount = count; dominant = color }
-  }
-  const [r, g, b] = dominant.split(',').map(Number)
-  return `rgb(${r}, ${g}, ${b})`
-}
+import { logoPanelStyle } from '../lib/logoPanel'
 
 export default function ExperienceStory() {
   const { slug } = useParams<{ slug: string }>()
@@ -41,8 +10,8 @@ export default function ExperienceStory() {
   const { data: experiences } = useExperiences()
 
   const handleImageLoad = useCallback((company: string, e: React.SyntheticEvent<HTMLImageElement>) => {
-    const color = getDominantColor(e.currentTarget)
-    setImgColors(prev => ({ ...prev, [company]: color }))
+    const panel = logoPanelStyle(e.currentTarget)
+    if (panel) setImgColors(prev => ({ ...prev, [company]: panel }))
   }, [])
 
   const experience = experiences?.find((exp) => exp.slug === slug)
@@ -73,6 +42,7 @@ export default function ExperienceStory() {
           <div className="mb-6">
             {experience.logo && (
               <img src={experience.logo} alt={experience.company}
+                crossOrigin="anonymous"
                 className="w-full h-48 md:h-64 object-contain rounded-2xl p-6 transition-colors duration-500"
                 style={{ backgroundColor: imgColors[experience.company] || 'var(--bg-elevated)' }}
                 onLoad={(e) => handleImageLoad(experience.company, e)}

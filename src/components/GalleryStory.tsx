@@ -1,13 +1,10 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useEffect } from 'react'
 import { useGallery } from '../hooks/useGallery'
 
 export default function GalleryStory() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const { data: stories } = useGallery()
-
-  useEffect(() => { window.scrollTo(0, 0) }, [slug])
 
   const story = stories?.find((s) => s.slug === slug)
 

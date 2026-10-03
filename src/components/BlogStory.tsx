@@ -10,8 +10,6 @@ export default function BlogStory() {
   const contentRef = useRef<HTMLDivElement>(null)
   const { data: blogs } = useBlogs()
 
-  useEffect(() => { window.scrollTo(0, 0) }, [slug])
-
   useEffect(() => {
     if (contentRef.current) {
       const blocks = contentRef.current.querySelectorAll('.story-block')

@@ -1,13 +1,10 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useEffect } from 'react'
 import { useProjects } from '../hooks/useProjects'
 
 export default function ProjectStory() {
   const { slug } = useParams<{ slug: string }>()
   const navigate = useNavigate()
   const { data: projects } = useProjects()
-
-  useEffect(() => { window.scrollTo(0, 0) }, [slug])
 
   const project = projects?.find((p) => p.slug === slug)
 
