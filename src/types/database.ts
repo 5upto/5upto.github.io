@@ -8,6 +8,7 @@ export interface Profile {
   location: string
   bio: string
   avatar_url: string
+  nav_avatar_url: string
   about_highlights: AboutHighlight[]
   created_at: string
   updated_at: string
@@ -152,15 +153,6 @@ export interface NavItem {
   id: string
   label: string
   href: string
-  sort_order: number
-  created_at: string
-}
-
-export interface LegacyLogo {
-  id: string
-  file: string
-  number: string
-  aspect: string
   sort_order: number
   created_at: string
 }

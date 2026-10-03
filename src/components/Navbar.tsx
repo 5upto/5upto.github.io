@@ -8,12 +8,12 @@ export type NavItem = {
 }
 
 interface NavbarProps {
-  logo: string
+  logoUrl: string
   onLogoClick: () => void
   items: NavItem[]
 }
 
-export default function Navbar({ logo, onLogoClick, items }: NavbarProps) {
+export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
   const navigate = useNavigate()
   const location = useLocation()
   const [dark, setDark] = useState(() => {
@@ -259,10 +259,10 @@ export default function Navbar({ logo, onLogoClick, items }: NavbarProps) {
           <button
             onClick={onLogoClick}
             aria-label="Home"
-            className="rounded-full p-[3px] inline-flex items-center justify-center overflow-hidden shrink-0"
+            className="rounded-full p-[3px] inline-flex items-center justify-center overflow-hidden shrink-0 bg-gradient-to-br from-primary-500 to-purple-500"
             style={{ width: 'var(--nav-h)', height: 'var(--nav-h)' }}
           >
-            <img src={`/images/logos/${logo}`} alt="logo" className="w-full h-full object-cover block rounded-full" />
+            {logoUrl && <img src={logoUrl} alt="logo" className="w-full h-full object-cover block rounded-full" />}
           </button>
 
           <div

@@ -17,6 +17,7 @@ create table public.profile (
   location text,
   bio text,
   avatar_url text,
+  nav_avatar_url text,
   about_highlights jsonb default '[]'::jsonb,
   created_at timestamptz default now(),
   updated_at timestamptz default now()

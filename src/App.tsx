@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react'
+import { useEffect, lazy, Suspense } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
@@ -8,7 +8,6 @@ import Projects from './components/Projects'
 import Skills from './components/Skills'
 import Education from './components/Education'
 import Contact from './components/Contact'
-import Legacy from './components/Legacy'
 import ProjectStory from './components/ProjectStory'
 import ExperienceStory from './components/ExperienceStory'
 
@@ -17,6 +16,8 @@ import GalleryStory from './components/GalleryStory'
 import BlogsPage from './components/BlogsPage'
 import BlogStory from './components/BlogStory'
 import { useNavItems } from './hooks/useNavItems'
+import { useProfile } from './hooks/useProfile'
+import { useJobTitle } from './hooks/useJobTitle'
 import LoadingSpinner from './components/LoadingSpinner'
 
 const AdminLayout = lazy(() => import('./admin/AdminLayout'))
@@ -36,14 +37,39 @@ const GalleryAdminPage = lazy(() => import('./admin/pages/GalleryAdminPage'))
 const NavItemsPage = lazy(() => import('./admin/pages/NavItemsPage'))
 const StoragePage = lazy(() => import('./admin/pages/StoragePage'))
 
-const LOGO_KEY = 'portfolio-logo'
+const FALLBACK_LOGO = '/images/logos/w26.jpeg'
 
-function HomePage({ logo, onLogoClick }: { logo: string; onLogoClick: () => void }) {
+const MIME_TYPES: Record<string, string> = {
+  svg: 'image/svg+xml',
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  gif: 'image/gif',
+  webp: 'image/webp',
+  avif: 'image/avif',
+  ico: 'image/x-icon',
+}
+
+function faviconMime(url: string): string {
+  const ext = url.split('?')[0].split('#')[0].split('.').pop()?.toLowerCase() ?? ''
+  return MIME_TYPES[ext] ?? 'image/jpeg'
+}
+
+function applyFavicon(url: string) {
+  for (const rel of ['icon', 'apple-touch-icon']) {
+    const link = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`)
+    if (!link) continue
+    link.href = url
+    link.type = faviconMime(url)
+  }
+}
+
+function HomePage({ logoUrl, onLogoClick }: { logoUrl: string; onLogoClick: () => void }) {
   const { data: navItems } = useNavItems()
   const items = (navItems ?? []).map(n => ({ label: n.label, href: n.href }))
   return (
     <>
-      <Navbar logo={logo} onLogoClick={onLogoClick} items={items} />
+      <Navbar logoUrl={logoUrl} onLogoClick={onLogoClick} items={items} />
       <main className="relative z-10">
         <Hero />
         <About />
@@ -55,10 +81,6 @@ function HomePage({ logo, onLogoClick }: { logo: string; onLogoClick: () => void
       </main>
     </>
   )
-}
-
-function LegacyPage({ onSelect }: { onSelect: (file: string) => void }) {
-  return <Legacy onBack={() => window.history.back()} onSelect={onSelect} />
 }
 
 function AdminFallback() {
@@ -73,23 +95,36 @@ const S = ({ children }: { children: React.ReactNode }) => <Suspense fallback={<
 
 export default function App() {
   const navigate = useNavigate()
-  const [logo, setLogo] = useState(() => localStorage.getItem(LOGO_KEY) || 'w26.jpeg')
+  const { data: profile, isFetched } = useProfile()
+  const name = profile?.name ?? ''
+  const jobTitle = useJobTitle()
 
-  useEffect(() => { localStorage.setItem(LOGO_KEY, logo) }, [logo])
+  // Navbar logo + favicon image: navbar avatar, else lanyard avatar, else the legacy jersey.
+  const logoUrl = isFetched ? profile?.nav_avatar_url || profile?.avatar_url || FALLBACK_LOGO : ''
 
   useEffect(() => {
-    const link = document.querySelector<HTMLLinkElement>('link[rel="icon"]')
-    if (link) link.href = `/images/logos/${logo}`
-  }, [logo])
+    if (!logoUrl) return
+    applyFavicon(logoUrl)
+  }, [logoUrl])
 
-  const handleLogoClick = () => navigate('/legacy')
-  const handleLegacySelect = (file: string) => { setLogo(file); navigate('/') }
+  useEffect(() => {
+    if (!jobTitle) return
+    document.title = `${name} | ${jobTitle}`
+  }, [name, jobTitle])
+
+  const handleLogoClick = () => {
+    if (window.location.pathname !== '/') {
+      navigate('/')
+      window.scrollTo(0, 0)
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }
 
   return (
     <>
       <Routes>
-        <Route path="/" element={<HomePage logo={logo} onLogoClick={handleLogoClick} />} />
-        <Route path="/legacy" element={<LegacyPage onSelect={handleLegacySelect} />} />
+        <Route path="/" element={<HomePage logoUrl={logoUrl} onLogoClick={handleLogoClick} />} />
         <Route path="/projects/:slug" element={<ProjectStory />} />
         <Route path="/experience/:slug" element={<ExperienceStory />} />
         <Route path="/gallery" element={<CircularGalleryPage />} />

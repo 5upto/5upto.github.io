@@ -328,6 +328,7 @@ export default function Hero() {
   const { data: profile } = useProfile()
   const { data: experiences } = useExperiences()
   const currentExp = experiences?.[0] ?? null
+  const jobTitle = currentExp?.role || profile?.title || ''
   const { front, back, band } = useIdCardImages(profile, currentExp)
 
   useEffect(() => {
@@ -355,7 +356,7 @@ export default function Hero() {
       <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col landscape:flex-row md:flex-row items-center gap-8 landscape:gap-16 md:gap-16 pointer-events-none">
         <div ref={textRef} className="hidden landscape:block md:block w-full landscape:w-1/2 md:w-1/2 text-left pointer-events-auto">
           <p className="text-primary-400 font-display text-base landscape:text-lg md:text-lg mb-4 tracking-[0.2em] uppercase opacity-80">
-            {profile.title}
+            {jobTitle}
           </p>
           <h1 className="text-5xl landscape:text-6xl md:text-6xl font-display font-bold mb-4 leading-tight">
             <NameReveal
