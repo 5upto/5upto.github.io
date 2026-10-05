@@ -19,6 +19,19 @@ export interface AboutHighlight {
   value: string
 }
 
+export interface Resume {
+  id: string
+  label: string
+  version: number
+  is_live: boolean
+  file_url: string
+  storage_path: string
+  file_name: string
+  file_size: number | null
+  note: string | null
+  created_at: string
+}
+
 export interface Experience {
   id: string
   role: string

@@ -11,6 +11,7 @@ import {
   MdFolder,
   MdSchool,
   MdCardMembership,
+  MdPictureAsPdf,
   MdMenuBook,
   MdLightbulb,
   MdLink,
@@ -30,6 +31,7 @@ import {
 const sidebarItems = [
   { label: 'Dashboard', href: '/admin', icon: MdHome },
   { label: 'Profile', href: '/admin/profile', icon: MdPerson },
+  { label: 'Resume', href: '/admin/resume', icon: MdPictureAsPdf },
   { label: 'Experiences', href: '/admin/experiences', icon: MdWork },
   { label: 'Projects', href: '/admin/projects', icon: MdFolder },
   { label: 'Education', href: '/admin/education', icon: MdSchool },

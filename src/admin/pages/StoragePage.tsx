@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase'
 import Toast from '../components/Toast'
 import { MdCloudUpload, MdImage } from 'react-icons/md'
 
-const buckets = ['avatars', 'logos', 'projects', 'gallery', 'blogs']
+const buckets = ['avatars', 'logos', 'projects', 'gallery', 'blogs', 'resumes']
 
 export default function StoragePage() {
   const [uploading, setUploading] = useState(false)

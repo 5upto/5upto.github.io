@@ -26,6 +26,7 @@ const LoginPage = lazy(() => import('./admin/pages/LoginPage'))
 const ProtectedRoute = lazy(() => import('./admin/ProtectedRoute'))
 const DashboardPage = lazy(() => import('./admin/pages/DashboardPage'))
 const ProfilePage = lazy(() => import('./admin/pages/ProfilePage'))
+const ResumePage = lazy(() => import('./admin/pages/ResumePage'))
 const ExperiencesPage = lazy(() => import('./admin/pages/ExperiencesPage'))
 const ProjectsPage = lazy(() => import('./admin/pages/ProjectsPage'))
 const EducationPage = lazy(() => import('./admin/pages/EducationPage'))
@@ -57,9 +58,15 @@ function faviconMime(url: string): string {
 }
 
 function applyFavicon(url: string) {
+  if (!url) return
   for (const rel of ['icon', 'apple-touch-icon']) {
-    const link = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`)
-    if (!link) continue
+    // index.html only ships an empty placeholder, so create the tag on demand.
+    let link = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`)
+    if (!link) {
+      link = document.createElement('link')
+      link.rel = rel
+      document.head.appendChild(link)
+    }
     link.href = url
     link.type = faviconMime(url)
   }
@@ -139,7 +146,8 @@ export default function App() {
           <Route element={<S><AdminLayout /></S>}>
             <Route index element={<S><DashboardPage /></S>} />
             <Route path="profile" element={<S><ProfilePage /></S>} />
-            <Route path="experiences" element={<S><ExperiencesPage /></S>} />
+            <Route path="resume" element={<S><ResumePage /></S>} />
+          <Route path="experiences" element={<S><ExperiencesPage /></S>} />
             <Route path="projects" element={<S><ProjectsPage /></S>} />
             <Route path="education" element={<S><EducationPage /></S>} />
             <Route path="certifications" element={<S><CertificationsPage /></S>} />

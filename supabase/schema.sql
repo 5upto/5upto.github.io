@@ -181,6 +181,22 @@ create table public.nav_items (
 );
 
 -- ============================================
+-- RESUMES
+-- ============================================
+create table public.resumes (
+  id uuid primary key default uuid_generate_v4(),
+  label text not null,
+  version int not null default 1,
+  is_live boolean not null default false,
+  file_url text not null,
+  storage_path text not null,
+  file_name text not null,
+  file_size bigint,
+  note text,
+  created_at timestamptz default now()
+);
+
+-- ============================================
 -- LEGACY LOGOS
 -- ============================================
 create table public.legacy_logos (
@@ -217,6 +233,7 @@ alter table public.social_links enable row level security;
 alter table public.blogs enable row level security;
 alter table public.gallery_stories enable row level security;
 alter table public.nav_items enable row level security;
+alter table public.resumes enable row level security;
 alter table public.legacy_logos enable row level security;
 alter table public.site_config enable row level security;
 
@@ -232,6 +249,7 @@ create policy "Public read social_links" on public.social_links for select using
 create policy "Public read blogs" on public.blogs for select using (true);
 create policy "Public read gallery_stories" on public.gallery_stories for select using (true);
 create policy "Public read nav_items" on public.nav_items for select using (true);
+create policy "Public read resumes" on public.resumes for select using (true);
 create policy "Public read legacy_logos" on public.legacy_logos for select using (true);
 create policy "Public read site_config" on public.site_config for select using (true);
 
@@ -247,5 +265,6 @@ create policy "Admin all social_links" on public.social_links for all using (aut
 create policy "Admin all blogs" on public.blogs for all using (auth.uid() is not null);
 create policy "Admin all gallery_stories" on public.gallery_stories for all using (auth.uid() is not null);
 create policy "Admin all nav_items" on public.nav_items for all using (auth.uid() is not null);
+create policy "Admin all resumes" on public.resumes for all using (auth.uid() is not null);
 create policy "Admin all legacy_logos" on public.legacy_logos for all using (auth.uid() is not null);
 create policy "Admin all site_config" on public.site_config for all using (auth.uid() is not null);

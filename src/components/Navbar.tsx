@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { gsap } from 'gsap'
+import { getNavIcon } from '../lib/navIcons'
 
 export type NavItem = {
   label: string
@@ -24,6 +25,7 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const circleRefs = useRef<Array<HTMLSpanElement | null>>([])
+  const iconRefs = useRef<Array<HTMLSpanElement | null>>([])
   const tlRefs = useRef<Array<gsap.core.Timeline | null>>([])
   const activeTweenRefs = useRef<Array<gsap.core.Tween | null>>([])
   const navItemsRef = useRef<HTMLDivElement | null>(null)
@@ -74,6 +76,7 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
 
         const label = pill.querySelector<HTMLElement>('.pill-label')
         const white = pill.querySelector<HTMLElement>('.pill-label-hover')
+        const icon = iconRefs.current[circleRefs.current.indexOf(circle)] ?? null
 
         if (label) gsap.set(label, { y: 0 })
         if (white) gsap.set(white, { y: h + 12, opacity: 0 })
@@ -89,6 +92,14 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
           gsap.set(white, { y: Math.ceil(h + 100), opacity: 0 })
           tl.to(white, { y: 0, opacity: 1, duration: 2, ease: 'power3.easeOut', overwrite: 'auto' }, 0)
         }
+        // Pill mode hides the labels, so the icon itself has to flip colour
+        // against the hover circle instead.
+        if (icon && !label) {
+          // Read the button's resting colour, not the icon's own, so re-running
+          // this mid-tween still resets to the correct active/muted colour.
+          gsap.set(icon, { color: getComputedStyle(pill).color })
+          tl.to(icon, { color: 'var(--bg-primary)', duration: 2, ease: 'power3.easeOut', overwrite: 'auto' }, 0)
+        }
         tlRefs.current[index] = tl
       })
     }
@@ -98,6 +109,12 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
     window.addEventListener('resize', onResize)
     if (document.fonts) document.fonts.ready.then(layout).catch(() => {})
 
+    return () => window.removeEventListener('resize', onResize)
+    // Re-measure when the pill toggles: the buttons change width between
+    // icon+label and icon-only, and the hover circle is sized from their rect.
+  }, [items, scrolled])
+
+  useEffect(() => {
     const menu = mobileMenuRef.current
     if (menu) gsap.set(menu, { visibility: 'hidden', opacity: 0, y: 0 })
 
@@ -112,8 +129,6 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
         }
       })
     }
-
-    return () => window.removeEventListener('resize', onResize)
   }, [items])
 
   useEffect(() => {
@@ -213,6 +228,13 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
 
   const baseStyle: React.CSSProperties = {
     '--nav-h': '42px',
+    // The pill carries a 1px border, so its content box would otherwise be 40px
+    // tall and 42px children (logo/theme/hamburger) would poke out of the caps.
+    '--nav-pill-h': scrolled ? 'calc(var(--nav-h) + 2px)' : 'var(--nav-h)',
+    // 34px inside the 42px content box leaves a 4px inset, which puts every
+    // circle dead-centre with the pill's end cap (both centred at 22px) so the
+    // gap around it is an even 5px ring instead of a lopsided 19-23px blob.
+    '--nav-avatar': scrolled ? '34px' : 'var(--nav-h)',
     '--pill-pad-x': scrolled ? '18px' : '24px',
     '--pill-gap': scrolled ? '3px' : '8px'
   } as React.CSSProperties
@@ -240,14 +262,14 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
         <div
           className="flex items-center"
           style={{
-            height: 'var(--nav-h)',
+            height: 'var(--nav-pill-h)',
             background: scrolled ? 'color-mix(in srgb, var(--bg-card) 80%, transparent)' : 'transparent',
             backdropFilter: scrolled ? 'blur(16px) saturate(180%)' : 'none',
             WebkitBackdropFilter: scrolled ? 'blur(16px) saturate(180%)' : 'none',
             border: scrolled ? '1px solid color-mix(in srgb, var(--border) 50%, transparent)' : '1px solid transparent',
             boxShadow: scrolled ? '0 4px 30px rgba(0,0,0,0.06)' : 'none',
             borderRadius: scrolled ? '9999px' : 0,
-            padding: scrolled ? '0 2px' : '0',
+            padding: scrolled ? '0 4px' : '0',
             gap: 10,
             width: scrolled ? 'auto' : '100%',
             justifyContent: scrolled ? 'normal' : 'space-between',
@@ -259,8 +281,8 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
           <button
             onClick={onLogoClick}
             aria-label="Home"
-            className="rounded-full p-[3px] inline-flex items-center justify-center overflow-hidden shrink-0 bg-gradient-to-br from-primary-500 to-purple-500"
-            style={{ width: 'var(--nav-h)', height: 'var(--nav-h)' }}
+            className="rounded-full inline-flex items-center justify-center overflow-hidden shrink-0"
+            style={{ width: 'var(--nav-avatar)', height: 'var(--nav-avatar)' }}
           >
             {logoUrl && <img src={logoUrl} alt="logo" className="w-full h-full object-cover block rounded-full" />}
           </button>
@@ -273,14 +295,17 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
             <ul role="menubar" className="list-none flex items-stretch m-0 p-[3px] h-full" style={{ gap: 'var(--pill-gap)', transition: 'gap 0.3s ease' }}>
               {items.map((item, i) => {
                 const active = isActive(item.href)
+                const Icon = getNavIcon(item.label, item.href)
                 return (
                   <li key={item.href} role="none" className="flex h-full">
                     <button
                       role="menuitem"
                       onClick={() => handleNavClick(item.href)}
                       className={pillBtnClasses}
+                      aria-label={scrolled ? item.label : undefined}
+                      title={scrolled ? item.label : undefined}
                       style={{
-            background: 'transparent',
+                        background: 'transparent',
                         color: active ? 'var(--text-primary)' : 'var(--text-muted)',
                         paddingLeft: 'var(--pill-pad-x)',
                         paddingRight: 'var(--pill-pad-x)',
@@ -295,18 +320,27 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
                         aria-hidden="true"
                         ref={el => { circleRefs.current[i] = el }}
                       />
-                      <span className="label-stack relative inline-block leading-none z-[2]">
-                        <span className="pill-label relative z-[2] inline-block leading-none" style={{ willChange: 'transform' }}>
-                          {item.label}
-                        </span>
-                        <span
-                          className="pill-label-hover absolute left-0 top-0 z-[3] inline-block"
-                          style={{ color: 'var(--bg-primary)', willChange: 'transform, opacity' }}
-                          aria-hidden="true"
-                        >
-                          {item.label}
-                        </span>
+                      <span
+                        ref={el => { iconRefs.current[i] = el }}
+                        className="relative z-[2] inline-flex items-center shrink-0"
+                        aria-hidden="true"
+                      >
+                        <Icon size={18} />
                       </span>
+                      {!scrolled && (
+                        <span className="label-stack relative inline-block leading-none z-[2] ml-2">
+                          <span className="pill-label relative z-[2] inline-block leading-none" style={{ willChange: 'transform' }}>
+                            {item.label}
+                          </span>
+                          <span
+                            className="pill-label-hover absolute left-0 top-0 z-[3] inline-block"
+                            style={{ color: 'var(--bg-primary)', willChange: 'transform, opacity' }}
+                            aria-hidden="true"
+                          >
+                            {item.label}
+                          </span>
+                        </span>
+                      )}
                     </button>
                   </li>
                 )
@@ -316,7 +350,7 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
 
           <button
             className="rounded-full flex items-center justify-center shrink-0 transition-colors"
-            style={{ width: 'var(--nav-h)', height: 'var(--nav-h)' }}
+            style={{ width: 'var(--nav-avatar)', height: 'var(--nav-avatar)' }}
             onClick={() => setDark(d => !d)}
             aria-label="Toggle theme"
           >
@@ -333,7 +367,7 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
             aria-label="Toggle menu"
             aria-expanded={mobileOpen}
             className="md:hidden rounded-full border-0 flex flex-col items-center justify-center gap-[5px] cursor-pointer p-0 shrink-0"
-            style={{ width: 'var(--nav-h)', height: 'var(--nav-h)' }}
+            style={{ width: 'var(--nav-avatar)', height: 'var(--nav-avatar)' }}
           >
             <span className="hamburger-line block w-4 h-[2px] rounded-full" style={{ background: 'var(--text-muted)' }} />
             <span className="hamburger-line block w-4 h-[2px] rounded-full" style={{ background: 'var(--text-muted)' }} />
@@ -354,19 +388,23 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
         }}
       >
         <ul className="list-none m-0 p-[3px] flex flex-col gap-[3px]">
-          {items.map(item => (
-            <li key={item.href}>
-              <button
-                onClick={() => handleNavClick(item.href)}
-                className="w-full text-left py-3 px-4 text-sm font-medium rounded-[50px] transition-all duration-200"
-                style={{ color: isActive(item.href) ? 'var(--accent)' : 'var(--text-muted)' }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-secondary)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-              >
-                {item.label}
-              </button>
-            </li>
-          ))}
+          {items.map(item => {
+            const Icon = getNavIcon(item.label, item.href)
+            return (
+              <li key={item.href}>
+                <button
+                  onClick={() => handleNavClick(item.href)}
+                  className="w-full text-left py-3 px-4 text-sm font-medium rounded-[50px] transition-all duration-200 inline-flex items-center gap-3"
+                  style={{ color: isActive(item.href) ? 'var(--accent)' : 'var(--text-muted)' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-secondary)' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                >
+                  <Icon size={18} />
+                  {item.label}
+                </button>
+              </li>
+            )
+          })}
         </ul>
       </div>
     </nav>

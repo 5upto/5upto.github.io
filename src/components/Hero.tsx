@@ -4,6 +4,7 @@ import Lanyard from './lanyard/Lanyard'
 import ParticleBackground from './ParticleBackground'
 import { useProfile } from '../hooks/useProfile'
 import { useExperiences } from '../hooks/useExperiences'
+import { useLiveResume } from '../hooks/useResumes'
 
 function useIdCardImages(profile: any, currentExp: any) {
   const [images, setImages] = useState<{ front: string | null; back: string | null; band: string | null }>({ front: null, back: null, band: null })
@@ -327,6 +328,7 @@ export default function Hero() {
   const textRef = useRef<HTMLDivElement>(null)
   const { data: profile } = useProfile()
   const { data: experiences } = useExperiences()
+  const { data: resume } = useLiveResume()
   const currentExp = experiences?.[0] ?? null
   const jobTitle = currentExp?.role || profile?.title || ''
   const { front, back, band } = useIdCardImages(profile, currentExp)
@@ -382,12 +384,16 @@ export default function Hero() {
             >
               View My Work
             </button>
-            <button
-              onClick={() => scrollTo('contact')}
-              className="px-8 py-3 border border-[var(--border)] hover:border-primary-500 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-full font-medium transition-all duration-300"
-            >
-              Get In Touch
-            </button>
+            {resume && (
+              <a
+                href={resume.file_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-8 py-3 border border-[var(--border)] hover:border-primary-500 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-full font-medium transition-all duration-300"
+              >
+                View Resume
+              </a>
+            )}
           </div>
         </div>
       </div>
@@ -402,12 +408,16 @@ export default function Hero() {
         >
           View My Work
         </button>
-        <button
-          onClick={() => scrollTo('contact')}
-          className="px-8 py-3 border border-[var(--border)] hover:border-primary-500 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-full font-medium transition-all duration-300"
-        >
-          Get In Touch
-        </button>
+        {resume && (
+          <a
+            href={resume.file_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center px-8 py-3 border border-[var(--border)] hover:border-primary-500 text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-full font-medium transition-all duration-300"
+          >
+            View Resume
+          </a>
+        )}
       </div>
 
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce z-10 hidden landscape:block md:block">
