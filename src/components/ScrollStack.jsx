@@ -7,7 +7,7 @@ let lenisCount = 0;
 let sharedRafId = null;
 
 export const ScrollStackItem = ({ children, itemClassName = '', ...props }) => (
-  <div className={`scroll-stack-card ${itemClassName}`.trim()} {...props}>{children}</div>
+  <div role="button" tabIndex={0} className={`scroll-stack-card ${itemClassName}`.trim()} {...props}>{children}</div>
 );
 
 const ScrollStack = ({
@@ -31,6 +31,7 @@ const ScrollStack = ({
   const lastTransformsRef = useRef(new Map());
   const positionsRef = useRef([]);
   const endTopRef = useRef(0);
+  const lastActiveIndexRef = useRef(-1);
 
   const calculateProgress = useCallback((scrollTop, start, end) => {
     if (scrollTop < start) return 0;
@@ -89,6 +90,7 @@ const ScrollStack = ({
     const endPx = parsePercentage(scaleEndPosition, containerHeight);
     const pinEnd = endTopRef.current - containerHeight / 2;
 
+    let newActive = -1;
     cards.forEach((card, i) => {
       let cardTop = positionsRef.current[i];
       if (cardTop == null) {
@@ -101,6 +103,7 @@ const ScrollStack = ({
 
       const triggerStart = cardTop - stackPx - itemStackDistance * i;
       const triggerEnd = cardTop - endPx;
+      if (scrollTop >= triggerStart) newActive = i;
 
       let translateY;
       let scale;
@@ -146,6 +149,11 @@ const ScrollStack = ({
         lastTransformsRef.current.set(i, { y: roundedY, s: roundedScale, rx: roundedRotX, ry: roundedRotY, rz: roundedRotZ, o: roundedOpacity });
       }
     });
+    if (newActive !== -1 && newActive !== lastActiveIndexRef.current) {
+      lastActiveIndexRef.current = newActive;
+      const playFn = window.__portfolioPlaySound;
+      if (typeof playFn === 'function') playFn(480 + newActive * 90, 0.05);
+    }
   }, [
     itemScale,
     itemStackDistance,
@@ -224,6 +232,9 @@ const ScrollStack = ({
       }
       lenisRef.current = sharedLenis;
       sharedLenis.on('scroll', handleScroll);
+      // Also react to native scroll events (scroll restoration, resize, etc.)
+      // so transforms never get stuck at a stale position.
+      window.addEventListener('scroll', handleScroll, { passive: true });
     } else {
       const lenis = new Lenis({
         wrapper: scroller,
@@ -252,10 +263,16 @@ const ScrollStack = ({
     }
 
     updateCardTransforms();
+    // Catch late layout/scroll-restoration shifts that happen after mount.
+    requestAnimationFrame(() => {
+      recompute();
+      requestAnimationFrame(() => recompute());
+    });
 
     return () => {
       if (useWindowScroll) {
         sharedLenis?.off('scroll', handleScroll);
+        window.removeEventListener('scroll', handleScroll);
         lenisCount--;
         if (lenisCount <= 0 && sharedLenis) {
           cancelAnimationFrame(sharedRafId);

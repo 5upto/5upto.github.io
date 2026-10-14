@@ -3,6 +3,7 @@ import gsap from 'gsap'
 import Lanyard from './lanyard/Lanyard'
 import ParticleBackground from './ParticleBackground'
 import { useProfile } from '../hooks/useProfile'
+import { useSound } from '../hooks/useSound'
 import { useExperiences } from '../hooks/useExperiences'
 import { useLiveResume } from '../hooks/useResumes'
 
@@ -330,6 +331,7 @@ export default function Hero() {
   const { data: experiences } = useExperiences()
   const { data: resume } = useLiveResume()
   const currentExp = experiences?.[0] ?? null
+  const { play } = useSound()
   const jobTitle = currentExp?.role || profile?.title || ''
   const { front, back, band } = useIdCardImages(profile, currentExp)
 
@@ -360,7 +362,7 @@ export default function Hero() {
           <p className="text-primary-400 font-display text-base landscape:text-lg md:text-lg mb-4 tracking-[0.2em] uppercase opacity-80">
             {jobTitle}
           </p>
-          <h1 className="text-5xl landscape:text-6xl md:text-6xl font-display font-bold mb-4 leading-tight">
+          <h1 onMouseEnter={() => { play(660, 0.06); setTimeout(() => play(880, 0.05), 80) }} className="text-5xl landscape:text-6xl md:text-6xl font-display font-bold mb-4 leading-tight cursor-default">
             <NameReveal
               en={[
                 "I'm",

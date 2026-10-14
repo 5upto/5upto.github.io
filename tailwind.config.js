@@ -14,7 +14,7 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Space Grotesk', 'system-ui', 'sans-serif'],
+        display: ['Ubuntu', 'system-ui', 'sans-serif'],
         certificate: ['"Cloister Black"', 'serif'],
         'certificate-body': ['"Cloister Black"', 'serif'],
       },
