@@ -139,8 +139,7 @@ export default function Contact() {
       </div>
 
       <div className="mt-16 text-center text-[var(--text-muted)] text-sm">
-        <p>{profile?.location}</p>
-        <p className="mt-2">&copy; {new Date().getFullYear()} {profile?.name}.</p>
+        <p>&copy; {new Date().getFullYear()}</p>
       </div>
     </section>
   )
