@@ -10,7 +10,7 @@ export default function ParticleBackground() {
       window.particlesJS!('particles-js', {
         particles: {
           number: { value: isMobile ? 80 : 110, density: { enable: true, value_area: isMobile ? 800 : 700 } },
-          color: { value: isDark ? '#a5b4fc' : '#312e81' },
+          color: { value: isDark ? '#c7c7c7' : '#312e81' },
           shape: { type: 'circle' },
           opacity: {
             value: 0.65,
@@ -25,7 +25,7 @@ export default function ParticleBackground() {
           line_linked: {
             enable: true,
             distance: 210,
-            color: isDark ? '#818cf8' : '#4338ca',
+            color: isDark ? '#737373' : '#4338ca',
             opacity: 0.4,
             width: 1,
           },
@@ -58,8 +58,8 @@ export default function ParticleBackground() {
         const pJS = window.pJSDom?.[0]?.pJS
         if (!pJS) return
         const d = document.documentElement.classList.contains('dark')
-        pJS.particles.color.value = d ? '#a5b4fc' : '#312e81'
-        pJS.particles.line_linked.color = d ? '#818cf8' : '#4338ca'
+        pJS.particles.color.value = d ? '#c7c7c7' : '#312e81'
+        pJS.particles.line_linked.color = d ? '#737373' : '#4338ca'
         pJS.particles.array.forEach((p: any) => { p.color.value = pJS.particles.color.value })
       })
       observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })

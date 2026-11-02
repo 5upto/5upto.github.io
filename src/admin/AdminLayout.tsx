@@ -24,6 +24,7 @@ import AdaptiveIcon from '../components/AdaptiveIcon'
 const sidebarItems: { label: string; href: string; icon: NavIcon }[] = [
   { label: 'Dashboard', href: '/admin', icon: sectionIcons.home },
   { label: 'Profile', href: '/admin/profile', icon: sectionIcons.profile },
+  { label: 'Lanyard Card', href: '/admin/lanyard', icon: sectionIcons.lanyard },
   { label: 'Resume', href: '/admin/resume', icon: sectionIcons.resume },
   { label: 'Experiences', href: '/admin/experiences', icon: sectionIcons.experience },
   { label: 'Projects', href: '/admin/projects', icon: sectionIcons.projects },
@@ -227,7 +228,7 @@ export default function AdminLayout() {
       </aside>
 
       {/* Mobile sidebar */}
-      <aside className={`lg:hidden fixed top-0 left-0 w-72 h-full z-50 shadow-2xl border-r border-[var(--border)] transition-transform duration-300 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{ background: dark ? 'rgba(15,23,42,0.95)' : 'rgba(255,255,255,0.98)', backdropFilter: 'blur(20px)' }}>
+      <aside className={`lg:hidden fixed top-0 left-0 w-72 h-full z-50 shadow-2xl border-r border-[var(--border)] transition-transform duration-300 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`} style={{ background: dark ? 'rgba(18,18,18,0.96)' : 'rgba(255,255,255,0.98)', backdropFilter: 'blur(20px)' }}>
         <SidebarContent collapsed={false} onNavigate={(href) => navigate(href)} currentPath={location.pathname} userEmail={user?.email} onSignOut={handleSignOut} onToggleCollapse={() => setMobileOpen(false)} dark={dark} onToggleTheme={() => setDark(!dark)} showThemeToggle={false} avatarUrl={profile?.avatar_url} />
       </aside>
 

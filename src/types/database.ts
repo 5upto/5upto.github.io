@@ -175,3 +175,22 @@ export interface SiteConfig {
   value: Record<string, unknown>
   updated_at: string
 }
+
+export interface LanyardSettings {
+  /** Card face colour in light mode. */
+  cardBg: string
+  /** Card face colour in dark mode. */
+  cardBgDark: string
+  /** Ribbon / strap colour in light mode. */
+  ribbonColor: string
+  /** Ribbon / strap colour in dark mode. */
+  ribbonColorDark: string
+  /** Avatar zoom, 100 = fill the photo frame. */
+  photoScale: number
+  /** Avatar horizontal shift, as a percentage of the photo frame width. */
+  photoOffsetX: number
+  /** Avatar vertical shift, as a percentage of the photo frame height. */
+  photoOffsetY: number
+  /** Font family used for the name, role and ribbon text. */
+  fontFamily: string
+}

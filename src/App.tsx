@@ -26,6 +26,7 @@ const LoginPage = lazy(() => import('./admin/pages/LoginPage'))
 const ProtectedRoute = lazy(() => import('./admin/ProtectedRoute'))
 const DashboardPage = lazy(() => import('./admin/pages/DashboardPage'))
 const ProfilePage = lazy(() => import('./admin/pages/ProfilePage'))
+const LanyardPage = lazy(() => import('./admin/pages/LanyardPage'))
 const ResumePage = lazy(() => import('./admin/pages/ResumePage'))
 const ExperiencesPage = lazy(() => import('./admin/pages/ExperiencesPage'))
 const ProjectsPage = lazy(() => import('./admin/pages/ProjectsPage'))
@@ -141,11 +142,13 @@ export default function App() {
         <Route path="/gallery/:slug" element={<GalleryStory />} />
         <Route path="/blog" element={<BlogsPage />} />
         <Route path="/blog/:slug" element={<BlogStory />} />
+        <Route path="/dev/lanyard" element={<S><LanyardPage /></S>} />
         <Route path="/admin/login" element={<S><LoginPage /></S>} />
         <Route path="/admin" element={<S><ProtectedRoute /></S>}>
           <Route element={<S><AdminLayout /></S>}>
             <Route index element={<S><DashboardPage /></S>} />
             <Route path="profile" element={<S><ProfilePage /></S>} />
+            <Route path="lanyard" element={<S><LanyardPage /></S>} />
             <Route path="resume" element={<S><ResumePage /></S>} />
           <Route path="experiences" element={<S><ExperiencesPage /></S>} />
             <Route path="projects" element={<S><ProjectsPage /></S>} />

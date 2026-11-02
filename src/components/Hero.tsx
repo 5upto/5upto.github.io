@@ -6,8 +6,11 @@ import { useProfile } from '../hooks/useProfile'
 import { useSound } from '../hooks/useSound'
 import { useExperiences } from '../hooks/useExperiences'
 import { useLiveResume } from '../hooks/useResumes'
+import { useLanyardSettings } from '../hooks/useLanyardSettings'
+import { renderCardBack, renderCardFront, renderRibbon } from '../lib/lanyardCard'
+import type { LanyardSettings } from '../types/database'
 
-function useIdCardImages(profile: any, currentExp: any, ready = true) {
+function useIdCardImages(profile: any, currentExp: any, settings: LanyardSettings, ready = true) {
   const [images, setImages] = useState<{ front: string | null; back: string | null; band: string | null }>({ front: null, back: null, band: null })
   const [themeTick, setThemeTick] = useState(0)
 
@@ -22,160 +25,35 @@ function useIdCardImages(profile: any, currentExp: any, ready = true) {
     if (!profile || !ready) return
     let cancelled = false
 
-    const loadImage = (src: string): Promise<HTMLImageElement> =>
-      new Promise((resolve, reject) => {
-        const img = new Image()
-        img.crossOrigin = 'anonymous'
-        img.onload = () => resolve(img)
-        img.onerror = () => reject(new Error(`Failed to load: ${src}`))
-        img.src = src
-      })
+    renderCardFront({
+      name: profile.name || '',
+      role: currentExp?.role || profile.title || '',
+      avatarUrl: profile.avatar_url,
+      isDark: document.documentElement.classList.contains('dark'),
+      settings,
+    })
+      .then((front) => { if (!cancelled) setImages(prev => ({ ...prev, front })) })
+      .catch(() => { /* keep the previous card */ })
 
-    const generate = async () => {
-      const W = 800, H = 1100
-      const canvas = document.createElement('canvas')
-      canvas.width = W
-      canvas.height = H
-      const ctx = canvas.getContext('2d')!
-      const isDark = document.documentElement.classList.contains('dark')
-
-      const bg = isDark ? '#1e293b' : '#f8fafc'
-      const textColor = isDark ? '#ffffff' : '#1a1a2e'
-      const accentColor = isDark ? '#818cf8' : '#4338ca'
-      const INNER_PAD = 70
-      const BOTTOM_ZONE = 200
-
-      ctx.fillStyle = bg
-      ctx.beginPath()
-      ctx.roundRect(0, 0, W, H, 40)
-      ctx.fill()
-
-      const imgX = INNER_PAD
-      const imgY = INNER_PAD
-      const imgW = W - INNER_PAD * 2
-      const imgH = H - INNER_PAD - BOTTOM_ZONE
-
-      ctx.save()
-      ctx.beginPath()
-      ctx.roundRect(imgX, imgY, imgW, imgH, 20)
-      ctx.clip()
-      try {
-        const avatarImg = await loadImage(profile.avatar_url)
-        const imgAspect = avatarImg.naturalWidth / avatarImg.naturalHeight
-        let dw: number, dh: number, dx: number, dy: number
-        if (imgAspect > imgW / imgH) {
-          dh = imgH; dw = dh * imgAspect
-          dx = imgX + (imgW - dw) / 2; dy = imgY
-        } else {
-          dw = imgW; dh = dw / imgAspect
-          dx = imgX; dy = imgY + (imgH - dh) / 2
-        }
-        ctx.drawImage(avatarImg, dx, dy, dw, dh)
-      } catch {
-        ctx.fillStyle = accentColor
-        ctx.fillRect(imgX, imgY, imgW, imgH)
-        ctx.fillStyle = '#fff'
-        ctx.font = 'bold 120px Inter, system-ui, sans-serif'
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'middle'
-        ctx.fillText(profile.name?.charAt(0) || '?', W / 2, imgY + imgH / 2)
-        ctx.textBaseline = 'alphabetic'
-      }
-      ctx.restore()
-
-      const textY = H - BOTTOM_ZONE + 80
-      ctx.textAlign = 'center'
-      ctx.fillStyle = textColor
-      ctx.font = 'bold 44px Inter, system-ui, sans-serif'
-      ctx.fillText(profile.name || '', W / 2, textY)
-
-      ctx.fillStyle = accentColor
-      ctx.font = '600 26px Inter, system-ui, sans-serif'
-      ctx.fillText(currentExp?.role || profile.title || '', W / 2, textY + 50)
-
-      if (cancelled) return
-      setImages(prev => ({ ...prev, front: canvas.toDataURL('image/png') }))
-    }
-
-    generate()
     return () => { cancelled = true }
-  }, [profile, currentExp, themeTick, ready])
+  }, [profile, currentExp?.role, settings, themeTick, ready])
 
   useEffect(() => {
-    if (!currentExp?.logo || !ready) return
+    if (!ready) return
     let cancelled = false
-    const loadImage = (src: string): Promise<HTMLImageElement> =>
-      new Promise((resolve, reject) => {
-        const img = new Image()
-        img.crossOrigin = 'anonymous'
-        img.onload = () => resolve(img)
-        img.onerror = () => reject(img)
-        img.src = src
+    const isDark = document.documentElement.classList.contains('dark')
+
+    Promise.all([
+      renderCardBack({ logoUrl: currentExp?.logo, isDark, settings }),
+      renderRibbon({ company: currentExp?.company || '', logoUrl: currentExp?.logo, isDark, settings }),
+    ])
+      .then(([back, band]) => {
+        if (!cancelled) setImages(prev => ({ ...prev, back, band }))
       })
+      .catch(() => { /* keep the previous card */ })
 
-    const generateBack = async () => {
-      const W = 800, H = 1100
-      try {
-        const logoImg = await loadImage(currentExp.logo)
-        const canvas = document.createElement('canvas')
-        canvas.width = W
-        canvas.height = H
-        const ctx = canvas.getContext('2d')!
-        const isDark = document.documentElement.classList.contains('dark')
-
-        ctx.fillStyle = isDark ? '#1e293b' : '#f8fafc'
-        ctx.beginPath()
-        ctx.roundRect(0, 0, W, H, 40)
-        ctx.fill()
-
-        const logoSize = Math.min(W, H) * 0.4
-        const aspect = logoImg.naturalWidth / logoImg.naturalHeight
-        let lw: number, lh: number
-        if (aspect > 1) { lw = logoSize; lh = logoSize / aspect }
-        else { lh = logoSize; lw = logoSize * aspect }
-        ctx.save()
-        ctx.beginPath()
-        ctx.roundRect((W - lw) / 2, (H - lh) / 2, lw, lh, 24)
-        ctx.clip()
-        ctx.drawImage(logoImg, (W - lw) / 2, (H - lh) / 2, lw, lh)
-        ctx.restore()
-
-        if (cancelled) return
-        setImages(prev => ({ ...prev, back: canvas.toDataURL('image/png') }))
-
-        const bandCanvas = document.createElement('canvas')
-        bandCanvas.width = 512
-        bandCanvas.height = 128
-        const bCtx = bandCanvas.getContext('2d')!
-        const isDarkBand = document.documentElement.classList.contains('dark')
-        bCtx.fillStyle = isDarkBand ? '#1e1b4b' : '#4338ca'
-        bCtx.fillRect(0, 0, 512, 128)
-
-        const logoH = 50
-        const logoW = aspect > 1 ? logoH * aspect : logoH
-        const logoY = (128 - logoH) / 2
-
-        const companyName = currentExp?.company || ''
-        bCtx.fillStyle = '#ffffff'
-        bCtx.font = 'bold 28px Inter, system-ui, sans-serif'
-        bCtx.textAlign = 'left'
-        bCtx.textBaseline = 'middle'
-
-        const textW = bCtx.measureText(companyName).width
-        const gap = 20
-        const totalW = logoW + gap + textW
-        const startX = (512 - totalW) / 2
-        bCtx.drawImage(logoImg, startX, logoY, logoW, logoH)
-        bCtx.fillText(companyName, startX + logoW + gap, 64)
-
-        if (cancelled) return
-        setImages(prev => ({ ...prev, band: bandCanvas.toDataURL('image/png') }))
-      } catch { /* logo not available */ }
-    }
-
-    generateBack()
     return () => { cancelled = true }
-  }, [currentExp?.logo, themeTick, ready])
+  }, [currentExp?.logo, currentExp?.company, settings, themeTick, ready])
 
   return images
 }
@@ -336,11 +214,13 @@ export default function Hero() {
   const textRef = useRef<HTMLDivElement>(null)
   const { data: profile } = useProfile()
   const { data: experiences, isFetched: experiencesFetched } = useExperiences()
+  const { data: lanyardSettings, isFetched: lanyardSettingsFetched } = useLanyardSettings()
   const { data: resume } = useLiveResume()
   const currentExp = experiences?.[0] ?? null
   const { play } = useSound()
   const jobTitle = currentExp?.role || profile?.title || ''
-  const { front, back, band } = useIdCardImages(profile, currentExp, experiencesFetched)
+  const lanyardReady = experiencesFetched && lanyardSettingsFetched
+  const { front, back, band } = useIdCardImages(profile, currentExp, lanyardSettings, lanyardReady)
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })
