@@ -137,8 +137,8 @@ export default function DashboardPage() {
         <div className="space-y-3">
           {[
             { label: 'Education', count: stats?.education ?? 0, href: '/admin/education', max: 5, icon: icons.education },
-            { label: 'Certifications', count: stats?.certifications ?? 0, href: '/admin/education', max: 10, icon: icons.certification },
-            { label: 'Publications', count: stats?.publications ?? 0, href: '/admin/education', max: 5, icon: icons.publication },
+            { label: 'Certifications', count: stats?.certifications ?? 0, href: '/admin/certifications', max: 10, icon: icons.certification },
+            { label: 'Publications', count: stats?.publications ?? 0, href: '/admin/publications', max: 5, icon: icons.publication },
             { label: 'Social Links', count: stats?.socialLinks ?? 0, href: '/admin/social-links', max: 10, icon: icons.social },
             { label: 'Gallery Stories', count: stats?.gallery ?? 0, href: '/admin/gallery', max: 10, icon: icons.gallery },
             { label: 'Nav Items', count: stats?.navItems ?? 0, href: '/admin/nav-items', max: 10, icon: icons.nav },

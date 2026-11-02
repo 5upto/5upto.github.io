@@ -7,7 +7,7 @@ import { useSound } from '../hooks/useSound'
 import { useExperiences } from '../hooks/useExperiences'
 import { useLiveResume } from '../hooks/useResumes'
 
-function useIdCardImages(profile: any, currentExp: any) {
+function useIdCardImages(profile: any, currentExp: any, ready = true) {
   const [images, setImages] = useState<{ front: string | null; back: string | null; band: string | null }>({ front: null, back: null, band: null })
   const [themeTick, setThemeTick] = useState(0)
 
@@ -19,7 +19,8 @@ function useIdCardImages(profile: any, currentExp: any) {
   }, [])
 
   useEffect(() => {
-    if (!profile) return
+    if (!profile || !ready) return
+    let cancelled = false
 
     const loadImage = (src: string): Promise<HTMLImageElement> =>
       new Promise((resolve, reject) => {
@@ -92,14 +93,17 @@ function useIdCardImages(profile: any, currentExp: any) {
       ctx.font = '600 26px Inter, system-ui, sans-serif'
       ctx.fillText(currentExp?.role || profile.title || '', W / 2, textY + 50)
 
+      if (cancelled) return
       setImages(prev => ({ ...prev, front: canvas.toDataURL('image/png') }))
     }
 
     generate()
-  }, [profile, currentExp, themeTick])
+    return () => { cancelled = true }
+  }, [profile, currentExp, themeTick, ready])
 
   useEffect(() => {
-    if (!currentExp?.logo) return
+    if (!currentExp?.logo || !ready) return
+    let cancelled = false
     const loadImage = (src: string): Promise<HTMLImageElement> =>
       new Promise((resolve, reject) => {
         const img = new Image()
@@ -136,6 +140,7 @@ function useIdCardImages(profile: any, currentExp: any) {
         ctx.drawImage(logoImg, (W - lw) / 2, (H - lh) / 2, lw, lh)
         ctx.restore()
 
+        if (cancelled) return
         setImages(prev => ({ ...prev, back: canvas.toDataURL('image/png') }))
 
         const bandCanvas = document.createElement('canvas')
@@ -163,12 +168,14 @@ function useIdCardImages(profile: any, currentExp: any) {
         bCtx.drawImage(logoImg, startX, logoY, logoW, logoH)
         bCtx.fillText(companyName, startX + logoW + gap, 64)
 
+        if (cancelled) return
         setImages(prev => ({ ...prev, band: bandCanvas.toDataURL('image/png') }))
       } catch { /* logo not available */ }
     }
 
     generateBack()
-  }, [currentExp?.logo, themeTick])
+    return () => { cancelled = true }
+  }, [currentExp?.logo, themeTick, ready])
 
   return images
 }
@@ -328,12 +335,12 @@ export default function Hero() {
   const containerRef = useRef<HTMLElement>(null)
   const textRef = useRef<HTMLDivElement>(null)
   const { data: profile } = useProfile()
-  const { data: experiences } = useExperiences()
+  const { data: experiences, isFetched: experiencesFetched } = useExperiences()
   const { data: resume } = useLiveResume()
   const currentExp = experiences?.[0] ?? null
   const { play } = useSound()
   const jobTitle = currentExp?.role || profile?.title || ''
-  const { front, back, band } = useIdCardImages(profile, currentExp)
+  const { front, back, band } = useIdCardImages(profile, currentExp, experiencesFetched)
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } })

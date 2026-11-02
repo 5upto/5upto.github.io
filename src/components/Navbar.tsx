@@ -3,7 +3,17 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { getNavIcon } from '../lib/navIcons'
 import { useSound } from '../hooks/useSound'
-import { MdVolumeUp, MdVolumeOff, MdLightMode, MdDarkMode } from 'react-icons/md'
+import AdaptiveIcon from './AdaptiveIcon'
+import {
+  MdVolumeUp,
+  MdOutlineVolumeUp,
+  MdVolumeOff,
+  MdOutlineVolumeOff,
+  MdLightMode,
+  MdOutlineLightMode,
+  MdDarkMode,
+  MdOutlineDarkMode,
+} from 'react-icons/md'
 
 export type NavItem = {
   label: string
@@ -248,7 +258,7 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
   }
 
   const pillBtnClasses =
-    'relative overflow-hidden inline-flex items-center justify-center h-full no-underline rounded-full box-border font-semibold text-sm leading-none tracking-[0.2px] whitespace-nowrap cursor-pointer px-0'
+    'group relative overflow-hidden inline-flex items-center justify-center h-full no-underline rounded-full box-border font-semibold text-sm leading-none tracking-[0.2px] whitespace-nowrap cursor-pointer px-0'
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-[999]" style={{
@@ -328,7 +338,7 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
                         className="relative z-[2] inline-flex items-center shrink-0"
                         aria-hidden="true"
                       >
-                        <Icon size={18} />
+                        <AdaptiveIcon outline={Icon.outline} filled={Icon.filled} active={active} size={18} />
                       </span>
                       {!scrolled && (
                         <span className="label-stack relative inline-block leading-none z-[2] ml-2">
@@ -352,7 +362,7 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
           </div>
 
           <button
-            className="rounded-full flex items-center justify-center shrink-0 transition-colors"
+            className="group rounded-full flex items-center justify-center shrink-0 transition-colors"
             style={{ width: 'var(--nav-avatar)', height: 'var(--nav-avatar)' }}
             onClick={toggleSound}
             aria-label={soundOn ? 'Mute sound' : 'Unmute sound'}
@@ -360,22 +370,22 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
             title={soundOn ? 'Sound on' : 'Sound off'}
           >
             {soundOn ? (
-              <MdVolumeUp size={18} className="text-[var(--text-muted)]" />
+              <AdaptiveIcon outline={MdOutlineVolumeUp} filled={MdVolumeUp} size={18} className="text-[var(--text-muted)]" />
             ) : (
-              <MdVolumeOff size={18} className="text-[var(--text-muted)]" />
+              <AdaptiveIcon outline={MdOutlineVolumeOff} filled={MdVolumeOff} size={18} className="text-[var(--text-muted)]" />
             )}
           </button>
 
           <button
-            className="rounded-full flex items-center justify-center shrink-0 transition-colors"
+            className="group rounded-full flex items-center justify-center shrink-0 transition-colors"
             style={{ width: 'var(--nav-avatar)', height: 'var(--nav-avatar)' }}
             onClick={() => setDark(d => !d)}
             aria-label="Toggle theme"
           >
             {dark ? (
-              <MdLightMode size={18} className="text-[var(--text-muted)]" />
+              <AdaptiveIcon outline={MdOutlineLightMode} filled={MdLightMode} size={18} className="text-[var(--text-muted)]" />
             ) : (
-              <MdDarkMode size={18} className="text-[var(--text-muted)]" />
+              <AdaptiveIcon outline={MdOutlineDarkMode} filled={MdDarkMode} size={18} className="text-[var(--text-muted)]" />
             )}
           </button>
 
@@ -412,12 +422,12 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
               <li key={item.href}>
                 <button
                   onClick={() => handleNavClick(item.href)}
-                  className="w-full text-left py-3 px-4 text-sm font-medium rounded-[50px] transition-all duration-200 inline-flex items-center gap-3"
+                  className="group w-full text-left py-3 px-4 text-sm font-medium rounded-[50px] transition-all duration-200 inline-flex items-center gap-3"
                   style={{ color: isActive(item.href) ? 'var(--accent)' : 'var(--text-muted)' }}
                   onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-secondary)' }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
                 >
-                  <Icon size={18} />
+                  <AdaptiveIcon outline={Icon.outline} filled={Icon.filled} active={isActive(item.href)} size={18} />
                   {item.label}
                 </button>
               </li>

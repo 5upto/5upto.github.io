@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 
 const STORAGE_KEY = 'cot_sound' // keep parity with the reference site's storage key
 
@@ -11,6 +12,9 @@ type SoundContextValue = {
 const SoundContext = createContext<SoundContextValue | null>(null)
 
 export function SoundProvider({ children }: { children: React.ReactNode }) {
+  const location = useLocation()
+  // The portfolio's interaction sounds should not follow you into the admin UI.
+  const isAdminRoute = location.pathname.startsWith('/admin')
   const [enabled, setEnabled] = useState<boolean>(() => {
     if (typeof window === 'undefined') return true
     try {
@@ -32,6 +36,8 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
   const tickTimerRef = useRef<number | null>(null)
   const enabledRef = useRef(enabled)
   enabledRef.current = enabled
+  const isAdminRouteRef = useRef(isAdminRoute)
+  isAdminRouteRef.current = isAdminRoute
 
   const isFinePointer =
     typeof window !== 'undefined' &&
@@ -124,7 +130,7 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const play = useCallback((freq = 720, dur = 0.07) => {
-    if (!enabledRef.current) return
+    if (!enabledRef.current || isAdminRouteRef.current) return
     if (!ctxRef.current) ensureAudio()
     const ctx = ctxRef.current
     const master = masterGainRef.current
@@ -271,6 +277,7 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const unlock = useCallback(async () => {
+    if (isAdminRouteRef.current) return
     ensureAudio()
     const ctx = ctxRef.current
     if (!ctx) return
@@ -298,13 +305,14 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
       /* ignore */
     }
     enabledRef.current = enabled
-    if (enabled && unlockedRef.current) startDrone()
-    if (!enabled) stopDrone()
+    if (enabled && !isAdminRoute && unlockedRef.current) startDrone()
+    if (!enabled || isAdminRoute) stopDrone()
     // No periodic ticks; sound is driven by user interactions instead.
-  }, [enabled, startDrone, stopDrone, playAmbientTick])
+  }, [enabled, isAdminRoute, startDrone, stopDrone])
 
   // first-gesture unlock
   useEffect(() => {
+    if (isAdminRoute) return
     const handler = () => {
       void unlock()
     }
@@ -315,10 +323,11 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
     return () => {
       events.forEach(ev => window.removeEventListener(ev, handler))
     }
-  }, [unlock])
+  }, [unlock, isAdminRoute])
 
   // global hover ticks (once per distinct element)
   useEffect(() => {
+    if (isAdminRoute) return
     const handler = (e: MouseEvent) => {
       if (!enabledRef.current || !isFinePointer) return
       const target = e.target as HTMLElement | null
@@ -342,10 +351,11 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
       document.removeEventListener('mouseover', handler)
       window.removeEventListener('blur', leaveHandler)
     }
-  }, [panForElement])
+  }, [panForElement, isAdminRoute])
 
   // global key sounds on inputs
   useEffect(() => {
+    if (isAdminRoute) return
     const handler = (e: KeyboardEvent) => {
       if (!enabledRef.current) return
       const target = e.target as HTMLElement | null
@@ -356,10 +366,11 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
     }
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
-  }, [panForElement])
+  }, [panForElement, isAdminRoute])
 
   // global click sound: richer two-tone pop, pitch by element position
   useEffect(() => {
+    if (isAdminRoute) return
     const handler = (e: MouseEvent) => {
       if (!enabledRef.current) return
       const target = e.target as HTMLElement | null
@@ -376,10 +387,11 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
     }
     document.addEventListener('click', handler)
     return () => document.removeEventListener('click', handler)
-  }, [play])
+  }, [play, isAdminRoute])
 
   // action-driven sound layer: scroll motion, fast mouse movement, section reveals
   useEffect(() => {
+    if (isAdminRoute) return
     let lastScrollY = window.scrollY
     let lastScrollT = performance.now()
     let lastMoveX = window.innerWidth / 2
@@ -427,7 +439,7 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
       window.removeEventListener('mousemove', onMove)
       io.disconnect()
     }
-  }, [])
+  }, [isAdminRoute])
 
   // expose play to non-React modules (e.g. ScrollStack) for synced feedback
   useEffect(() => {

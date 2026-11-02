@@ -144,6 +144,54 @@
   .timeline-dot-ring {
     box-shadow: 0 0 0 4px var(--bg-primary);
   }
+
+  /* Outline by default, filled while the parent .group is hovered/focused or
+     when the icon marks the active item. */
+  .adaptive-icon {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .adaptive-icon > svg {
+    transition: opacity 0.18s ease;
+  }
+
+  .adaptive-icon > .adaptive-icon-filled {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+
+  /* Some Material icons have no distinct outlined glyph. Hollow out the filled
+     glyph with a stroke so it still reads as the outlined state. */
+  .adaptive-icon > .adaptive-icon-stroked path:not([fill='none']) {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.2px;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .group:hover .adaptive-icon > .adaptive-icon-outline,
+  .group:focus-visible .adaptive-icon > .adaptive-icon-outline,
+  .group:active .adaptive-icon > .adaptive-icon-outline,
+  .adaptive-icon:hover > .adaptive-icon-outline,
+  .adaptive-icon:active > .adaptive-icon-outline,
+  .adaptive-icon.is-active > .adaptive-icon-outline {
+    opacity: 0;
+  }
+
+  .group:hover .adaptive-icon > .adaptive-icon-filled,
+  .group:focus-visible .adaptive-icon > .adaptive-icon-filled,
+  .group:active .adaptive-icon > .adaptive-icon-filled,
+  .adaptive-icon:hover > .adaptive-icon-filled,
+  .adaptive-icon:active > .adaptive-icon-filled,
+  .adaptive-icon.is-active > .adaptive-icon-filled {
+    opacity: 1;
+  }
 }
 
 #experience .scroll-stack-inner {

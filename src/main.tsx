@@ -15,11 +15,11 @@ if ('scrollRestoration' in history) {
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <SoundProvider>
-        <HashRouter>
+      <HashRouter>
+        <SoundProvider>
           <App />
-        </HashRouter>
-      </SoundProvider>
+        </SoundProvider>
+      </HashRouter>
     </QueryClientProvider>
   </React.StrictMode>,
 )

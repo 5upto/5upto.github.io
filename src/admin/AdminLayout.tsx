@@ -4,45 +4,38 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../hooks/useAuth'
 import { supabase } from '../lib/supabase'
 import type { Profile } from '../types/database'
+import { sectionIcons, type NavIcon } from '../lib/navIcons'
 import {
-  MdHome,
-  MdPerson,
-  MdWork,
-  MdFolder,
-  MdSchool,
-  MdCardMembership,
-  MdPictureAsPdf,
-  MdMenuBook,
-  MdLightbulb,
-  MdLink,
-  MdArticle,
-  MdPhotoLibrary,
-  MdMenu,
-  MdCloudUpload,
   MdDarkMode,
+  MdOutlineDarkMode,
   MdLightMode,
+  MdOutlineLightMode,
   MdLogout,
-  MdLaunch,
-  MdChevronLeft,
-  MdClose,
-  MdMenuOpen,
+  MdOutlineLogout,
+  MdPublic,
+  MdOutlinePublic,
+  MdNavigateBefore,
+  MdOutlineNavigateBefore,
+  MdCancel,
+  MdOutlineCancel,
 } from 'react-icons/md'
+import AdaptiveIcon from '../components/AdaptiveIcon'
 
-const sidebarItems = [
-  { label: 'Dashboard', href: '/admin', icon: MdHome },
-  { label: 'Profile', href: '/admin/profile', icon: MdPerson },
-  { label: 'Resume', href: '/admin/resume', icon: MdPictureAsPdf },
-  { label: 'Experiences', href: '/admin/experiences', icon: MdWork },
-  { label: 'Projects', href: '/admin/projects', icon: MdFolder },
-  { label: 'Education', href: '/admin/education', icon: MdSchool },
-  { label: 'Certifications', href: '/admin/certifications', icon: MdCardMembership },
-  { label: 'Publications', href: '/admin/publications', icon: MdMenuBook },
-  { label: 'Skills', href: '/admin/skills', icon: MdLightbulb },
-  { label: 'Social Links', href: '/admin/social-links', icon: MdLink },
-  { label: 'Blogs', href: '/admin/blogs', icon: MdArticle },
-  { label: 'Gallery', href: '/admin/gallery', icon: MdPhotoLibrary },
-  { label: 'Nav Items', href: '/admin/nav-items', icon: MdMenu },
-  { label: 'Storage', href: '/admin/storage', icon: MdCloudUpload },
+const sidebarItems: { label: string; href: string; icon: NavIcon }[] = [
+  { label: 'Dashboard', href: '/admin', icon: sectionIcons.home },
+  { label: 'Profile', href: '/admin/profile', icon: sectionIcons.profile },
+  { label: 'Resume', href: '/admin/resume', icon: sectionIcons.resume },
+  { label: 'Experiences', href: '/admin/experiences', icon: sectionIcons.experience },
+  { label: 'Projects', href: '/admin/projects', icon: sectionIcons.projects },
+  { label: 'Education', href: '/admin/education', icon: sectionIcons.education },
+  { label: 'Certifications', href: '/admin/certifications', icon: sectionIcons.certifications },
+  { label: 'Publications', href: '/admin/publications', icon: sectionIcons.publications },
+  { label: 'Skills', href: '/admin/skills', icon: sectionIcons.skills },
+  { label: 'Social Links', href: '/admin/social-links', icon: sectionIcons.socialLinks },
+  { label: 'Blogs', href: '/admin/blogs', icon: sectionIcons.blog },
+  { label: 'Gallery', href: '/admin/gallery', icon: sectionIcons.gallery },
+  { label: 'Nav Items', href: '/admin/nav-items', icon: sectionIcons.navItems },
+  { label: 'Storage', href: '/admin/storage', icon: sectionIcons.storage },
 ]
 
 function SidebarContent({ collapsed, onNavigate, currentPath, userEmail, onSignOut, onToggleCollapse, dark, onToggleTheme, showThemeToggle = true, avatarUrl }: {
@@ -79,17 +72,21 @@ function SidebarContent({ collapsed, onNavigate, currentPath, userEmail, onSignO
         )}
         {!collapsed && showThemeToggle && (
           <button onClick={onToggleTheme} title={dark ? 'Light mode' : 'Dark mode'}
-            className="p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors shrink-0">
+            className="group p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors shrink-0">
             {dark ? (
-              <MdLightMode className="w-4 h-4" />
+              <AdaptiveIcon outline={MdOutlineLightMode} filled={MdLightMode} className="w-4 h-4" />
             ) : (
-              <MdDarkMode className="w-4 h-4" />
+              <AdaptiveIcon outline={MdOutlineDarkMode} filled={MdDarkMode} className="w-4 h-4" />
             )}
           </button>
         )}
         <button onClick={onToggleCollapse} title={collapsed ? 'Expand' : 'Collapse'}
-          className="p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors shrink-0">
-          <MdChevronLeft className={`w-4 h-4 transition-transform ${collapsed ? 'rotate-180' : ''}`} />
+          className="group p-1.5 rounded-lg hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors shrink-0">
+          <AdaptiveIcon
+            outline={MdOutlineNavigateBefore}
+            filled={MdNavigateBefore}
+            className={`w-4 h-4 transition-transform ${collapsed ? 'rotate-180' : ''}`}
+          />
         </button>
       </div>
 
@@ -100,14 +97,19 @@ function SidebarContent({ collapsed, onNavigate, currentPath, userEmail, onSignO
           const isActive = currentPath === item.href || (item.href === '/admin' && currentPath === '/admin')
           return (
             <button key={item.href} onClick={() => onNavigate(item.href)} title={collapsed ? item.label : undefined}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all mb-0.5 ${
+              className={`group w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all mb-0.5 ${
                 collapsed ? 'justify-center' : ''
               } ${
                 isActive
                   ? 'bg-primary-600/15 text-primary-400 shadow-sm'
                   : 'text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]'
               }`}>
-              <item.icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-primary-400' : ''}`} />
+              <AdaptiveIcon
+                outline={item.icon.outline}
+                filled={item.icon.filled}
+                active={isActive}
+                className={`w-5 h-5 ${isActive ? 'text-primary-400' : ''}`}
+              />
               {!collapsed && item.label}
             </button>
           )
@@ -118,9 +120,11 @@ function SidebarContent({ collapsed, onNavigate, currentPath, userEmail, onSignO
       <div className="p-3 border-t border-[var(--border)]" ref={menuRef}>
         <div className="relative">
           <button onClick={() => setShowMenu(!showMenu)} title={collapsed ? 'Menu' : undefined}
-            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-all ${collapsed ? 'justify-center' : ''}`}>
+            className={`w-full flex items-center rounded-xl text-sm font-medium text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-elevated)] transition-all ${collapsed ? 'justify-center p-2' : 'gap-3 px-3 py-2.5'}`}>
             {avatarUrl ? (
-              <img src={avatarUrl} alt="" className="w-7 h-7 rounded-full object-cover shrink-0" />
+              <div className="w-7 h-7 rounded-full overflow-hidden shrink-0">
+                <img src={avatarUrl} alt="" width={28} height={28} className="block w-full h-full object-cover" />
+              </div>
             ) : (
               <div className="w-7 h-7 rounded-full bg-primary-500/20 text-primary-400 flex items-center justify-center text-xs font-semibold shrink-0">S</div>
             )}
@@ -129,14 +133,14 @@ function SidebarContent({ collapsed, onNavigate, currentPath, userEmail, onSignO
           {showMenu && (
             <div className={`absolute bottom-full mb-2 ${collapsed ? 'left-0' : 'left-0 right-0'} bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl shadow-xl py-1.5 z-50 min-w-[160px]`}>
               <button onClick={() => { setShowMenu(false); window.open('/', '_blank') }}
-                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors">
-                <MdLaunch className="w-4 h-4" />
+                className="group w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-[var(--text-primary)] hover:bg-[var(--bg-hover)] transition-colors">
+                <AdaptiveIcon outline={MdOutlinePublic} filled={MdPublic} className="w-4 h-4" />
                 Go to Portfolio
               </button>
               <div className="my-1 border-t border-[var(--border)]" />
               <button onClick={() => { setShowMenu(false); onSignOut() }}
-                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors">
-                <MdLogout className="w-4 h-4" />
+                className="group w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors">
+                <AdaptiveIcon outline={MdOutlineLogout} filled={MdLogout} className="w-4 h-4" />
                 Sign Out
               </button>
             </div>
@@ -196,19 +200,19 @@ export default function AdminLayout() {
             borderRadius: scrolled ? '9999px' : '16px',
             padding: scrolled ? '0 6px' : '0',
           }}>
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-2 rounded-full hover:bg-[var(--bg-elevated)] text-[var(--text-muted)]">
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="group p-2 rounded-full hover:bg-[var(--bg-elevated)] text-[var(--text-muted)]">
             {mobileOpen ? (
-              <MdClose className="w-5 h-5" />
+              <AdaptiveIcon outline={MdOutlineCancel} filled={MdCancel} className="w-5 h-5" />
             ) : (
-              <MdMenu className="w-5 h-5" />
+              <AdaptiveIcon {...sectionIcons.navItems} className="w-5 h-5" />
             )}
           </button>
           {/* Theme toggle */}
-          <button onClick={() => setDark(!dark)} className="p-2 rounded-full hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] transition-colors">
+          <button onClick={() => setDark(!dark)} className="group p-2 rounded-full hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] transition-colors">
             {dark ? (
-              <MdLightMode className="w-5 h-5" />
+              <AdaptiveIcon outline={MdOutlineLightMode} filled={MdLightMode} className="w-5 h-5" />
             ) : (
-              <MdDarkMode className="w-5 h-5" />
+              <AdaptiveIcon outline={MdOutlineDarkMode} filled={MdDarkMode} className="w-5 h-5" />
             )}
           </button>
         </div>
