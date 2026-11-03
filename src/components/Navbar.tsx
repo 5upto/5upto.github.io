@@ -36,6 +36,9 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
   })
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [isMobilePortrait, setIsMobilePortrait] = useState(() =>
+    window.matchMedia('(max-width: 480px) and (orientation: portrait)').matches
+  )
   const { enabled: soundOn, toggle: toggleSound } = useSound()
   const circleRefs = useRef<Array<HTMLSpanElement | null>>([])
   const iconRefs = useRef<Array<HTMLSpanElement | null>>([])
@@ -44,6 +47,13 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
   const navItemsRef = useRef<HTMLDivElement | null>(null)
   const mobileMenuRef = useRef<HTMLDivElement | null>(null)
   const hamburgerRef = useRef<HTMLButtonElement | null>(null)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 480px) and (orientation: portrait)')
+    const handler = (e: MediaQueryListEvent) => setIsMobilePortrait(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   useEffect(() => {
     let rafId: number
@@ -247,7 +257,7 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
     // 34px inside the 42px content box leaves a 4px inset, which puts every
     // circle dead-centre with the pill's end cap (both centred at 22px) so the
     // gap around it is an even 5px ring instead of a lopsided 19-23px blob.
-    '--nav-avatar': scrolled ? '34px' : 'var(--nav-h)',
+    '--nav-avatar': scrolled ? '34px' : (isMobilePortrait ? '36px' : 'var(--nav-h)'),
     '--pill-pad-x': scrolled ? '18px' : '24px',
     '--pill-gap': scrolled ? '3px' : '8px'
   } as React.CSSProperties
@@ -268,7 +278,7 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
       <div
         className="flex items-center justify-center w-full h-full"
         style={{
-          padding: scrolled ? '7px 1rem 0' : '0',
+          padding: scrolled ? '7px 1rem 0' : (isMobilePortrait ? '0 0.5rem' : '0'),
           transition: 'padding 0.3s ease'
         }}
       >
@@ -284,8 +294,8 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
             borderRadius: scrolled ? '9999px' : 0,
             padding: scrolled ? '0 4px' : '0',
             gap: 10,
-            width: scrolled ? 'auto' : '100%',
-            justifyContent: scrolled ? 'normal' : 'space-between',
+            width: (scrolled && !isMobilePortrait) ? 'auto' : '100%',
+            justifyContent: (scrolled && !isMobilePortrait) ? 'normal' : 'space-between',
             maxWidth: scrolled ? 'none' : '72rem',
             margin: scrolled ? undefined : '0 auto',
             transition: 'background 0.3s ease, backdrop-filter 0.3s ease, -webkit-backdrop-filter 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, border-radius 0.3s ease, padding 0.3s ease'
