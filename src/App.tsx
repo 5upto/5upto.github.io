@@ -27,6 +27,7 @@ const ProtectedRoute = lazy(() => import('./admin/ProtectedRoute'))
 const DashboardPage = lazy(() => import('./admin/pages/DashboardPage'))
 const ProfilePage = lazy(() => import('./admin/pages/ProfilePage'))
 const LanyardPage = lazy(() => import('./admin/pages/LanyardPage'))
+const HeroBackgroundPage = lazy(() => import('./admin/pages/HeroBackgroundPage'))
 const ResumePage = lazy(() => import('./admin/pages/ResumePage'))
 const ExperiencesPage = lazy(() => import('./admin/pages/ExperiencesPage'))
 const ProjectsPage = lazy(() => import('./admin/pages/ProjectsPage'))
@@ -149,6 +150,7 @@ export default function App() {
             <Route index element={<S><DashboardPage /></S>} />
             <Route path="profile" element={<S><ProfilePage /></S>} />
             <Route path="lanyard" element={<S><LanyardPage /></S>} />
+            <Route path="hero-background" element={<S><HeroBackgroundPage /></S>} />
             <Route path="resume" element={<S><ResumePage /></S>} />
           <Route path="experiences" element={<S><ExperiencesPage /></S>} />
             <Route path="projects" element={<S><ProjectsPage /></S>} />

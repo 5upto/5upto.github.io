@@ -33,6 +33,8 @@ import {
   MdMenu,
   MdCloudUpload,
   MdOutlineCloudUpload,
+  MdWallpaper,
+  MdOutlineWallpaper,
 } from 'react-icons/md'
 import type { IconPair } from '../components/AdaptiveIcon'
 
@@ -57,6 +59,7 @@ export const sectionIcons = {
   contact: { outline: MdOutlineEmail, filled: MdEmail },
   profile: { outline: MdOutlinePerson, filled: MdPerson },
   lanyard: { outline: MdOutlineBadge, filled: MdBadge },
+  heroBackground: { outline: MdOutlineWallpaper, filled: MdWallpaper },
   resume: { outline: MdOutlinePictureAsPdf, filled: MdPictureAsPdf },
   education: { outline: MdOutlineSchool, filled: MdSchool },
   certifications: { outline: MdOutlineWorkspacePremium, filled: MdWorkspacePremium },

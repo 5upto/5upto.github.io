@@ -1,14 +1,29 @@
 import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import gsap from 'gsap'
 import Lanyard from './lanyard/Lanyard'
-import ParticleBackground from './ParticleBackground'
+import HeroBackground from './backgrounds/HeroBackground'
 import { useProfile } from '../hooks/useProfile'
 import { useSound } from '../hooks/useSound'
 import { useExperiences } from '../hooks/useExperiences'
 import { useLiveResume } from '../hooks/useResumes'
 import { useLanyardSettings } from '../hooks/useLanyardSettings'
+import { useHeroBackgroundSettings } from '../hooks/useHeroBackgroundSettings'
 import { renderCardBack, renderCardFront, renderRibbon } from '../lib/lanyardCard'
 import type { LanyardSettings } from '../types/database'
+
+function useIsDarkTheme() {
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'))
+
+  useEffect(() => {
+    const observer = new MutationObserver(() =>
+      setIsDark(document.documentElement.classList.contains('dark'))
+    )
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+
+  return isDark
+}
 
 function useIdCardImages(profile: any, currentExp: any, settings: LanyardSettings, ready = true) {
   const [images, setImages] = useState<{ front: string | null; back: string | null; band: string | null }>({ front: null, back: null, band: null })
@@ -215,9 +230,11 @@ export default function Hero() {
   const { data: profile } = useProfile()
   const { data: experiences, isFetched: experiencesFetched } = useExperiences()
   const { data: lanyardSettings, isFetched: lanyardSettingsFetched } = useLanyardSettings()
+  const { data: heroBackground } = useHeroBackgroundSettings()
   const { data: resume } = useLiveResume()
   const currentExp = experiences?.[0] ?? null
   const { play } = useSound()
+  const isDark = useIsDarkTheme()
   const jobTitle = currentExp?.role || profile?.title || ''
   const lanyardReady = experiencesFetched && lanyardSettingsFetched
   const { front, back, band } = useIdCardImages(profile, currentExp, lanyardSettings, lanyardReady)
@@ -242,7 +259,7 @@ export default function Hero() {
       id="hero"
       className="relative min-h-dvh flex items-center px-4 py-12"
     >
-      <ParticleBackground />
+      <HeroBackground settings={heroBackground} isDark={isDark} />
       {front && <Lanyard frontImage={front} backImage={back} lanyardImage={band} coverColor={lanyardSettings.coverColor} position={[0, 0, 28]} fov={18} transparent />}
       <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col landscape:flex-row md:flex-row items-center gap-8 landscape:gap-16 md:gap-16 pointer-events-none">
         <div ref={textRef} className="hidden landscape:block md:block w-full landscape:w-1/2 md:w-1/2 text-left pointer-events-auto">

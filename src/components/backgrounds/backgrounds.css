@@ -1,0 +1,154 @@
+/* ------------------------------------------------------------------ */
+/* Aurora                                                              */
+/* ------------------------------------------------------------------ */
+
+.hero-aurora {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hero-aurora::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 90% 80% at 50% 45%, transparent 20%, var(--bg-primary) 98%);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.hero-aurora-blob {
+  position: absolute;
+  width: 62vmax;
+  height: 62vmax;
+  border-radius: 9999px;
+  filter: blur(80px);
+  opacity: 0.5;
+  will-change: transform;
+}
+
+html.dark .hero-aurora-blob {
+  opacity: 0.32;
+}
+
+.hero-aurora-blob--1 {
+  top: -28%;
+  left: -18%;
+  background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.85) 0%, rgba(99, 102, 241, 0) 68%);
+  animation: hero-aurora-drift-1 22s ease-in-out infinite alternate;
+}
+
+.hero-aurora-blob--2 {
+  top: -10%;
+  right: -22%;
+  background: radial-gradient(circle at 50% 50%, rgba(244, 114, 182, 0.7) 0%, rgba(244, 114, 182, 0) 68%);
+  animation: hero-aurora-drift-2 26s ease-in-out infinite alternate;
+}
+
+.hero-aurora-blob--3 {
+  bottom: -32%;
+  left: 18%;
+  background: radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.65) 0%, rgba(34, 211, 238, 0) 68%);
+  animation: hero-aurora-drift-3 30s ease-in-out infinite alternate;
+}
+
+@keyframes hero-aurora-drift-1 {
+  from {
+    transform: translate3d(-6%, -4%, 0) scale(0.92) rotate(0deg);
+  }
+  to {
+    transform: translate3d(14%, 10%, 0) scale(1.12) rotate(18deg);
+  }
+}
+
+@keyframes hero-aurora-drift-2 {
+  from {
+    transform: translate3d(8%, -6%, 0) scale(1.05) rotate(0deg);
+  }
+  to {
+    transform: translate3d(-12%, 12%, 0) scale(0.9) rotate(-14deg);
+  }
+}
+
+@keyframes hero-aurora-drift-3 {
+  from {
+    transform: translate3d(-8%, 6%, 0) scale(1.08) rotate(-8deg);
+  }
+  to {
+    transform: translate3d(10%, -12%, 0) scale(0.94) rotate(12deg);
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Blueprint grid                                                      */
+/* ------------------------------------------------------------------ */
+
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.hero-grid-lines {
+  --hero-grid-color: rgba(15, 23, 42, 0.1);
+  position: absolute;
+  inset: -80px;
+  background-image:
+    linear-gradient(to right, var(--hero-grid-color) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--hero-grid-color) 1px, transparent 1px);
+  background-size: 64px 64px;
+  opacity: 0.75;
+  mask-image: radial-gradient(ellipse 78% 70% at 50% 45%, #000 30%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 78% 70% at 50% 45%, #000 30%, transparent 78%);
+  animation: hero-grid-pan 30s linear infinite;
+}
+
+html.dark .hero-grid-lines {
+  --hero-grid-color: rgba(255, 255, 255, 0.09);
+  opacity: 0.65;
+}
+
+.hero-grid-glow {
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  width: 64vmax;
+  height: 64vmax;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.3) 0%, rgba(99, 102, 241, 0) 62%);
+  filter: blur(30px);
+  animation: hero-grid-pulse 14s ease-in-out infinite;
+}
+
+html.dark .hero-grid-glow {
+  background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.26) 0%, rgba(99, 102, 241, 0) 62%);
+}
+
+@keyframes hero-grid-pan {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(64px, 64px, 0);
+  }
+}
+
+@keyframes hero-grid-pulse {
+  0%,
+  100% {
+    opacity: 0.7;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-aurora-blob,
+  .hero-grid-lines,
+  .hero-grid-glow {
+    animation: none;
+  }
+}

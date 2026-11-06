@@ -176,6 +176,46 @@ export interface SiteConfig {
   updated_at: string
 }
 
+export type HeroBackgroundStyle = 'particles' | 'antigravity' | 'aurora' | 'grid'
+
+export type AntigravityColorMode = 'conic' | 'radial' | 'random'
+
+export type AntigravityParticleShape = 'capsule' | 'sphere' | 'box' | 'tetrahedron'
+
+/** Full ReactBits Antigravity configuration, so every tweak can be persisted. */
+export interface AntigravitySettings {
+  colors: string[]
+  colorMode: AntigravityColorMode
+  colorSpeed: number
+  count: number
+  particleSize: number
+  particleVariance: number
+  particleShape: AntigravityParticleShape
+  magnetRadius: number
+  ringRadius: number
+  fieldStrength: number
+  waveAmplitude: number
+  waveCount: number
+  waveSpeed: number
+  rotationSpeed: number
+  pulseSpeed: number
+  depthFactor: number
+  ambient: number
+  lerpSpeed: number
+  opacity: number
+  interactive: boolean
+  clickBurst: boolean
+  intro: boolean
+}
+
+/** Hero section background, stored in site_config under the "hero_background" key. */
+export interface HeroBackgroundSettings {
+  /** Master switch. When false the hero renders on the plain page background. */
+  enabled: boolean
+  style: HeroBackgroundStyle
+  antigravity: AntigravitySettings
+}
+
 export interface LanyardSettings {
   /** Card face colour in light mode. */
   cardBg: string

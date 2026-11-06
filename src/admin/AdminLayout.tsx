@@ -25,6 +25,7 @@ const sidebarItems: { label: string; href: string; icon: NavIcon }[] = [
   { label: 'Dashboard', href: '/admin', icon: sectionIcons.home },
   { label: 'Profile', href: '/admin/profile', icon: sectionIcons.profile },
   { label: 'Lanyard Card', href: '/admin/lanyard', icon: sectionIcons.lanyard },
+  { label: 'Hero Background', href: '/admin/hero-background', icon: sectionIcons.heroBackground },
   { label: 'Resume', href: '/admin/resume', icon: sectionIcons.resume },
   { label: 'Experiences', href: '/admin/experiences', icon: sectionIcons.experience },
   { label: 'Projects', href: '/admin/projects', icon: sectionIcons.projects },
