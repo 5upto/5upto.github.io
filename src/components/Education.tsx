@@ -1,7 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import ScrollStack, { ScrollStackItem } from './ScrollStack'
+import Folder from './reactbits/Folder'
+import CardSwap, { Card } from './reactbits/CardSwap'
 import { useEducation } from '../hooks/useEducation'
 import { FaAws } from 'react-icons/fa'
 import { SiIeee, SiElsevier, SiAcm, SiArxiv, SiGooglecloud, SiCisco, SiComptia, SiLinuxfoundation, SiHashicorp } from 'react-icons/si'
@@ -9,6 +11,38 @@ import { GrOracle } from 'react-icons/gr'
 import { publisherIcons } from './PublisherIcons'
 
 gsap.registerPlugin(ScrollTrigger)
+
+function useIsDark() {
+  const [isDark, setIsDark] = useState(() =>
+    typeof document === 'undefined' ? false : document.documentElement.classList.contains('dark')
+  )
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'))
+    })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+
+  return isDark
+}
+
+function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(() =>
+    typeof window === 'undefined' ? false : window.matchMedia(query).matches
+  )
+
+  useEffect(() => {
+    const media = window.matchMedia(query)
+    const update = () => setMatches(media.matches)
+    update()
+    media.addEventListener('change', update)
+    return () => media.removeEventListener('change', update)
+  }, [query])
+
+  return matches
+}
 
 // Publisher detection from conference name
 const publishers = [
@@ -34,24 +68,6 @@ function getPublisher(pub: { publisher?: string; conference?: string }) {
   return publishers[publishers.length - 1] // default to Other
 }
 
-const certProviders = [
-  { name: 'Microsoft Certified', color: '#0078d4', lightBg: '#f5f5f5', darkBg: '#141414' },
-  { name: 'AWS Certified', color: '#FF9900', lightBg: '#fff', darkBg: '#232f3e' },
-  { name: 'Google Cloud Certified', color: '#4285F4', lightBg: '#fff', darkBg: '#1a1a2e' },
-  { name: 'Cisco Certified', color: '#049FD9', lightBg: '#fff', darkBg: '#0a1628' },
-  { name: 'CompTIA', color: '#E8112D', lightBg: '#fff', darkBg: '#1a0a0c' },
-  { name: 'Oracle Certified', color: '#C74634', lightBg: '#fff', darkBg: '#1a0e0d' },
-  { name: 'Linux Foundation', color: '#FCC624', lightBg: '#fff', darkBg: '#1a1a10' },
-  { name: 'HashiCorp', color: '#e04e39', lightBg: '#fff', darkBg: '#1a0f0d' },
-]
-
-function getCertProvider(certName: string) {
-  for (const p of certProviders) {
-    if (certName.startsWith(p.name)) return p
-  }
-  return certProviders[0] // default to Microsoft style
-}
-
 export default function Education() {
   const sectionRef = useRef<HTMLElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
@@ -67,97 +83,128 @@ export default function Education() {
     return () => ctx.revert()
   }, [])
 
+  const isDark = useIsDark()
+  const isDesktop = useMediaQuery('(min-width: 768px)')
+
   if (!data) return null
 
   const { education, certifications, publications } = data
 
-  const renderEducationCard = (edu: typeof education[0]) => {
-    const isNitStyle = edu.style === 'nit'
+  const renderEducationDocument = (edu: typeof education[0]) => {
+    const unit = (value: number) => `calc(${value}px * var(--folder-scale))`
+    const isNIT = edu.style === 'nit'
+    const isInternational = edu.style === 'international'
+    const accent = isNIT ? '#1a237e' : isInternational ? '#a8872f' : '#006633'
+    const rule = isNIT ? 'rgba(26, 35, 126, 0.3)' : isInternational ? 'rgba(201, 168, 76, 0.4)' : '#c8b88a'
+    const outerFrame = isNIT ? 'rgba(26, 35, 126, 0.4)' : isInternational ? 'rgba(201, 168, 76, 0.32)' : 'rgba(200, 184, 138, 0.95)'
+    const innerFrame = isNIT ? 'rgba(26, 35, 126, 0.2)' : isInternational ? 'rgba(201, 168, 76, 0.22)' : 'rgba(200, 184, 138, 0.6)'
 
-    if (isNitStyle) {
+    const logo = (
+      <div
+        className="flex flex-none items-center justify-center rounded-full"
+        style={{
+          width: unit(isInternational ? 24 : 30),
+          height: unit(isInternational ? 24 : 30),
+          background: isNIT ? 'rgba(26, 35, 126, 0.06)' : isInternational ? 'transparent' : 'rgba(249, 245, 224, 0.9)',
+          overflow: 'hidden',
+        }}
+      >
+        {edu.logo ? (
+          <img
+            src={edu.logo}
+            alt={edu.institution}
+            draggable={false}
+            className="h-full w-full object-contain"
+            style={{ padding: unit(1), opacity: isInternational ? 0.75 : 1 }}
+            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
+          />
+        ) : (
+          <span
+            className="font-certificate"
+            style={{ color: accent, fontSize: unit(10), opacity: 0.5 }}
+          >
+            {edu.institution?.charAt(0) || 'E'}
+          </span>
+        )}
+      </div>
+    )
+
+    const ruleLine = (
+      <div
+        className="flex-none"
+        style={{ width: unit(12), height: unit(0.7), margin: `${unit(4)} auto`, background: rule }}
+      />
+    )
+
+    const footer = (
+      <div className="flex w-full items-end justify-between leading-tight">
+        <span
+          className="font-certificate text-left leading-tight"
+          style={{ color: isInternational ? '#8a7a5a' : isNIT ? '#8a9aaa' : '#a09080', fontSize: unit(3.8), maxWidth: '42%' }}
+        >
+          {edu.signatory}
+        </span>
+        <span
+          className="font-semibold leading-tight"
+          style={{ color: isInternational ? '#1a1a2e' : isNIT ? '#1a237e' : '#006633', fontSize: unit(4.8), letterSpacing: '0.12em' }}
+        >
+          {edu.year}
+        </span>
+        <span className="flex text-right" style={{ width: '24%', justifyContent: 'flex-end' }}>
+          <svg viewBox="0 0 16 16" style={{ width: unit(4), height: unit(4), fill: isInternational ? 'rgba(201, 168, 76, 0.45)' : isNIT ? 'rgba(26, 35, 126, 0.35)' : 'rgba(0, 102, 51, 0.35)' }}>
+            <path d="M8 1a7 7 0 110 14A7 7 0 018 1zm3.36 4.65a.5.5 0 00-.71 0L7 9.29 5.35 7.65a.5.5 0 10-.7.7l2 2c.2.2.5.2.7 0l4-4a.5.5 0 000-.7z" />
+          </svg>
+        </span>
+      </div>
+    )
+
+    if (isInternational) {
       return (
-        <div className="bg-[#faf8f0] dark:bg-[#1a1818] rounded-sm overflow-hidden">
-          <div className="px-6 md:px-10 py-6 md:py-8">
-            <div className="border-2 border-[#1a237e]/40 dark:border-[#5a6abf]/40 p-1">
-              <div className="border border-[#1a237e]/20 dark:border-[#5a6abf]/20">
-                <div className="flex flex-col md:flex-row">
-                  <div className="md:w-[30%] flex items-center justify-center py-6 px-4">
-                    <img src={edu.logo} alt={edu.institution} className="w-24 h-24 md:w-28 md:h-28 rounded-full object-contain" onError={(e) => {(e.target as HTMLImageElement).style.display = 'none'}} />
-                  </div>
-                  <div className="md:w-[70%] text-center md:text-left py-6 px-4 md:pl-0 md:pr-6">
-                    {edu.country_name && <p className="text-[10px] tracking-[0.15em] uppercase text-[#5a6a8a] dark:text-[#7a8aaa] font-medium">{edu.country_name}</p>}
-                    <p className="text-xs tracking-[0.08em] text-[#1a237e] dark:text-[#7a8adf] font-bold mt-0.5 font-certificate">{edu.institution}</p>
-                    <div className="w-10 h-px bg-[#1a237e]/30 dark:bg-[#5a6abf]/30 mx-auto md:mx-0 my-3" />
-                    {edu.certificate_label && <p className="text-[10px] text-[#8a9aaa] dark:text-[#7a8aaa] uppercase tracking-wider">{edu.certificate_label}</p>}
-                    <h3 className="text-lg md:text-xl font-bold text-[#1a1a2a] dark:text-[#d0d8e8] mt-1 leading-tight font-certificate">{edu.degree}</h3>
-                    {edu.subject && <p className="text-xs text-[#5a6a7a] dark:text-[#8a9aaa] mt-1">in <span className="font-medium">{edu.subject}</span></p>}
-                    <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mt-4">
-                      <span className="text-xs text-[#1a237e] dark:text-[#7a8adf] font-bold font-certificate">{edu.year}</span>
-                      {edu.signatory && <span className="text-[9px] text-[#8a9aaa] dark:text-[#6a7a8a] font-certificate">{edu.signatory}</span>}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    if (edu.style === 'international') {
-      return (
-        <div className="bg-[#fdfbf5] dark:bg-[#0f0e0c] rounded-sm overflow-hidden">
-          <div className="px-6 md:px-10 py-6 md:py-8">
-            <div className="border border-[#c9a84c]/30 dark:border-[#c9a84c]/20 p-1">
-              <div className="p-6 md:p-8">
-                {/* Country */}
-                {edu.country_name && <p className="text-center text-[10px] tracking-[0.2em] uppercase text-[#8a7a5a] dark:text-[#c9a84c]/50 font-sans">{edu.country_name}</p>}
-                {edu.board_name && <p className="text-center text-[11px] tracking-[0.1em] uppercase text-[#1a1a2e] dark:text-[#c9a84c]/60 font-medium mt-1 font-sans">{edu.board_name}</p>}
-
-                {/* Institution - Cloister Black, not all caps */}
-                <p className="text-center text-sm text-[#1a1a2e] dark:text-[#e0d5c0] mt-5 font-certificate">{edu.institution}</p>
-
-                {/* Simple line */}
-                <div className="flex justify-center my-5">
-                  <div className="w-12 h-px bg-[#c9a84c]/40 dark:bg-[#c9a84c]/25" />
-                </div>
-
-                {/* Certificate label */}
-                {edu.certificate_label && <p className="text-center text-[10px] text-[#8a7a5a] dark:text-[#c9a84c]/45 uppercase tracking-[0.2em] font-sans">{edu.certificate_label}</p>}
-
-                {/* Degree - Cloister Black */}
-                <h3 className="text-center text-xl md:text-2xl text-[#1a1a2e] dark:text-[#f0e6d0] mt-2 leading-tight font-certificate tracking-wide">{edu.degree}</h3>
-
-                {/* Subject */}
-                {edu.subject && <p className="text-center text-sm text-[#5a5a5a] dark:text-[#c9a84c]/55 mt-2 font-sans italic">in {edu.subject}</p>}
-
-                {/* Logo */}
-                {edu.logo && (
-                  <div className="flex justify-center my-5">
-                    <img src={edu.logo} alt={edu.institution} className="w-14 h-14 md:w-16 md:h-16 rounded-full object-contain opacity-70 dark:opacity-60" onError={(e) => {(e.target as HTMLImageElement).style.display = 'none'}} />
-                  </div>
+        <div className="h-full w-full overflow-hidden" style={{ background: '#fdfbf5', padding: unit(4) }}>
+          <div className="flex h-full flex-col" style={{ border: `${unit(1.3)} solid ${outerFrame}`, padding: unit(1) }}>
+            <div
+              className="flex h-full flex-col items-center justify-between text-center"
+              style={{ border: `${unit(0.6)} solid ${innerFrame}`, padding: `${unit(3.5)} ${unit(3)}` }}
+            >
+              <div className="flex w-full flex-col items-center">
+                {edu.country_name && (
+                  <p className="uppercase leading-tight" style={{ color: '#8a7a5a', fontSize: unit(3.7), letterSpacing: '0.2em' }}>
+                    {edu.country_name}
+                  </p>
                 )}
+                {edu.board_name && (
+                  <p className="uppercase leading-tight" style={{ color: '#1a1a2e', fontSize: unit(4.2), letterSpacing: '0.1em', marginTop: unit(1) }}>
+                    {edu.board_name}
+                  </p>
+                )}
+                {edu.institution && (
+                  <p className="font-certificate leading-tight" style={{ color: '#1a1a2e', fontSize: unit(5.6), marginTop: unit(3) }}>
+                    {edu.institution}
+                  </p>
+                )}
+              </div>
 
-                {/* Simple line */}
-                <div className="flex justify-center my-4">
-                  <div className="w-12 h-px bg-[#c9a84c]/40 dark:bg-[#c9a84c]/25" />
-                </div>
+              <div className="flex w-full flex-col items-center">
+                {ruleLine}
+                {edu.certificate_label && (
+                  <p className="uppercase leading-tight" style={{ color: '#8a7a5a', fontSize: unit(3.7), letterSpacing: '0.18em' }}>
+                    {edu.certificate_label}
+                  </p>
+                )}
+                <h3 className="font-certificate leading-tight" style={{ color: '#1a1a2e', fontSize: unit(8.2), marginTop: unit(1.5), letterSpacing: '0.02em' }}>
+                  {edu.degree}
+                </h3>
+                {edu.subject && (
+                  <p className="italic leading-tight" style={{ color: '#5a5a5a', fontSize: unit(4.6), marginTop: unit(1.5) }}>
+                    in {edu.subject}
+                  </p>
+                )}
+                {edu.logo && <div style={{ marginTop: unit(3) }}>{logo}</div>}
+              </div>
 
-                {/* Year and Signatory */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mt-1">
-                  <div className="text-left">
-                    {/* Signatory - Cloister Black */}
-                    {edu.signatory && <p className="text-[10px] text-[#8a7a5a] dark:text-[#c9a84c]/45 font-certificate">{edu.signatory}</p>}
-                  </div>
-                  <div className="text-center">
-                    {edu.year && <p className="text-xs font-semibold text-[#1a1a2e] dark:text-[#c9a84c] font-sans tracking-widest">{edu.year}</p>}
-                  </div>
-                  <div className="text-right">
-                    <div className="w-7 h-7 rounded-full border border-[#c9a84c]/25 dark:border-[#c9a84c]/15 flex items-center justify-center">
-                      <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 text-[#c9a84c]/40 fill-current"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
-                    </div>
-                  </div>
-                </div>
+              <div className="flex w-full flex-col items-center">
+                {ruleLine}
+                {footer}
               </div>
             </div>
           </div>
@@ -165,30 +212,94 @@ export default function Education() {
       )
     }
 
-    // Bangladesh / Default style
     return (
-      <div className="bg-[#faf8f0] dark:bg-[#1a1816] rounded-sm overflow-hidden">
-        <div className="px-6 md:px-10 py-6 md:py-8">
-          <div className="border-2 border-[#c8b88a] dark:border-[#5a4f3a] p-1">
-            <div className="border border-[#c8b88a]/60 dark:border-[#5a4f3a]/60">
-              <div className="flex flex-col md:flex-row">
-                <div className="md:w-[30%] flex items-center justify-center py-6 px-4">
-                  <img src={edu.logo} alt={edu.institution} className="w-24 h-24 md:w-28 md:h-28 rounded-full object-cover" onError={(e) => {(e.target as HTMLImageElement).style.display = 'none'}} />
-                </div>
-                <div className="md:w-[70%] text-center md:text-left py-6 px-4 md:pl-0 md:pr-6">
-                  {edu.country_name && <p className="text-[10px] tracking-[0.15em] uppercase text-[#8a7a6a] dark:text-[#8a7a6a] font-medium">{edu.country_name}</p>}
-                  {edu.board_name && <p className="text-[11px] tracking-[0.1em] uppercase text-[#006633] dark:text-[#4a9a6a] font-bold mt-0.5">{edu.board_name}</p>}
-                  <div className="w-10 h-px bg-[#c8b88a] dark:bg-[#5a4f3a] mx-auto md:mx-0 my-3" />
-                  {edu.certificate_label && <p className="text-[10px] text-[#a09080] dark:text-[#8a7a6a] uppercase tracking-wider">{edu.certificate_label}</p>}
-                  <h3 className="text-lg md:text-xl font-bold text-[#1a1a1a] dark:text-[#e0d5c5] mt-1 leading-tight">{edu.degree}</h3>
-                  {edu.subject && <p className="text-xs text-[#6a5a4a] dark:text-[#a09080] mt-1">{edu.subject}</p>}
-                  <p className="text-xs text-[#4a4a4a] dark:text-[#8a7a6a] mt-2 italic">{edu.institution}</p>
-                  <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-4 mt-4">
-                    <span className="text-xs text-[#006633] dark:text-[#4a9a6a] font-bold">{edu.year}</span>
-                    {edu.signatory && <span className="text-[9px] text-[#a09080] dark:text-[#6a5a4a]">{edu.signatory}</span>}
-                  </div>
-                </div>
-              </div>
+      <div className="h-full w-full overflow-hidden" style={{ background: '#faf8f0', padding: unit(4) }}>
+        <div className="flex h-full flex-col" style={{ border: `${unit(1.3)} solid ${outerFrame}`, padding: unit(1) }}>
+          <div
+            className="flex h-full flex-col items-center justify-between text-center"
+            style={{ border: `${unit(0.6)} solid ${innerFrame}`, padding: `${unit(3.5)} ${unit(3)}` }}
+          >
+            <div className="flex w-full flex-col items-center">
+              {logo}
+              {edu.country_name && (
+                <p
+                  className="uppercase leading-tight"
+                  style={{
+                    color: isNIT ? '#5a6a8a' : '#8a7a6a',
+                    fontSize: unit(3.8),
+                    letterSpacing: '0.15em',
+                    marginTop: unit(2),
+                  }}
+                >
+                  {edu.country_name}
+                </p>
+              )}
+              {isNIT ? (
+                edu.institution && (
+                  <p
+                    className="font-certificate font-bold leading-tight"
+                    style={{ color: '#1a237e', fontSize: unit(5.2), marginTop: unit(1), letterSpacing: '0.04em' }}
+                  >
+                    {edu.institution}
+                  </p>
+                )
+              ) : (
+                edu.board_name && (
+                  <p
+                    className="font-bold uppercase leading-tight"
+                    style={{ color: '#006633', fontSize: unit(4.4), marginTop: unit(1), letterSpacing: '0.06em' }}
+                  >
+                    {edu.board_name}
+                  </p>
+                )
+              )}
+            </div>
+
+            <div className="flex w-full flex-col items-center">
+              {ruleLine}
+              {edu.certificate_label && (
+                <p
+                  className="uppercase leading-tight"
+                  style={{
+                    color: isNIT ? '#8a9aaa' : '#a09080',
+                    fontSize: unit(3.7),
+                    letterSpacing: '0.12em',
+                  }}
+                >
+                  {edu.certificate_label}
+                </p>
+              )}
+              <h3
+                className={isNIT ? 'font-certificate font-bold leading-tight' : 'font-bold leading-tight'}
+                style={{
+                  color: isNIT ? '#1a1a2a' : '#1a1a1a',
+                  fontSize: unit(isNIT ? 8 : 7.4),
+                  marginTop: unit(1.5),
+                }}
+              >
+                {edu.degree}
+              </h3>
+              {edu.subject && (
+                <p
+                  className="leading-tight"
+                  style={{
+                    color: isNIT ? '#5a6a7a' : '#6a5a4a',
+                    fontSize: unit(4.4),
+                    marginTop: unit(1.5),
+                  }}
+                >
+                  {isNIT ? `in ${edu.subject}` : edu.subject}
+                </p>
+              )}
+              {!isNIT && edu.institution && (
+                <p className="italic leading-tight" style={{ color: '#4a4a4a', fontSize: unit(4.2), marginTop: unit(2) }}>
+                  {edu.institution}
+                </p>
+              )}
+            </div>
+
+            <div className="flex w-full flex-col items-center">
+              {footer}
             </div>
           </div>
         </div>
@@ -202,25 +313,58 @@ export default function Education() {
         <span className="gradient-text">Education</span>
       </h2>
       <div className="max-w-4xl mx-auto">
-        <ScrollStack useWindowScroll={true} itemDistance={120} itemScale={0.03} itemStackDistance={25} stackPosition="15%" baseScale={0.88}>
-          {education.map((edu) => (
-            <ScrollStackItem
-              key={edu.id}
-              itemClassName="!h-auto !p-0 !rounded-sm overflow-hidden !bg-transparent !border-none !shadow-none"
-            >
-              {renderEducationCard(edu)}
-            </ScrollStackItem>
-          ))}
-        </ScrollStack>
+        <div className="flex min-h-[360px] items-center justify-center md:min-h-[470px]">
+          <Folder
+            key={`education-folder-${education.length}`}
+            mode="book"
+            variant="solid"
+            color={isDark ? '#4f5fd4' : '#1a237e'}
+            paperColor="#faf8f0"
+            ariaLabel="Education records"
+            tabPosition="right"
+            layout={isDesktop ? 'spread' : 'stack'}
+            size={isDesktop ? 1.8 : 1.45}
+            openOn="click"
+            draggable
+            zoomOnClick
+            theme={isDark ? 'dark' : 'light'}
+            className="max-w-full"
+          >
+            {education.slice(0, 6).map((edu) => (
+              <div key={edu.id} className="h-full w-full">
+                {renderEducationDocument(edu)}
+              </div>
+            ))}
+          </Folder>
+        </div>
+        <p className="mt-5 text-center text-xs text-[#6a7a8a] dark:text-[#7a8a9a]">
+          Click the folder to open it, then click any record to enlarge.
+        </p>
       </div>
 
       <div className="max-w-4xl mx-auto mt-12 md:mt-16">
         <h2 className="section-heading text-center mb-8 md:mb-10">
           <span className="gradient-text">Certifications</span>
         </h2>
-        <ScrollStack useWindowScroll={true} itemDistance={120} itemScale={0.03} itemStackDistance={25} stackPosition="15%" baseScale={0.88}>
+        <div className="relative mx-auto h-[400px] w-full max-w-3xl sm:h-[470px]">
+          <CardSwap
+            key={`certifications-${certifications.length}`}
+            width={isDesktop ? 430 : 320}
+            height={isDesktop ? 330 : 280}
+            cardDistance={isDesktop ? 62 : 46}
+            verticalDistance={isDesktop ? 66 : 52}
+            depth={90}
+            skewAmount={6}
+            visibleCards={Math.min(4, Math.max(1, certifications.length))}
+            delay={4200}
+            autoplay={certifications.length > 1}
+            pauseOnHover
+            draggable
+            speed={1}
+            cardRadius={18}
+            theme={isDark ? 'dark' : 'light'}
+          >
           {certifications.map((cert) => {
-            const provider = getCertProvider(cert.name)
             const match = cert.name.match(/^(.+?):\s*(.+?)\s*\((.+?)\)$/)
             const title = match ? match[2] : cert.name
             const certId = match ? match[3] : ''
@@ -228,9 +372,9 @@ export default function Education() {
             // Microsoft format
             if (cert.name.startsWith('Microsoft Certified')) {
               return (
-                <ScrollStackItem key={cert.id} itemClassName="!h-auto !p-0 !rounded-xl overflow-hidden !bg-transparent !border-none !shadow-none">
-                  <div className="bg-[#f5f5f5] dark:bg-[#141414] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#2a2a2a] w-full">
-                    <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
+                <Card key={cert.id}>
+                  <div className="bg-[#f5f5f5] dark:bg-[#141414] flex h-full flex-col overflow-hidden rounded-[inherit] border border-[#d4d4d4] dark:border-[#2a2a2a] w-full">
+                    <div className="px-6 md:px-8 py-5 md:py-6 flex flex-1 flex-col items-center justify-center text-center gap-4">
                       <div className="shrink-0 w-[92px] h-[92px]">
                         <svg viewBox="0 0 300 300" className="w-full h-full">
                           <path d="M283.38 118.47a16.44 16.44 0 00-10.75-6.69q-11.26-1.95-22.56-3.52V54.43A21.54 21.54 0 00235.49 34l-.16-.05h-.17l-74.74-22.61A32.63 32.63 0 00150 9.64a32.58 32.58 0 00-10.41 1.7L64.84 33.93h-.17l-.16.05a21.54 21.54 0 00-14.58 20.4v53.83q-11.3 1.58-22.56 3.52a16.44 16.44 0 00-10.75 6.69 13.48 13.48 0 00-2.25 10.25l11 57.39a14.64 14.64 0 0016.82 11.47c2.6-.45 5.2-.87 7.81-1.29.15 14.32 5.62 28.23 16.3 41.36 8.15 10 19.37 19.62 33.34 28.52a244.66 244.66 0 0047.18 23.07l3.28 1.12 3.27-1.15a250.23 250.23 0 0047.12-23.35c14-9 25.17-18.56 33.3-28.53 10.68-13.09 16.16-26.9 16.31-41 2.61.42 5.21.84 7.81 1.29a14.92 14.92 0 002.48.21 14.62 14.62 0 0014.34-11.69l10.95-57.37a13.49 13.49 0 00-2.3-10.25z" fill="#002050"/>
@@ -255,16 +399,16 @@ export default function Education() {
                       </div>
                     </div>
                   </div>
-                </ScrollStackItem>
+                </Card>
               )
             }
 
             // AWS format
             if (cert.name.startsWith('AWS Certified')) {
               return (
-                <ScrollStackItem key={cert.id} itemClassName="!h-auto !p-0 !rounded-xl overflow-hidden !bg-transparent !border-none !shadow-none">
-                  <div className="bg-white dark:bg-[#232f3e] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#2a2a2a] w-full">
-                    <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
+                <Card key={cert.id}>
+                  <div className="bg-white dark:bg-[#232f3e] flex h-full flex-col overflow-hidden rounded-[inherit] border border-[#d4d4d4] dark:border-[#2a2a2a] w-full">
+                    <div className="px-6 md:px-8 py-5 md:py-6 flex flex-1 flex-col items-center justify-center text-center gap-4">
                       <div className="shrink-0 w-[92px] h-[92px] flex items-center justify-center">
                         <FaAws size={64} style={{ color: '#FF9900' }} />
                       </div>
@@ -279,17 +423,17 @@ export default function Education() {
                       </div>
                     </div>
                   </div>
-                </ScrollStackItem>
+                </Card>
               )
             }
 
             // Google Cloud format
             if (cert.name.startsWith('Google Cloud Certified')) {
               return (
-                <ScrollStackItem key={cert.id} itemClassName="!h-auto !p-0 !rounded-xl overflow-hidden !bg-transparent !border-none !shadow-none">
-                  <div className="bg-white dark:bg-[#1a1a2e] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#2a2a2a] w-full">
+                <Card key={cert.id}>
+                  <div className="bg-white dark:bg-[#1a1a2e] flex h-full flex-col overflow-hidden rounded-[inherit] border border-[#d4d4d4] dark:border-[#2a2a2a] w-full">
                     <div className="h-1.5 bg-gradient-to-r from-[#4285F4] via-[#EA4335] via-[#FBBC04] to-[#34A853]" />
-                    <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
+                    <div className="px-6 md:px-8 py-5 md:py-6 flex flex-1 flex-col items-center justify-center text-center gap-4">
                       <div className="shrink-0 w-[92px] h-[92px] flex items-center justify-center">
                         <SiGooglecloud size={64} style={{ color: '#4285F4' }} />
                       </div>
@@ -304,16 +448,16 @@ export default function Education() {
                       </div>
                     </div>
                   </div>
-                </ScrollStackItem>
+                </Card>
               )
             }
 
             // Cisco format
             if (cert.name.startsWith('Cisco Certified')) {
               return (
-                <ScrollStackItem key={cert.id} itemClassName="!h-auto !p-0 !rounded-xl overflow-hidden !bg-transparent !border-none !shadow-none">
-                  <div className="bg-white dark:bg-[#0a1628] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#049fd9]/30 w-full">
-                    <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
+                <Card key={cert.id}>
+                  <div className="bg-white dark:bg-[#0a1628] flex h-full flex-col overflow-hidden rounded-[inherit] border border-[#d4d4d4] dark:border-[#049fd9]/30 w-full">
+                    <div className="px-6 md:px-8 py-5 md:py-6 flex flex-1 flex-col items-center justify-center text-center gap-4">
                       <div className="shrink-0 w-[92px] h-[92px] flex items-center justify-center">
                         <SiCisco size={64} style={{ color: '#049FD9' }} />
                       </div>
@@ -328,16 +472,16 @@ export default function Education() {
                       </div>
                     </div>
                   </div>
-                </ScrollStackItem>
+                </Card>
               )
             }
 
             // CompTIA format
             if (cert.name.startsWith('CompTIA')) {
               return (
-                <ScrollStackItem key={cert.id} itemClassName="!h-auto !p-0 !rounded-xl overflow-hidden !bg-transparent !border-none !shadow-none">
-                  <div className="bg-white dark:bg-[#1a0a0c] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#e8112d]/30 w-full">
-                    <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
+                <Card key={cert.id}>
+                  <div className="bg-white dark:bg-[#1a0a0c] flex h-full flex-col overflow-hidden rounded-[inherit] border border-[#d4d4d4] dark:border-[#e8112d]/30 w-full">
+                    <div className="px-6 md:px-8 py-5 md:py-6 flex flex-1 flex-col items-center justify-center text-center gap-4">
                       <div className="shrink-0 w-[92px] h-[92px] flex items-center justify-center">
                         <SiComptia size={64} style={{ color: '#E8112D' }} />
                       </div>
@@ -352,16 +496,16 @@ export default function Education() {
                       </div>
                     </div>
                   </div>
-                </ScrollStackItem>
+                </Card>
               )
             }
 
             // Oracle format
             if (cert.name.startsWith('Oracle Certified')) {
               return (
-                <ScrollStackItem key={cert.id} itemClassName="!h-auto !p-0 !rounded-xl overflow-hidden !bg-transparent !border-none !shadow-none">
-                  <div className="bg-white dark:bg-[#1a0e0d] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#c74634]/30 w-full">
-                    <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
+                <Card key={cert.id}>
+                  <div className="bg-white dark:bg-[#1a0e0d] flex h-full flex-col overflow-hidden rounded-[inherit] border border-[#d4d4d4] dark:border-[#c74634]/30 w-full">
+                    <div className="px-6 md:px-8 py-5 md:py-6 flex flex-1 flex-col items-center justify-center text-center gap-4">
                       <div className="shrink-0 w-[92px] h-[92px] flex items-center justify-center">
                         <GrOracle size={64} style={{ color: '#C74634' }} />
                       </div>
@@ -376,16 +520,16 @@ export default function Education() {
                       </div>
                     </div>
                   </div>
-                </ScrollStackItem>
+                </Card>
               )
             }
 
             // Linux Foundation format
             if (cert.name.startsWith('Linux Foundation')) {
               return (
-                <ScrollStackItem key={cert.id} itemClassName="!h-auto !p-0 !rounded-xl overflow-hidden !bg-transparent !border-none !shadow-none">
-                  <div className="bg-white dark:bg-[#1a1a10] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#fcc624]/30 w-full">
-                    <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
+                <Card key={cert.id}>
+                  <div className="bg-white dark:bg-[#1a1a10] flex h-full flex-col overflow-hidden rounded-[inherit] border border-[#d4d4d4] dark:border-[#fcc624]/30 w-full">
+                    <div className="px-6 md:px-8 py-5 md:py-6 flex flex-1 flex-col items-center justify-center text-center gap-4">
                       <div className="shrink-0 w-[92px] h-[92px] flex items-center justify-center">
                         <SiLinuxfoundation size={64} style={{ color: '#FCC624' }} />
                       </div>
@@ -400,16 +544,16 @@ export default function Education() {
                       </div>
                     </div>
                   </div>
-                </ScrollStackItem>
+                </Card>
               )
             }
 
             // HashiCorp format
             if (cert.name.startsWith('HashiCorp')) {
               return (
-                <ScrollStackItem key={cert.id} itemClassName="!h-auto !p-0 !rounded-xl overflow-hidden !bg-transparent !border-none !shadow-none">
-                  <div className="bg-white dark:bg-[#1a0f0d] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#e04e39]/30 w-full">
-                    <div className="px-6 md:px-8 py-6 md:py-7 flex flex-col items-center text-center gap-5">
+                <Card key={cert.id}>
+                  <div className="bg-white dark:bg-[#1a0f0d] flex h-full flex-col overflow-hidden rounded-[inherit] border border-[#d4d4d4] dark:border-[#e04e39]/30 w-full">
+                    <div className="px-6 md:px-8 py-5 md:py-6 flex flex-1 flex-col items-center justify-center text-center gap-4">
                       <div className="shrink-0 w-[92px] h-[92px] flex items-center justify-center">
                         <SiHashicorp size={64} style={{ color: '#e04e39' }} />
                       </div>
@@ -424,16 +568,16 @@ export default function Education() {
                       </div>
                     </div>
                   </div>
-                </ScrollStackItem>
+                </Card>
               )
             }
 
             // Default format
             return (
-              <ScrollStackItem key={cert.id} itemClassName="!h-auto !p-0 !rounded-xl overflow-hidden !bg-transparent !border-none !shadow-none">
-                <div className="bg-white dark:bg-[#1a1a2e] rounded-xl overflow-hidden border border-[#d4d4d4] dark:border-[#2a2a2a] w-full">
+              <Card key={cert.id}>
+                <div className="bg-white dark:bg-[#1a1a2e] flex h-full flex-col overflow-hidden rounded-[inherit] border border-[#d4d4d4] dark:border-[#2a2a2a] w-full">
                   <div className="h-1.5 bg-gradient-to-r from-primary-500 to-accent-500" />
-                  <div className="px-6 md:px-8 py-6 md:py-7">
+                  <div className="px-6 md:px-8 py-6 md:py-7 flex flex-1 flex-col justify-center">
                     <h3 className="text-base md:text-lg font-bold text-[#1a1a2a] dark:text-[#e0e0e8] leading-snug">{cert.name}</h3>
                     <div className="flex items-center justify-center gap-1.5 mt-2.5">
                       <svg viewBox="0 0 16 16" className="w-3 h-3 fill-[#00a84e]"><path d="M8 1a7 7 0 110 14A7 7 0 018 1zm3.36 4.65a.5.5 0 00-.71 0L7 9.29 5.35 7.65a.5.5 0 10-.7.7l2 2c.2.2.5.2.7 0l4-4a.5.5 0 000-.7z"/></svg>
@@ -441,10 +585,14 @@ export default function Education() {
                     </div>
                   </div>
                 </div>
-              </ScrollStackItem>
+              </Card>
             )
           })}
-        </ScrollStack>
+          </CardSwap>
+        </div>
+        <p className="mt-4 text-center text-xs text-[#6a7a8a] dark:text-[#7a8a9a]">
+          Drag a card or let the stack cycle through each credential.
+        </p>
 
         <div className="mt-8 md:mt-10">
           <h2 className="section-heading text-center mb-8 md:mb-10">
