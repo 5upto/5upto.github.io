@@ -310,8 +310,8 @@ export default function Education() {
   return (
     <section ref={sectionRef} id="education" className="py-16 md:py-20 pb-8 md:pb-10 px-4 relative">
       <h2 ref={headingRef} className="section-heading text-center mb-8 md:mb-10">
-        
-      </h2>
+          <span className="gradient-text">Education</span>
+        </h2>
       <div className="max-w-4xl mx-auto">
         <div className="flex min-h-[360px] items-center justify-center md:min-h-[470px]">
           <Folder
