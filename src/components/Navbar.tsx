@@ -267,6 +267,17 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
     return location.pathname === href
   }
 
+  // On mobile the section anchors live in the bar as icon-only buttons, while
+  // the page links (Gallery, Blog, ...) go inside the hamburger menu. The logo
+  // already takes you home, so the Home icon is dropped from the mobile row.
+  const sectionItems = items.filter(item => item.href.startsWith('#'))
+  const pageItems = items.filter(item => !item.href.startsWith('#'))
+  const mobileSectionItems = sectionItems.filter(item => {
+    const label = item.label.trim().toLowerCase()
+    const segment = item.href.replace(/^#/, '').split('?')[0].replace(/^\/+|\/+$/g, '').toLowerCase()
+    return label !== 'home' && segment !== 'home' && segment !== 'hero'
+  })
+
   const pillBtnClasses =
     'group relative overflow-hidden inline-flex items-center justify-center h-full no-underline rounded-full box-border font-semibold text-sm leading-none tracking-[0.2px] whitespace-nowrap cursor-pointer px-0'
 
@@ -278,7 +289,7 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
       <div
         className="flex items-center justify-center w-full h-full"
         style={{
-          padding: scrolled ? '7px 1rem 0' : (isMobilePortrait ? '0 0.5rem' : '0'),
+          padding: scrolled ? (isMobilePortrait ? '7px 0.5rem 0' : '7px 1rem 0') : (isMobilePortrait ? '0 0.25rem' : '0'),
           transition: 'padding 0.3s ease'
         }}
       >
@@ -293,7 +304,7 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
             boxShadow: scrolled ? '0 4px 30px rgba(0,0,0,0.06)' : 'none',
             borderRadius: scrolled ? '9999px' : 0,
             padding: scrolled ? '0 4px' : '0',
-            gap: 10,
+            gap: isMobilePortrait ? 2 : 10,
             width: (scrolled && !isMobilePortrait) ? 'auto' : '100%',
             justifyContent: (scrolled && !isMobilePortrait) ? 'normal' : 'space-between',
             maxWidth: scrolled ? 'none' : '72rem',
@@ -304,11 +315,31 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
           <button
             onClick={onLogoClick}
             aria-label="Home"
-            className="rounded-full inline-flex items-center justify-center overflow-hidden shrink-0"
+            className="nav-mobile-control rounded-full inline-flex items-center justify-center overflow-hidden shrink-0"
             style={{ width: 'var(--nav-avatar)', height: 'var(--nav-avatar)' }}
           >
             {logoUrl && <img src={logoUrl} alt="logo" className="w-full h-full object-cover block rounded-full" />}
           </button>
+
+          {/* Mobile: icon-only section links. Rendered as direct children so the
+              space-between layout gives every icon the same gap up to the menu. */}
+          {mobileSectionItems.map(item => {
+            const active = isActive(item.href)
+            const Icon = getNavIcon(item.label, item.href)
+            return (
+              <button
+                key={item.href}
+                onClick={() => handleNavClick(item.href)}
+                aria-label={item.label}
+                aria-current={active ? 'page' : undefined}
+                title={item.label}
+                className="nav-mobile-control group md:hidden rounded-full flex items-center justify-center shrink-0 transition-colors"
+                style={{ width: 'var(--nav-avatar)', height: 'var(--nav-avatar)', color: active ? 'var(--text-primary)' : 'var(--text-muted)' }}
+              >
+                <AdaptiveIcon outline={Icon.outline} filled={Icon.filled} active={active} size={18} />
+              </button>
+            )
+          })}
 
           <div
             ref={navItemsRef}
@@ -372,7 +403,7 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
           </div>
 
           <button
-            className="group rounded-full flex items-center justify-center shrink-0 transition-colors"
+            className="nav-mobile-control group rounded-full flex items-center justify-center shrink-0 transition-colors"
             style={{ width: 'var(--nav-avatar)', height: 'var(--nav-avatar)' }}
             onClick={toggleSound}
             aria-label={soundOn ? 'Mute sound' : 'Unmute sound'}
@@ -387,7 +418,7 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
           </button>
 
           <button
-            className="group rounded-full flex items-center justify-center shrink-0 transition-colors"
+            className="nav-mobile-control group rounded-full flex items-center justify-center shrink-0 transition-colors"
             style={{ width: 'var(--nav-avatar)', height: 'var(--nav-avatar)' }}
             onClick={() => setDark(d => !d)}
             aria-label="Toggle theme"
@@ -399,17 +430,19 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
             )}
           </button>
 
-          <button
-            ref={hamburgerRef}
-            onClick={toggleMobile}
-            aria-label="Toggle menu"
-            aria-expanded={mobileOpen}
-            className="md:hidden rounded-full border-0 flex flex-col items-center justify-center gap-[5px] cursor-pointer p-0 shrink-0"
-            style={{ width: 'var(--nav-avatar)', height: 'var(--nav-avatar)' }}
-          >
-            <span className="hamburger-line block w-4 h-[2px] rounded-full" style={{ background: 'var(--text-muted)' }} />
-            <span className="hamburger-line block w-4 h-[2px] rounded-full" style={{ background: 'var(--text-muted)' }} />
-          </button>
+          {pageItems.length > 0 && (
+            <button
+              ref={hamburgerRef}
+              onClick={toggleMobile}
+              aria-label="Toggle menu"
+              aria-expanded={mobileOpen}
+              className="nav-mobile-control md:hidden rounded-full border-0 flex flex-col items-center justify-center gap-[5px] cursor-pointer p-0 shrink-0"
+              style={{ width: 'var(--nav-avatar)', height: 'var(--nav-avatar)' }}
+            >
+              <span className="hamburger-line block w-4 h-[2px] rounded-full" style={{ background: 'var(--text-muted)' }} />
+              <span className="hamburger-line block w-4 h-[2px] rounded-full" style={{ background: 'var(--text-muted)' }} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -426,7 +459,7 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
         }}
       >
         <ul className="list-none m-0 p-[3px] flex flex-col gap-[3px]">
-          {items.map(item => {
+          {pageItems.map(item => {
             const Icon = getNavIcon(item.label, item.href)
             return (
               <li key={item.href}>

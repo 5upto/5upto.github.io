@@ -24,6 +24,8 @@ export const DEFAULT_LANYARD_SETTINGS: LanyardSettings = {
   photoScale: 100,
   photoOffsetX: 0,
   photoOffsetY: 0,
+  photoRadius: 20,
+  coverColor: 'black',
   fontFamily: 'Inter',
 }
 
@@ -41,6 +43,8 @@ export function normalizeLanyardSettings(raw: unknown): LanyardSettings {
     photoScale: clamp(value.photoScale, 50, 200, DEFAULT_LANYARD_SETTINGS.photoScale),
     photoOffsetX: clamp(value.photoOffsetX, -50, 50, DEFAULT_LANYARD_SETTINGS.photoOffsetX),
     photoOffsetY: clamp(value.photoOffsetY, -50, 50, DEFAULT_LANYARD_SETTINGS.photoOffsetY),
+    photoRadius: clamp(value.photoRadius, 0, 80, DEFAULT_LANYARD_SETTINGS.photoRadius),
+    coverColor: value.coverColor === 'silver' ? 'silver' : 'black',
     fontFamily: LANYARD_FONT_OPTIONS.some((font) => font.value === value.fontFamily)
       ? (value.fontFamily as string)
       : DEFAULT_LANYARD_SETTINGS.fontFamily,
@@ -51,6 +55,46 @@ function parseHex(color: string): [number, number, number] {
   const hex = HEX_RE.test(color) ? color.slice(1) : '000000'
   const n = Number.parseInt(hex, 16)
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+}
+
+/** Metal rim colour used by the ID-card cover around the card edge. */
+export function coverColorHex(color: LanyardSettings['coverColor']): string {
+  return color === 'silver' ? '#c9ced6' : '#141414'
+}
+
+/** Draws the metal cover rim around the rounded card edge. */
+function paintCardCover(ctx: CanvasRenderingContext2D, color: LanyardSettings['coverColor']) {
+  const rim = 24
+  // The card image is composited into the GLB's UV atlas with "cover" scaling,
+  // which trims ~37px from each side. Inset the rim by that amount on the x
+  // axis so it still lands on the card's left/right edges after compositing.
+  const SIDE_CROP = 37
+  const x = SIDE_CROP + rim / 2
+  const y = rim / 2
+  const w = CARD_WIDTH - SIDE_CROP * 2 - rim
+  const h = CARD_HEIGHT - rim
+
+  ctx.save()
+  ctx.beginPath()
+  ctx.roundRect(0, 0, CARD_WIDTH, CARD_HEIGHT, 40)
+  ctx.clip()
+
+  if (color === 'silver') {
+    const grad = ctx.createLinearGradient(0, 0, CARD_WIDTH, CARD_HEIGHT)
+    grad.addColorStop(0, '#f6f8fa')
+    grad.addColorStop(0.35, '#c3c9d1')
+    grad.addColorStop(0.6, '#eef1f4')
+    grad.addColorStop(1, '#98a1ac')
+    ctx.strokeStyle = grad
+  } else {
+    ctx.strokeStyle = coverColorHex(color)
+  }
+
+  ctx.lineWidth = rim
+  ctx.beginPath()
+  ctx.roundRect(x, y, w, h, 40 - rim / 2)
+  ctx.stroke()
+  ctx.restore()
 }
 
 /** Relative brightness, used to pick readable text/logo colours automatically. */
@@ -115,9 +159,11 @@ export async function renderCardFront({
   ctx.roundRect(0, 0, CARD_WIDTH, CARD_HEIGHT, 40)
   ctx.fill()
 
+  paintCardCover(ctx, settings.coverColor)
+
   ctx.save()
   ctx.beginPath()
-  ctx.roundRect(imageX, imageY, imageW, imageH, 20)
+  ctx.roundRect(imageX, imageY, imageW, imageH, settings.photoRadius)
   ctx.clip()
   try {
     if (!avatarUrl) throw new Error('No avatar')
@@ -128,7 +174,14 @@ export async function renderCardFront({
     const drawH = avatar.naturalHeight * cover * zoom
     const drawX = imageX + (imageW - drawW) / 2 + (settings.photoOffsetX / 100) * imageW
     const drawY = imageY + (imageH - drawH) / 2 + (settings.photoOffsetY / 100) * imageH
+    // Round the photo itself as well as its frame. Without this, shrinking the
+    // photo leaves it short of the frame corners and the radius looks gone.
+    ctx.save()
+    ctx.beginPath()
+    ctx.roundRect(drawX, drawY, drawW, drawH, settings.photoRadius)
+    ctx.clip()
     ctx.drawImage(avatar, drawX, drawY, drawW, drawH)
+    ctx.restore()
   } catch {
     ctx.fillStyle = isDark ? '#333333' : '#4338ca'
     ctx.fillRect(imageX, imageY, imageW, imageH)
@@ -172,6 +225,8 @@ export async function renderCardBack({ logoUrl, isDark, settings, scale = 1 }: C
   ctx.beginPath()
   ctx.roundRect(0, 0, CARD_WIDTH, CARD_HEIGHT, 40)
   ctx.fill()
+
+  paintCardCover(ctx, settings.coverColor)
 
   if (logoUrl) {
     try {

@@ -191,6 +191,10 @@ export interface LanyardSettings {
   photoOffsetX: number
   /** Avatar vertical shift, as a percentage of the photo frame height. */
   photoOffsetY: number
+  /** Photo frame corner radius in px. 0 = square corners. */
+  photoRadius: number
+  /** Colour of the metal ID-card cover / clip hardware. */
+  coverColor: 'silver' | 'black'
   /** Font family used for the name, role and ribbon text. */
   fontFamily: string
 }

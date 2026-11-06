@@ -243,7 +243,7 @@ export default function Hero() {
       className="relative min-h-dvh flex items-center px-4 py-12"
     >
       <ParticleBackground />
-      {front && <Lanyard frontImage={front} backImage={back} lanyardImage={band} position={[0, 0, 28]} fov={18} transparent />}
+      {front && <Lanyard frontImage={front} backImage={back} lanyardImage={band} coverColor={lanyardSettings.coverColor} position={[0, 0, 28]} fov={18} transparent />}
       <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col landscape:flex-row md:flex-row items-center gap-8 landscape:gap-16 md:gap-16 pointer-events-none">
         <div ref={textRef} className="hidden landscape:block md:block w-full landscape:w-1/2 md:w-1/2 text-left pointer-events-auto">
           <p className="text-primary-400 font-display text-base landscape:text-lg md:text-lg mb-4 tracking-[0.2em] uppercase opacity-80">

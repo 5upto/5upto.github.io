@@ -25,6 +25,10 @@ interface LanyardProps {
   imageFit?: 'cover' | 'contain'
   lanyardImage?: string | null
   lanyardWidth?: number
+  /** Centre the card for small preview boxes (same framing as the mobile hero). */
+  compact?: boolean
+  /** Colour of the metal clip / ID-card cover hardware. */
+  coverColor?: 'silver' | 'black'
 }
 
 export default function Lanyard({
@@ -37,6 +41,8 @@ export default function Lanyard({
   imageFit = 'cover',
   lanyardImage = null,
   lanyardWidth = 1,
+  compact = false,
+  coverColor = 'black',
 }: LanyardProps) {
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768)
   const [phoneLandscape, setPhoneLandscape] = useState(() => typeof window !== 'undefined' && window.innerWidth > window.innerHeight && window.innerHeight < 600)
@@ -106,6 +112,8 @@ export default function Lanyard({
               imageFit={imageFit}
               lanyardImage={lanyardImage}
               lanyardWidth={lanyardWidth}
+              compact={compact}
+              coverColor={coverColor}
             />
         </Physics>
         <Environment blur={0.75}>
@@ -152,7 +160,9 @@ function Band({
   backImage = null,
   imageFit = 'cover',
   lanyardImage = null,
-  lanyardWidth = 1
+  lanyardWidth = 1,
+  compact = false,
+  coverColor = 'black'
 }) {
   const band = useRef(),
     fixed = useRef(),
@@ -165,10 +175,23 @@ function Band({
     rot = new THREE.Vector3(),
     dir = new THREE.Vector3()
   const segmentProps = { type: 'dynamic', canSleep: true, colliders: false, angularDamping: 6, linearDamping: 6 }
+  const compactLayout = compact || isMobile
 
   const { nodes, materials } = useGLTF('/lanyard/card.glb')
   const { size } = useThree()
   const fallbackTexture = useTexture('/lanyard/lanyard.png')
+
+  // The GLB ships a near-black metal material. Clone it so silver/black can be
+  // switched per-instance without mutating the shared cached material.
+  const coverMaterial = useMemo(() => {
+    const material = (materials.metal as THREE.MeshStandardMaterial).clone()
+    material.color = new THREE.Color(coverColor === 'silver' ? '#d8dce2' : '#151515')
+    material.metalness = 1
+    material.roughness = coverColor === 'silver' ? 0.2 : 0.5
+    return material
+  }, [materials.metal, coverColor])
+
+  useEffect(() => () => { coverMaterial.dispose() }, [coverMaterial])
 
   const texture = useMemo(() => {
     if (!lanyardImage) return fallbackTexture
@@ -287,7 +310,7 @@ function Band({
       curve.points[1].copy(j2.current.lerped)
       curve.points[2].copy(j1.current.lerped)
       curve.points[3].copy(fixed.current.translation())
-      band.current.geometry.setPoints(curve.getPoints(isMobile ? 16 : 32))
+      band.current.geometry.setPoints(curve.getPoints(compactLayout ? 16 : 32))
       ang.copy(card.current.angvel())
       rot.copy(card.current.rotation())
       card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z })
@@ -299,7 +322,7 @@ function Band({
 
   return (
     <>
-      <group position={[phoneLandscape ? 3 : (isMobile ? 0 : 5), isMobile ? 5 : 4.5, 0]}>
+      <group position={[phoneLandscape ? 3 : (compactLayout ? 0 : 5), compactLayout ? 5 : 4.5, 0]}>
         <RigidBody ref={fixed} {...segmentProps} type="fixed" />
         <RigidBody position={[0.5, 0, 0]} ref={j1} {...segmentProps}>
           <BallCollider args={[0.1]} />
@@ -337,8 +360,8 @@ function Band({
                 metalness={0.8}
               />
             </mesh>
-            <mesh geometry={nodes.clip.geometry} material={materials.metal} material-roughness={0.3} />
-            <mesh geometry={nodes.clamp.geometry} material={materials.metal} />
+            <mesh geometry={nodes.clip.geometry} material={coverMaterial} material-roughness={coverColor === 'silver' ? 0.2 : 0.5} />
+            <mesh geometry={nodes.clamp.geometry} material={coverMaterial} />
           </group>
         </RigidBody>
       </group>
@@ -351,7 +374,7 @@ function Band({
           useMap
           map={texture}
           repeat={[-4, 1]}
-          lineWidth={phoneLandscape ? lanyardWidth * 0.7 : (isMobile ? lanyardWidth * 1.4 : lanyardWidth * 0.7)}
+          lineWidth={phoneLandscape ? lanyardWidth * 0.7 : (compactLayout ? lanyardWidth * 1.4 : lanyardWidth * 0.7)}
         />
       </mesh>
     </>
