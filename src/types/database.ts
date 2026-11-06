@@ -176,7 +176,7 @@ export interface SiteConfig {
   updated_at: string
 }
 
-export type HeroBackgroundStyle = 'particles' | 'antigravity' | 'aurora' | 'grid'
+export type HeroBackgroundStyle = 'particles' | 'antigravity' | 'aurora' | 'grid' | 'galaxy' | 'letter-glitch' | 'hyperspeed' | 'lightning' | 'side-rays'
 
 export type AntigravityColorMode = 'conic' | 'radial' | 'random'
 
@@ -214,6 +214,26 @@ export interface HeroBackgroundSettings {
   enabled: boolean
   style: HeroBackgroundStyle
   antigravity: AntigravitySettings
+  /** Galaxy background config */
+  galaxyDensity: number
+  galaxySpeed: number
+  galaxyHoles: number
+  /** Letter glitch config */
+  glitchSpeed: number
+  glitchIntensity: number
+  glitchOpacity: number
+  /** Hyperspeed config */
+  hyperspeedStreaks: number
+  hyperspeedLength: number
+  hyperspeedRotation: number
+  /** Lightning config */
+  lightningBolts: number
+  lightningThickness: number
+  lightningFrequency: number
+  /** Side rays config */
+  sideraysCount: number
+  sideraysWidth: number
+  sideraysIntensity: number
 }
 
 export interface LanyardSettings {

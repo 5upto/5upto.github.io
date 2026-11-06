@@ -103,8 +103,8 @@ export default function Education() {
       <div
         className="flex flex-none items-center justify-center rounded-full"
         style={{
-          width: unit(isInternational ? 24 : 30),
-          height: unit(isInternational ? 24 : 30),
+          width: unit(isInternational ? 28 : 34),
+          height: unit(isInternational ? 28 : 34),
           background: isNIT ? 'rgba(26, 35, 126, 0.06)' : isInternational ? 'transparent' : 'rgba(249, 245, 224, 0.9)',
           overflow: 'hidden',
         }}
@@ -310,7 +310,7 @@ export default function Education() {
   return (
     <section ref={sectionRef} id="education" className="py-16 md:py-20 pb-8 md:pb-10 px-4 relative">
       <h2 ref={headingRef} className="section-heading text-center mb-8 md:mb-10">
-        <span className="gradient-text">Education</span>
+        
       </h2>
       <div className="max-w-4xl mx-auto">
         <div className="flex min-h-[360px] items-center justify-center md:min-h-[470px]">

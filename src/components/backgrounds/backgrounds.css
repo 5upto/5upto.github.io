@@ -41,46 +41,34 @@ html.dark .hero-aurora-blob {
 .hero-aurora-blob--2 {
   top: -10%;
   right: -22%;
-  background: radial-gradient(circle at 50% 50%, rgba(244, 114, 182, 0.7) 0%, rgba(244, 114, 182, 0) 68%);
-  animation: hero-aurora-drift-2 26s ease-in-out infinite alternate;
+  background: radial-gradient(circle at 50% 50%, rgba(244, 114, 182, 0.75) 0%, rgba(244, 114, 182, 0) 68%);
+  animation: hero-aurora-drift-2 28s ease-in-out infinite alternate;
 }
 
 .hero-aurora-blob--3 {
-  bottom: -32%;
-  left: 18%;
-  background: radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.65) 0%, rgba(34, 211, 238, 0) 68%);
-  animation: hero-aurora-drift-3 30s ease-in-out infinite alternate;
+  bottom: -30%;
+  left: 20%;
+  background: radial-gradient(circle at 50% 50%, rgba(34, 211, 238, 0.7) 0%, rgba(34, 211, 238, 0) 68%);
+  animation: hero-aurora-drift-3 34s ease-in-out infinite alternate;
 }
 
 @keyframes hero-aurora-drift-1 {
-  from {
-    transform: translate3d(-6%, -4%, 0) scale(0.92) rotate(0deg);
-  }
-  to {
-    transform: translate3d(14%, 10%, 0) scale(1.12) rotate(18deg);
-  }
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(12%, 8%) scale(1.1); }
 }
 
 @keyframes hero-aurora-drift-2 {
-  from {
-    transform: translate3d(8%, -6%, 0) scale(1.05) rotate(0deg);
-  }
-  to {
-    transform: translate3d(-12%, 12%, 0) scale(0.9) rotate(-14deg);
-  }
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-10%, 12%) scale(1.15); }
 }
 
 @keyframes hero-aurora-drift-3 {
-  from {
-    transform: translate3d(-8%, 6%, 0) scale(1.08) rotate(-8deg);
-  }
-  to {
-    transform: translate3d(10%, -12%, 0) scale(0.94) rotate(12deg);
-  }
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(8%, -10%) scale(1.08); }
 }
 
 /* ------------------------------------------------------------------ */
-/* Blueprint grid                                                      */
+/* Grid                                                                */
 /* ------------------------------------------------------------------ */
 
 .hero-grid {
@@ -90,65 +78,186 @@ html.dark .hero-aurora-blob {
 }
 
 .hero-grid-lines {
-  --hero-grid-color: rgba(15, 23, 42, 0.1);
   position: absolute;
-  inset: -80px;
+  inset: 0;
   background-image:
-    linear-gradient(to right, var(--hero-grid-color) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--hero-grid-color) 1px, transparent 1px);
-  background-size: 64px 64px;
-  opacity: 0.75;
-  mask-image: radial-gradient(ellipse 78% 70% at 50% 45%, #000 30%, transparent 78%);
-  -webkit-mask-image: radial-gradient(ellipse 78% 70% at 50% 45%, #000 30%, transparent 78%);
-  animation: hero-grid-pan 30s linear infinite;
-}
-
-html.dark .hero-grid-lines {
-  --hero-grid-color: rgba(255, 255, 255, 0.09);
-  opacity: 0.65;
+    linear-gradient(rgba(99, 102, 241, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(99, 102, 241, 0.15) 1px, transparent 1px);
+  background-size: 48px 48px;
+  animation: hero-grid-glow 4s ease-in-out infinite alternate;
 }
 
 .hero-grid-glow {
   position: absolute;
-  left: 50%;
-  top: 42%;
-  width: 64vmax;
-  height: 64vmax;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.3) 0%, rgba(99, 102, 241, 0) 62%);
-  filter: blur(30px);
-  animation: hero-grid-pulse 14s ease-in-out infinite;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
+  pointer-events: none;
 }
 
-html.dark .hero-grid-glow {
-  background: radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.26) 0%, rgba(99, 102, 241, 0) 62%);
+@keyframes hero-grid-glow {
+  0% { opacity: 0.3; }
+  100% { opacity: 0.7; }
 }
 
-@keyframes hero-grid-pan {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(64px, 64px, 0);
-  }
+/* ------------------------------------------------------------------ */
+/* Galaxy                                                              */
+/* ------------------------------------------------------------------ */
+
+.hero-galaxy {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: radial-gradient(ellipse 120% 80% at 30% 20%, #1a1a2e 0%, #16213e 40%, #0f3460 80%, #0a0a1a 100%);
 }
 
-@keyframes hero-grid-pulse {
-  0%,
-  100% {
-    opacity: 0.7;
-    transform: translate(-50%, -50%) scale(0.96);
-  }
-  50% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.08);
-  }
+.hero-galaxy-stars {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 60% 40%, rgba(255,255,255,0.9), transparent),
+    radial-gradient(1px 1px at 80% 80%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 10% 90%, rgba(255,255,255,0.5), transparent),
+    radial-gradient(1px 1px at 90% 10%, rgba(255,255,255,0.85), transparent);
+  background-size: 200px 200px, 300px 300px, 250px 250px, 180px 180px, 320px 320px, 280px 280px;
+  animation: hero-galaxy-twinkle 4s ease-in-out infinite alternate;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .hero-aurora-blob,
-  .hero-grid-lines,
-  .hero-grid-glow {
-    animation: none;
-  }
+.hero-galaxy-nebula {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 30% 20%, rgba(100, 100, 255, 0.3) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 35% at 70% 80%, rgba(255, 100, 150, 0.25) 0%, transparent 70%),
+    radial-gradient(ellipse 45% 30% at 50% 50%, rgba(100, 200, 255, 0.2) 0%, transparent 70%);
+  filter: blur(40px);
+  animation: hero-galaxy-drift 20s ease-in-out infinite alternate;
+}
+
+@keyframes hero-galaxy-twinkle {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+@keyframes hero-galaxy-drift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(2%, 3%); }
+}
+
+/* ------------------------------------------------------------------ */
+/* Letter Glitch                                                       */
+/* ------------------------------------------------------------------ */
+
+.hero-letter-glitch {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(180deg, #0a0a0a 0%, #1a1a2e 100%);
+}
+
+.hero-letter-glitch-lines {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg, transparent 0px, transparent 40px, rgba(255, 0, 0, 0.15) 40px, rgba(255, 0, 0, 0.15) 80px),
+    repeating-linear-gradient(0deg, transparent 0px, transparent 20px, rgba(0, 255, 0, 0.1) 20px, rgba(0, 255, 0, 0.1) 40px);
+  animation: hero-letter-glitch-shift 3s linear infinite;
+}
+
+@keyframes hero-letter-glitch-shift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(40px, 20px); }
+}
+
+/* ------------------------------------------------------------------ */
+/* Hyperspeed                                                         */
+/* ------------------------------------------------------------------ */
+
+.hero-hyperspeed {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #2a2a5e 100%);
+}
+
+.hero-hyperspeed-streaks {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(135deg, transparent 0px, transparent 100px, rgba(99, 102, 241, 0.3) 100px, rgba(99, 102, 241, 0.3) 102px, transparent 102px, transparent 200px),
+    repeating-linear-gradient(135deg, transparent 0px, transparent 150px, rgba(139, 92, 246, 0.25) 150px, rgba(139, 92, 246, 0.25) 152px, transparent 152px, transparent 300px);
+  animation: hero-hyperspeed-move 2s linear infinite;
+}
+
+@keyframes hero-hyperspeed-move {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(200px, 200px); }
+}
+
+/* ------------------------------------------------------------------ */
+/* Lightning                                                          */
+/* ------------------------------------------------------------------ */
+
+.hero-lightning {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: radial-gradient(ellipse 100% 100% at 50% 50%, #1a1a2e 0%, #0a0a1a 100%);
+}
+
+.hero-lightning-bolt {
+  position: absolute;
+  inset: 0;
+  background:
+    conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(251, 191, 36, 0.3) 5deg, transparent 10deg, transparent 180deg, rgba(251, 191, 36, 0.2) 185deg, transparent 190deg, transparent 360deg);
+  animation: hero-lightning-flash 2s ease-in-out infinite;
+}
+
+@keyframes hero-lightning-flash {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* ------------------------------------------------------------------ */
+/* Side Rays                                                          */
+/* ------------------------------------------------------------------ */
+
+.hero-side-rays {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(90deg, #0a0a1a 0%, #1a1a2e 50%, #0a0a1a 100%);
+}
+
+.hero-side-rays-left {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.08) 0%, transparent 100%);
+  clip-path: polygon(0% 0%, 100% 20%, 100% 80%, 0% 100%);
+  animation: hero-side-rays-pulse-left 3s ease-in-out infinite alternate;
+}
+
+.hero-side-rays-right {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 40%;
+  background: linear-gradient(270deg, rgba(255, 255, 255, 0.08) 0%, transparent 100%);
+  clip-path: polygon(0% 20%, 100% 0%, 100% 100%, 0% 80%);
+  animation: hero-side-rays-pulse-right 3s ease-in-out infinite alternate;
+}
+
+@keyframes hero-side-rays-pulse-left {
+  0% { opacity: 0.3; }
+  100% { opacity: 0.8; }
+}
+
+@keyframes hero-side-rays-pulse-right {
+  0% { opacity: 0.3; }
+  100% { opacity: 0.8; }
 }

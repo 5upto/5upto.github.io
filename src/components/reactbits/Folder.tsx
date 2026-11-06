@@ -1107,8 +1107,8 @@ const placeBook = (rank: number, count: number, phase: Phase, layout: string, g:
       const top = g.frontTop + 14 * g.scale + (count - 1) * strip;
       return { x: g.w / 2, y: top + (g.docH * fit) / 2 - rank * strip, z: 0, r: 0, ry: 0, s: fit };
     }
-    const fit = count > 4 ? (count > 5 ? 0.44 : 0.5) : count > 3 ? 0.58 : 0.7;
-    const span = count === 2 ? g.w * 1.42 : Math.min(g.w * 1.7, g.w * 0.78 * (count - 1));
+    const fit = count > 4 ? (count > 5 ? 0.42 : 0.48) : count > 3 ? 0.55 : 0.65;
+    const span = count === 2 ? g.w * 1.35 : Math.min(g.w * 1.55, g.w * 0.68 * (count - 1));
     const x = count > 1 ? span / 2 - (rank * span) / (count - 1) : g.w * 0.5;
     return { x: g.w / 2 + x, y: pileY + SPREAD_DROP[rank] * g.h, z: 0, r: SPREAD_TURN[rank], ry: 0, s: fit };
   }

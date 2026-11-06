@@ -403,6 +403,57 @@ export default function HeroBackgroundPage() {
               </Section>
             </>
           )}
+
+{form.style === 'galaxy' && (
+            <Section title="Galaxy Palette" description="Color controls for the galaxy background.">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <RangeField label="Star density" value={100} min={50} max={300} step={1} onChange={(val) => setForm(f => ({...f, galaxyDensity: val}))} />
+                <RangeField label="Nebula speed" value={1} min={0.1} max={5} step={0.1} onChange={(val) => setForm(f => ({...f, galaxySpeed: val}))} />
+                <RangeField label="Black hole count" value={0} min={0} max={10} step={1} onChange={(val) => setForm(f => ({...f, galaxyHoles: val}))} />
+              </div>
+            </Section>
+          )}
+          
+          {form.style === 'letter-glitch' && (
+            <Section title="Glitch Config" description="Settings for letter glitch effect.">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <RangeField label="Glitch speed" value={1} min={0.1} max={10} step={0.1} onChange={(val) => setForm(f => ({...f, glitchSpeed: val}))} />
+                <RangeField label="Glitch intensity" value={5} min={1} max={20} step={1} onChange={(val) => setForm(f => ({...f, glitchIntensity: val}))} />
+                <RangeField label="Scan line opacity" value={0.5} min={0} max={1} step={0.1} onChange={(val) => setForm(f => ({...f, glitchOpacity: val}))} />
+              </div>
+            </Section>
+          )}
+          
+          {form.style === 'hyperspeed' && (
+            <Section title="Hyperspeed Config" description="Settings for hyperspeed streaks.">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <RangeField label="Streak count" value={20} min={5} max={50} step={1} onChange={(val) => setForm(f => ({...f, hyperspeedStreaks: val}))} />
+                <RangeField label="Streak length" value={5} min={1} max={20} step={1} onChange={(val) => setForm(f => ({...f, hyperspeedLength: val}))} />
+                <RangeField label="Rotation speed" value={1} min={0.1} max={5} step={0.1} onChange={(val) => setForm(f => ({...f, hyperspeedRotation: val}))} />
+              </div>
+            </Section>
+          )}
+          
+          {form.style === 'lightning' && (
+            <Section title="Lightning Config" description="Settings for lightning bolts.">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <RangeField label="Bolt count" value={5} min={1} max={20} step={1} onChange={(val) => setForm(f => ({...f, lightningBolts: val}))} />
+                <RangeField label="Bolt thickness" value={3} min={1} max={10} step={1} onChange={(val) => setForm(f => ({...f, lightningThickness: val}))} />
+                <RangeField label="Strike frequency" value={1} min={0.1} max={5} step={0.1} onChange={(val) => setForm(f => ({...f, lightningFrequency: val}))} />
+              </div>
+            </Section>
+          )}
+          
+          {form.style === 'side-rays' && (
+            <Section title="Side Rays Config" description="Settings for side rays effect.">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <RangeField label="Ray count" value={4} min={2} max={10} step={1} onChange={(val) => setForm(f => ({...f, sideraysCount: val}))} />
+                <RangeField label="Ray width" value={2} min={1} max={10} step={1} onChange={(val) => setForm(f => ({...f, sideraysWidth: val}))} />
+                <RangeField label="Ray intensity" value={0.5} min={0} max={1} step={0.1} onChange={(val) => setForm(f => ({...f, sideraysIntensity: val}))} />
+              </div>
+            </Section>
+          )}
+
         </div>
 
         <div className="space-y-4 xl:sticky xl:top-6 h-fit">
@@ -434,6 +485,9 @@ export default function HeroBackgroundPage() {
             <p className="text-[10px] text-[var(--text-muted)] mt-4 leading-relaxed">
               Move the pointer inside the preview to test the cursor field. Antigravity colours automatically adjust for light and dark mode, and the saved setting follows the same theme as the live hero.
             </p>
+          
+          
+
           </div>
         </div>
       </div>

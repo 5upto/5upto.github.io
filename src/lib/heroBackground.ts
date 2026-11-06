@@ -19,6 +19,11 @@ export const HERO_BACKGROUND_STYLES: readonly HeroBackgroundStyle[] = [
   'antigravity',
   'aurora',
   'grid',
+  'galaxy',
+  'letter-glitch',
+  'hyperspeed',
+  'lightning',
+  'side-rays',
 ]
 
 export const ANTIGRAVITY_COLOR_MODES: readonly AntigravityColorMode[] = ['conic', 'radial', 'random']
@@ -59,6 +64,36 @@ export const HERO_BACKGROUND_OPTIONS: {
     label: 'Blueprint grid',
     description: 'Fading technical grid with a slow glow. Crisp and minimal.',
     preview: 'linear-gradient(rgba(99,102,241,.4) 1px, transparent 1px) 0 0 / 16px 16px, linear-gradient(90deg, rgba(99,102,241,.4) 1px, transparent 1px) 0 0 / 16px 16px',
+  },
+  {
+    value: 'galaxy',
+    label: 'Galaxy',
+    description: 'Deep space with swirling nebula colors.',
+    preview: 'radial-gradient(ellipse at 30% 20%, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+  },
+  {
+    value: 'letter-glitch',
+    label: 'Letter Glitch',
+    description: 'Horizontal scan lines with color shifting text.',
+    preview: 'linear-gradient(90deg, #ff0000 0%, #00ff00 20%, #0000ff 40%, #ffff00 60%, #ff00ff 80%, #ff0000 100%)',
+  },
+  {
+    value: 'hyperspeed',
+    label: 'Hyperspeed',
+    description: 'Dynamic diagonal streaks suggesting motion.',
+    preview: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%)',
+  },
+  {
+    value: 'lightning',
+    label: 'Lightning',
+    description: 'Bright zigzag lightning bolts.',
+    preview: 'conic-gradient(from 0deg at 50% 50%, #fbbf24, #f87171, #a3e635, #60a5fa, #fbbf24)',
+  },
+  {
+    value: 'side-rays',
+    label: 'Side Rays',
+    description: 'Radial rays from left and right edges.',
+    preview: 'repeated-linear-gradient(90deg, rgba(255,255,255,.1) 0px, rgba(255,255,255,.1) 10px, transparent 10px, transparent 20px)',
   },
 ]
 
@@ -104,6 +139,21 @@ export const DEFAULT_HERO_BACKGROUND_SETTINGS: HeroBackgroundSettings = {
   enabled: true,
   style: 'particles',
   antigravity: DEFAULT_ANTIGRAVITY_SETTINGS,
+  galaxyDensity: 100,
+  galaxySpeed: 1,
+  galaxyHoles: 0,
+  glitchSpeed: 1,
+  glitchIntensity: 5,
+  glitchOpacity: 0.5,
+  hyperspeedStreaks: 20,
+  hyperspeedLength: 5,
+  hyperspeedRotation: 1,
+  lightningBolts: 5,
+  lightningThickness: 3,
+  lightningFrequency: 1,
+  sideraysCount: 4,
+  sideraysWidth: 2,
+  sideraysIntensity: 0.5,
 }
 
 export const ANTIGRAVITY_PRESETS: {
@@ -224,5 +274,20 @@ export function normalizeHeroBackgroundSettings(value: unknown): HeroBackgroundS
     enabled: typeof v.enabled === 'boolean' ? v.enabled : DEFAULT_HERO_BACKGROUND_SETTINGS.enabled,
     style: oneOf(v.style, HERO_BACKGROUND_STYLES, DEFAULT_HERO_BACKGROUND_SETTINGS.style),
     antigravity: normalizeAntigravitySettings(v.antigravity),
+    galaxyDensity: typeof v.galaxyDensity === 'number' ? v.galaxyDensity : DEFAULT_HERO_BACKGROUND_SETTINGS.galaxyDensity,
+    galaxySpeed: typeof v.galaxySpeed === 'number' ? v.galaxySpeed : DEFAULT_HERO_BACKGROUND_SETTINGS.galaxySpeed,
+    galaxyHoles: typeof v.galaxyHoles === 'number' ? v.galaxyHoles : DEFAULT_HERO_BACKGROUND_SETTINGS.galaxyHoles,
+    glitchSpeed: typeof v.glitchSpeed === 'number' ? v.glitchSpeed : DEFAULT_HERO_BACKGROUND_SETTINGS.glitchSpeed,
+    glitchIntensity: typeof v.glitchIntensity === 'number' ? v.glitchIntensity : DEFAULT_HERO_BACKGROUND_SETTINGS.glitchIntensity,
+    glitchOpacity: typeof v.glitchOpacity === 'number' ? v.glitchOpacity : DEFAULT_HERO_BACKGROUND_SETTINGS.glitchOpacity,
+    hyperspeedStreaks: typeof v.hyperspeedStreaks === 'number' ? v.hyperspeedStreaks : DEFAULT_HERO_BACKGROUND_SETTINGS.hyperspeedStreaks,
+    hyperspeedLength: typeof v.hyperspeedLength === 'number' ? v.hyperspeedLength : DEFAULT_HERO_BACKGROUND_SETTINGS.hyperspeedLength,
+    hyperspeedRotation: typeof v.hyperspeedRotation === 'number' ? v.hyperspeedRotation : DEFAULT_HERO_BACKGROUND_SETTINGS.hyperspeedRotation,
+    lightningBolts: typeof v.lightningBolts === 'number' ? v.lightningBolts : DEFAULT_HERO_BACKGROUND_SETTINGS.lightningBolts,
+    lightningThickness: typeof v.lightningThickness === 'number' ? v.lightningThickness : DEFAULT_HERO_BACKGROUND_SETTINGS.lightningThickness,
+    lightningFrequency: typeof v.lightningFrequency === 'number' ? v.lightningFrequency : DEFAULT_HERO_BACKGROUND_SETTINGS.lightningFrequency,
+    sideraysCount: typeof v.sideraysCount === 'number' ? v.sideraysCount : DEFAULT_HERO_BACKGROUND_SETTINGS.sideraysCount,
+    sideraysWidth: typeof v.sideraysWidth === 'number' ? v.sideraysWidth : DEFAULT_HERO_BACKGROUND_SETTINGS.sideraysWidth,
+    sideraysIntensity: typeof v.sideraysIntensity === 'number' ? v.sideraysIntensity : DEFAULT_HERO_BACKGROUND_SETTINGS.sideraysIntensity,
   }
 }

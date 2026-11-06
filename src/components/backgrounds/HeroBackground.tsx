@@ -1,6 +1,11 @@
 import Antigravity from './Antigravity'
 import AuroraBackground from './AuroraBackground'
 import GridBackground from './GridBackground'
+import Galaxy from './Galaxy'
+import LetterGlitch from './LetterGlitch'
+import Hyperspeed from './Hyperspeed'
+import Lightning from './Lightning'
+import SideRays from './SideRays'
 import ParticleBackground from '../ParticleBackground'
 import type { HeroBackgroundSettings } from '../../types/database'
 
@@ -50,6 +55,11 @@ export default function HeroBackground({ settings, isDark }: HeroBackgroundProps
       )}
       {settings.style === 'aurora' && <AuroraBackground />}
       {settings.style === 'grid' && <GridBackground />}
+      {settings.style === 'galaxy' && <Galaxy lightMode={!isDark} className="h-full w-full" />}
+      {settings.style === 'letter-glitch' && <LetterGlitch lightMode={!isDark} className="h-full w-full" />}
+      {settings.style === 'hyperspeed' && <Hyperspeed className="h-full w-full" />}
+      {settings.style === 'lightning' && <Lightning lightMode={!isDark} className="h-full w-full" />}
+      {settings.style === 'side-rays' && <SideRays lightMode={!isDark} className="h-full w-full" />}
     </div>
   )
 }
