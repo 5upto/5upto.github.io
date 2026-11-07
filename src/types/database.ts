@@ -176,11 +176,101 @@ export interface SiteConfig {
   updated_at: string
 }
 
-export type HeroBackgroundStyle = 'particles' | 'antigravity' | 'aurora' | 'grid' | 'galaxy' | 'letter-glitch' | 'hyperspeed' | 'lightning' | 'side-rays'
+export type HeroBackgroundStyle = 'particles' | 'antigravity' | 'galaxy' | 'letter-glitch' | 'hyperspeed' | 'lightning' | 'side-rays'
 
 export type AntigravityColorMode = 'conic' | 'radial' | 'random'
 
 export type AntigravityParticleShape = 'capsule' | 'sphere' | 'box' | 'tetrahedron'
+
+export type GalaxyDirection = 'forward' | 'backward'
+
+export type LetterGlitchClickEffect = 'tear' | 'burst' | 'none'
+
+export type HyperspeedCurve = 'straight' | 'gentle' | 'winding' | 'hills' | 'racing' | 'deep'
+
+export type SideRaysOrigin = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'right' | 'left'
+
+export type ParticleShapeType = 'circle' | 'edge' | 'triangle' | 'polygon' | 'star' | 'image'
+
+export type ParticleMoveDirection =
+  | 'none'
+  | 'top'
+  | 'top-right'
+  | 'right'
+  | 'bottom-right'
+  | 'bottom'
+  | 'bottom-left'
+  | 'left'
+  | 'top-left'
+
+export type ParticleOutMode = 'out' | 'bounce'
+
+export type ParticleDetectOn = 'canvas' | 'window'
+
+export type ParticleHoverMode = 'grab' | 'repulse' | 'bubble'
+
+export type ParticleClickMode = 'push' | 'remove' | 'repulse' | 'bubble'
+
+/** Full particles.js v2 configuration. */
+export interface ParticleSettings {
+  number: number
+  densityEnable: boolean
+  densityArea: number
+  /** Empty means the theme colour. */
+  color: string
+  shapeType: ParticleShapeType
+  shapeStrokeWidth: number
+  shapeStrokeColor: string
+  polygonSides: number
+  imageSrc: string
+  imageWidth: number
+  imageHeight: number
+  opacity: number
+  opacityRandom: boolean
+  opacityAnimEnable: boolean
+  opacityAnimSpeed: number
+  opacityAnimMin: number
+  opacityAnimSync: boolean
+  size: number
+  sizeRandom: boolean
+  sizeAnimEnable: boolean
+  sizeAnimSpeed: number
+  sizeAnimMin: number
+  sizeAnimSync: boolean
+  lineLinkedEnable: boolean
+  lineLinkedDistance: number
+  /** Empty means the theme colour. */
+  lineLinkedColor: string
+  lineLinkedOpacity: number
+  lineLinkedWidth: number
+  moveEnable: boolean
+  moveSpeed: number
+  moveDirection: ParticleMoveDirection
+  moveRandom: boolean
+  moveStraight: boolean
+  moveOutMode: ParticleOutMode
+  moveBounce: boolean
+  moveAttractEnable: boolean
+  moveAttractRotateX: number
+  moveAttractRotateY: number
+  detectOn: ParticleDetectOn
+  hoverEnable: boolean
+  hoverMode: ParticleHoverMode
+  clickEnable: boolean
+  clickMode: ParticleClickMode
+  resize: boolean
+  grabDistance: number
+  grabLineOpacity: number
+  bubbleDistance: number
+  bubbleSize: number
+  bubbleDuration: number
+  bubbleOpacity: number
+  repulseDistance: number
+  repulseDuration: number
+  pushCount: number
+  removeCount: number
+  retinaDetect: boolean
+}
 
 /** Full ReactBits Antigravity configuration, so every tweak can be persisted. */
 export interface AntigravitySettings {
@@ -208,32 +298,157 @@ export interface AntigravitySettings {
   intro: boolean
 }
 
+/** Full ReactBits Galaxy configuration, so every prop can be persisted. */
+export interface GalaxySettings {
+  focalX: number
+  focalY: number
+  /** Star rotation in degrees; converted to the ReactBits [cos, sin] pair. */
+  rotationAngle: number
+  starSpeed: number
+  density: number
+  hueShift: number
+  disableAnimation: boolean
+  speed: number
+  mouseInteraction: boolean
+  glowIntensity: number
+  saturation: number
+  mouseRepulsion: boolean
+  repulsionStrength: number
+  twinkleIntensity: number
+  rotationSpeed: number
+  autoCenterRepulsion: number
+  transparent: boolean
+  /** Empty means the theme palette. */
+  starColors: string[]
+  starSize: number
+  flareIntensity: number
+  layers: number
+  direction: GalaxyDirection
+  clickWarp: boolean
+  intro: boolean
+  /** Empty means the theme background. */
+  backgroundColor: string
+  opacity: number
+}
+
+/** Full ReactBits Letter Glitch configuration. */
+export interface LetterGlitchSettings {
+  /** Empty means the theme palette. */
+  glitchColors: string[]
+  /** Empty means the theme base colour. */
+  baseColor: string
+  characters: string
+  /** Empty means the ReactBits monospace stack. */
+  fontFamily: string
+  fontSize: number
+  spacing: number
+  density: number
+  baseOpacity: number
+  glitchAmount: number
+  speed: number
+  smooth: boolean
+  interactive: boolean
+  cursorRadius: number
+  clickEffect: LetterGlitchClickEffect
+  flow: number
+  edgeFade: number
+  centerFade: number
+  intro: boolean
+  /** Empty means the theme background. */
+  backgroundColor: string
+}
+
+/** Full ReactBits Hyperspeed configuration. */
+export interface HyperspeedSettings {
+  curve: HyperspeedCurve
+  curvature: number
+  speed: number
+  boost: number
+  fov: number
+  boostFov: number
+  lanes: number
+  roadWidth: number
+  medianWidth: number
+  density: number
+  trailLength: number
+  lightSize: number
+  poles: number
+  poleHeight: number
+  dust: number
+  glow: number
+  reflections: number
+  steer: number
+  /** Empty arrays and colours fall back to the theme palette. */
+  tailColors: string[]
+  headColors: string[]
+  poleColors: string[]
+  roadColor: string
+  roadOpacity: number
+  lineColor: string
+  background: string
+  interactive: boolean
+}
+
+/** Full ReactBits Lightning configuration. */
+export interface LightningSettings {
+  color: string
+  bolts: number
+  spread: number
+  branches: number
+  xOffset: number
+  /** Rotation in degrees. */
+  angle: number
+  size: number
+  thickness: number
+  glow: number
+  intensity: number
+  speed: number
+  flicker: number
+  mouseInteraction: boolean
+  mouseStrength: number
+  clickStrike: boolean
+  intro: boolean
+  fade: number
+  opacity: number
+  paused: boolean
+}
+
+/** Full ReactBits Side Rays configuration. */
+export interface SideRaysSettings {
+  rayColor1: string
+  rayColor2: string
+  blend: number
+  origin: SideRaysOrigin
+  speed: number
+  intensity: number
+  spread: number
+  density: number
+  sharpness: number
+  /** Tilt in degrees. */
+  tilt: number
+  falloff: number
+  glow: number
+  saturation: number
+  dust: number
+  followMouse: boolean
+  mouseInfluence: number
+  intro: boolean
+  opacity: number
+}
 /** Hero section background, stored in site_config under the "hero_background" key. */
 export interface HeroBackgroundSettings {
   /** Master switch. When false the hero renders on the plain page background. */
   enabled: boolean
   style: HeroBackgroundStyle
   antigravity: AntigravitySettings
-  /** Galaxy background config */
-  galaxyDensity: number
-  galaxySpeed: number
-  galaxyHoles: number
-  /** Letter glitch config */
-  glitchSpeed: number
-  glitchIntensity: number
-  glitchOpacity: number
-  /** Hyperspeed config */
-  hyperspeedStreaks: number
-  hyperspeedLength: number
-  hyperspeedRotation: number
-  /** Lightning config */
-  lightningBolts: number
-  lightningThickness: number
-  lightningFrequency: number
-  /** Side rays config */
-  sideraysCount: number
-  sideraysWidth: number
-  sideraysIntensity: number
+  /** particles.js configuration */
+  particles: ParticleSettings
+  /** ReactBits backgrounds */
+  galaxy: GalaxySettings
+  letterGlitch: LetterGlitchSettings
+  hyperspeed: HyperspeedSettings
+  lightning: LightningSettings
+  sideRays: SideRaysSettings
 }
 
 export interface LanyardSettings {

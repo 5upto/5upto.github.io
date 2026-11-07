@@ -167,6 +167,7 @@ export default function Education() {
               style={{ border: `${unit(0.6)} solid ${innerFrame}`, padding: `${unit(3.5)} ${unit(3)}` }}
             >
               <div className="flex w-full flex-col items-center">
+                {edu.logo && <div style={{ marginBottom: unit(2) }}>{logo}</div>}
                 {edu.country_name && (
                   <p className="uppercase leading-tight" style={{ color: '#8a7a5a', fontSize: unit(3.7), letterSpacing: '0.2em' }}>
                     {edu.country_name}
@@ -199,7 +200,6 @@ export default function Education() {
                     in {edu.subject}
                   </p>
                 )}
-                {edu.logo && <div style={{ marginTop: unit(3) }}>{logo}</div>}
               </div>
 
               <div className="flex w-full flex-col items-center">

@@ -230,7 +230,7 @@ export default function Hero() {
   const { data: profile } = useProfile()
   const { data: experiences, isFetched: experiencesFetched } = useExperiences()
   const { data: lanyardSettings, isFetched: lanyardSettingsFetched } = useLanyardSettings()
-  const { data: heroBackground } = useHeroBackgroundSettings()
+  const { data: heroBackground, isFetched: heroBackgroundFetched } = useHeroBackgroundSettings()
   const { data: resume } = useLiveResume()
   const currentExp = experiences?.[0] ?? null
   const { play } = useSound()
@@ -259,7 +259,7 @@ export default function Hero() {
       id="hero"
       className="relative min-h-dvh flex items-center px-4 py-12"
     >
-      <HeroBackground settings={heroBackground} isDark={isDark} />
+      {heroBackgroundFetched && <HeroBackground settings={heroBackground} isDark={isDark} />}
       {front && <Lanyard frontImage={front} backImage={back} lanyardImage={band} coverColor={lanyardSettings.coverColor} position={[0, 0, 28]} fov={18} transparent />}
       <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col landscape:flex-row md:flex-row items-center gap-8 landscape:gap-16 md:gap-16 pointer-events-none">
         <div ref={textRef} className="hidden landscape:block md:block w-full landscape:w-1/2 md:w-1/2 text-left pointer-events-auto">

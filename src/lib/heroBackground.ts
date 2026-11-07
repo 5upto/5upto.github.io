@@ -2,8 +2,24 @@ import type {
   AntigravityColorMode,
   AntigravityParticleShape,
   AntigravitySettings,
+  GalaxyDirection,
+  GalaxySettings,
   HeroBackgroundSettings,
   HeroBackgroundStyle,
+  HyperspeedCurve,
+  HyperspeedSettings,
+  LetterGlitchClickEffect,
+  LetterGlitchSettings,
+  LightningSettings,
+  ParticleClickMode,
+  ParticleDetectOn,
+  ParticleHoverMode,
+  ParticleMoveDirection,
+  ParticleOutMode,
+  ParticleSettings,
+  ParticleShapeType,
+  SideRaysOrigin,
+  SideRaysSettings,
 } from '../types/database'
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/
@@ -17,8 +33,6 @@ const oneOf = <T extends string>(value: unknown, options: readonly T[], fallback
 export const HERO_BACKGROUND_STYLES: readonly HeroBackgroundStyle[] = [
   'particles',
   'antigravity',
-  'aurora',
-  'grid',
   'galaxy',
   'letter-glitch',
   'hyperspeed',
@@ -34,6 +48,61 @@ export const ANTIGRAVITY_SHAPES: readonly AntigravityParticleShape[] = [
   'box',
   'tetrahedron',
 ]
+
+export const GALAXY_DIRECTIONS: readonly GalaxyDirection[] = ['forward', 'backward']
+
+export const LETTER_GLITCH_CLICK_EFFECTS: readonly LetterGlitchClickEffect[] = ['tear', 'burst', 'none']
+
+export const HYPERSPEED_CURVES: readonly HyperspeedCurve[] = [
+  'straight',
+  'gentle',
+  'winding',
+  'hills',
+  'racing',
+  'deep',
+]
+
+export const SIDE_RAYS_ORIGINS: readonly SideRaysOrigin[] = [
+  'top-right',
+  'top-left',
+  'bottom-right',
+  'bottom-left',
+  'right',
+  'left',
+]
+
+export const PARTICLE_SHAPES: readonly ParticleShapeType[] = [
+  'circle',
+  'edge',
+  'triangle',
+  'polygon',
+  'star',
+  'image',
+]
+
+export const PARTICLE_MOVE_DIRECTIONS: readonly ParticleMoveDirection[] = [
+  'none',
+  'top',
+  'top-right',
+  'right',
+  'bottom-right',
+  'bottom',
+  'bottom-left',
+  'left',
+  'top-left',
+]
+
+export const PARTICLE_OUT_MODES: readonly ParticleOutMode[] = ['out', 'bounce']
+
+export const PARTICLE_DETECT_ON: readonly ParticleDetectOn[] = ['canvas', 'window']
+
+export const PARTICLE_HOVER_MODES: readonly ParticleHoverMode[] = ['grab', 'repulse', 'bubble']
+
+export const PARTICLE_CLICK_MODES: readonly ParticleClickMode[] = ['push', 'remove', 'repulse', 'bubble']
+
+/** ReactBits Letter Glitch default glyph set. */
+export const LETTER_GLITCH_DEFAULT_CHARACTERS =
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$&*()-_+=/[]{};:<>.,0123456789'
 
 export const HERO_BACKGROUND_OPTIONS: {
   value: HeroBackgroundStyle
@@ -52,18 +121,6 @@ export const HERO_BACKGROUND_OPTIONS: {
     label: 'Antigravity',
     description: 'ReactBits particle field that orbits the cursor and bursts on click.',
     preview: 'conic-gradient(from 210deg at 50% 50%, #4285F4, #9B72CB, #D96570, #F9AB00, #4285F4)',
-  },
-  {
-    value: 'aurora',
-    label: 'Aurora',
-    description: 'Soft drifting colour clouds. Calm and GPU-cheap.',
-    preview: 'radial-gradient(circle at 25% 30%, #6366f1 0%, transparent 45%), radial-gradient(circle at 75% 60%, #f472b6 0%, transparent 45%), radial-gradient(circle at 55% 85%, #22d3ee 0%, transparent 45%)',
-  },
-  {
-    value: 'grid',
-    label: 'Blueprint grid',
-    description: 'Fading technical grid with a slow glow. Crisp and minimal.',
-    preview: 'linear-gradient(rgba(99,102,241,.4) 1px, transparent 1px) 0 0 / 16px 16px, linear-gradient(90deg, rgba(99,102,241,.4) 1px, transparent 1px) 0 0 / 16px 16px',
   },
   {
     value: 'galaxy',
@@ -135,25 +192,197 @@ export const DEFAULT_ANTIGRAVITY_SETTINGS: AntigravitySettings = {
   magnetRadius: 11,
 }
 
+export const DEFAULT_GALAXY_SETTINGS: GalaxySettings = {
+  focalX: 0.5,
+  focalY: 0.5,
+  rotationAngle: 0,
+  starSpeed: 0.5,
+  density: 1,
+  hueShift: 140,
+  disableAnimation: false,
+  speed: 1,
+  mouseInteraction: true,
+  glowIntensity: 0.3,
+  saturation: 0,
+  mouseRepulsion: true,
+  repulsionStrength: 2,
+  twinkleIntensity: 0.3,
+  rotationSpeed: 0.1,
+  autoCenterRepulsion: 0,
+  transparent: true,
+  starColors: [],
+  starSize: 1,
+  flareIntensity: 1,
+  layers: 4,
+  direction: 'forward',
+  clickWarp: true,
+  intro: true,
+  backgroundColor: '',
+  opacity: 1,
+}
+
+export const DEFAULT_LETTER_GLITCH_SETTINGS: LetterGlitchSettings = {
+  glitchColors: [],
+  baseColor: '',
+  characters: LETTER_GLITCH_DEFAULT_CHARACTERS,
+  fontFamily: '',
+  fontSize: 14,
+  spacing: 0.6,
+  density: 0.9,
+  baseOpacity: 0.16,
+  glitchAmount: 0.5,
+  speed: 1,
+  smooth: true,
+  interactive: true,
+  cursorRadius: 140,
+  clickEffect: 'tear',
+  flow: 0.5,
+  edgeFade: 0,
+  centerFade: 0,
+  intro: true,
+  backgroundColor: '',
+}
+
+export const DEFAULT_HYPERSPEED_SETTINGS: HyperspeedSettings = {
+  curve: 'winding',
+  curvature: 1,
+  speed: 1,
+  boost: 3,
+  fov: 90,
+  boostFov: 130,
+  lanes: 3,
+  roadWidth: 10,
+  medianWidth: 2,
+  density: 40,
+  trailLength: 1,
+  lightSize: 1,
+  poles: 20,
+  poleHeight: 1,
+  dust: 100,
+  glow: 0.6,
+  reflections: 0.5,
+  steer: 0.35,
+  tailColors: [],
+  headColors: [],
+  poleColors: [],
+  roadColor: '',
+  roadOpacity: 0.1,
+  lineColor: '',
+  background: '',
+  interactive: true,
+}
+
+export const DEFAULT_LIGHTNING_SETTINGS: LightningSettings = {
+  color: '#4d6bff',
+  bolts: 1,
+  spread: 0.6,
+  branches: 0.5,
+  xOffset: 0,
+  angle: 0,
+  size: 1,
+  thickness: 1,
+  glow: 1,
+  intensity: 1,
+  speed: 1,
+  flicker: 0.6,
+  mouseInteraction: true,
+  mouseStrength: 1,
+  clickStrike: true,
+  intro: true,
+  fade: 0,
+  opacity: 1,
+  paused: false,
+}
+
+export const DEFAULT_SIDE_RAYS_SETTINGS: SideRaysSettings = {
+  rayColor1: '#FFC46B',
+  rayColor2: '#96c8ff',
+  blend: 0.6,
+  origin: 'top-right',
+  speed: 2.5,
+  intensity: 2,
+  spread: 2,
+  density: 5,
+  sharpness: 0.5,
+  tilt: 0,
+  falloff: 1.6,
+  glow: 1,
+  saturation: 1,
+  dust: 0,
+  followMouse: true,
+  mouseInfluence: 0.5,
+  intro: true,
+  opacity: 1,
+}
+
+export const DEFAULT_PARTICLE_SETTINGS: ParticleSettings = {
+  number: 110,
+  densityEnable: true,
+  densityArea: 700,
+  color: '',
+  shapeType: 'circle',
+  shapeStrokeWidth: 0,
+  shapeStrokeColor: '#ff0000',
+  polygonSides: 5,
+  imageSrc: '',
+  imageWidth: 100,
+  imageHeight: 100,
+  opacity: 0.65,
+  opacityRandom: true,
+  opacityAnimEnable: true,
+  opacityAnimSpeed: 0.6,
+  opacityAnimMin: 0.2,
+  opacityAnimSync: false,
+  size: 3.5,
+  sizeRandom: true,
+  sizeAnimEnable: true,
+  sizeAnimSpeed: 1,
+  sizeAnimMin: 1,
+  sizeAnimSync: false,
+  lineLinkedEnable: true,
+  lineLinkedDistance: 210,
+  lineLinkedColor: '',
+  lineLinkedOpacity: 0.4,
+  lineLinkedWidth: 1,
+  moveEnable: true,
+  moveSpeed: 1.5,
+  moveDirection: 'none',
+  moveRandom: true,
+  moveStraight: false,
+  moveOutMode: 'out',
+  moveBounce: false,
+  moveAttractEnable: false,
+  moveAttractRotateX: 6000,
+  moveAttractRotateY: 1200,
+  detectOn: 'window',
+  hoverEnable: true,
+  hoverMode: 'repulse',
+  clickEnable: true,
+  clickMode: 'push',
+  resize: true,
+  grabDistance: 180,
+  grabLineOpacity: 0.4,
+  bubbleDistance: 200,
+  bubbleSize: 8,
+  bubbleDuration: 2,
+  bubbleOpacity: 1,
+  repulseDistance: 180,
+  repulseDuration: 0.4,
+  pushCount: 3,
+  removeCount: 2,
+  retinaDetect: true,
+}
+
 export const DEFAULT_HERO_BACKGROUND_SETTINGS: HeroBackgroundSettings = {
   enabled: true,
   style: 'particles',
   antigravity: DEFAULT_ANTIGRAVITY_SETTINGS,
-  galaxyDensity: 100,
-  galaxySpeed: 1,
-  galaxyHoles: 0,
-  glitchSpeed: 1,
-  glitchIntensity: 5,
-  glitchOpacity: 0.5,
-  hyperspeedStreaks: 20,
-  hyperspeedLength: 5,
-  hyperspeedRotation: 1,
-  lightningBolts: 5,
-  lightningThickness: 3,
-  lightningFrequency: 1,
-  sideraysCount: 4,
-  sideraysWidth: 2,
-  sideraysIntensity: 0.5,
+  particles: DEFAULT_PARTICLE_SETTINGS,
+  galaxy: DEFAULT_GALAXY_SETTINGS,
+  letterGlitch: DEFAULT_LETTER_GLITCH_SETTINGS,
+  hyperspeed: DEFAULT_HYPERSPEED_SETTINGS,
+  lightning: DEFAULT_LIGHTNING_SETTINGS,
+  sideRays: DEFAULT_SIDE_RAYS_SETTINGS,
 }
 
 export const ANTIGRAVITY_PRESETS: {
@@ -267,6 +496,268 @@ export function normalizeAntigravitySettings(value: unknown): AntigravitySetting
   }
 }
 
+const normalizePalette = (value: unknown, max: number) =>
+  Array.isArray(value)
+    ? value.filter((color): color is string => typeof color === 'string' && HEX_RE.test(color)).slice(0, max)
+    : []
+
+const normalizeOptionalColor = (value: unknown) =>
+  typeof value === 'string' && HEX_RE.test(value) ? value : ''
+
+const normalizeRequiredColor = (value: unknown, fallback: string) =>
+  typeof value === 'string' && HEX_RE.test(value) ? value : fallback
+
+const asObject = (value: unknown): Record<string, unknown> =>
+  value && typeof value === 'object' ? (value as Record<string, unknown>) : {}
+
+export function normalizeParticleSettings(value: unknown, legacy?: Record<string, unknown>): ParticleSettings {
+  const d = DEFAULT_PARTICLE_SETTINGS
+  const old = asObject(legacy)
+  const v: Record<string, unknown> = {
+    ...(typeof old.particleCount === 'number' ? { number: old.particleCount } : {}),
+    ...(typeof old.particleSpeed === 'number' ? { moveSpeed: old.particleSpeed } : {}),
+    ...(typeof old.particleOpacity === 'number' ? { opacity: old.particleOpacity } : {}),
+    ...asObject(value),
+  }
+
+  return {
+    number: Math.round(clamp(v.number, 10, 1000, d.number)),
+    densityEnable: typeof v.densityEnable === 'boolean' ? v.densityEnable : d.densityEnable,
+    densityArea: clamp(v.densityArea, 100, 3000, d.densityArea),
+    color: normalizeOptionalColor(v.color),
+    shapeType: oneOf(v.shapeType, PARTICLE_SHAPES, d.shapeType),
+    shapeStrokeWidth: clamp(v.shapeStrokeWidth, 0, 10, d.shapeStrokeWidth),
+    shapeStrokeColor: normalizeRequiredColor(v.shapeStrokeColor, d.shapeStrokeColor),
+    polygonSides: Math.round(clamp(v.polygonSides, 3, 12, d.polygonSides)),
+    imageSrc: typeof v.imageSrc === 'string' ? v.imageSrc : d.imageSrc,
+    imageWidth: clamp(v.imageWidth, 10, 400, d.imageWidth),
+    imageHeight: clamp(v.imageHeight, 10, 400, d.imageHeight),
+    opacity: clamp(v.opacity, 0, 1, d.opacity),
+    opacityRandom: typeof v.opacityRandom === 'boolean' ? v.opacityRandom : d.opacityRandom,
+    opacityAnimEnable: typeof v.opacityAnimEnable === 'boolean' ? v.opacityAnimEnable : d.opacityAnimEnable,
+    opacityAnimSpeed: clamp(v.opacityAnimSpeed, 0, 10, d.opacityAnimSpeed),
+    opacityAnimMin: clamp(v.opacityAnimMin, 0, 1, d.opacityAnimMin),
+    opacityAnimSync: typeof v.opacityAnimSync === 'boolean' ? v.opacityAnimSync : d.opacityAnimSync,
+    size: clamp(v.size, 0.1, 30, d.size),
+    sizeRandom: typeof v.sizeRandom === 'boolean' ? v.sizeRandom : d.sizeRandom,
+    sizeAnimEnable: typeof v.sizeAnimEnable === 'boolean' ? v.sizeAnimEnable : d.sizeAnimEnable,
+    sizeAnimSpeed: clamp(v.sizeAnimSpeed, 0, 10, d.sizeAnimSpeed),
+    sizeAnimMin: clamp(v.sizeAnimMin, 0.1, 30, d.sizeAnimMin),
+    sizeAnimSync: typeof v.sizeAnimSync === 'boolean' ? v.sizeAnimSync : d.sizeAnimSync,
+    lineLinkedEnable: typeof v.lineLinkedEnable === 'boolean' ? v.lineLinkedEnable : d.lineLinkedEnable,
+    lineLinkedDistance: clamp(v.lineLinkedDistance, 0, 1000, d.lineLinkedDistance),
+    lineLinkedColor: normalizeOptionalColor(v.lineLinkedColor),
+    lineLinkedOpacity: clamp(v.lineLinkedOpacity, 0, 1, d.lineLinkedOpacity),
+    lineLinkedWidth: clamp(v.lineLinkedWidth, 0, 10, d.lineLinkedWidth),
+    moveEnable: typeof v.moveEnable === 'boolean' ? v.moveEnable : d.moveEnable,
+    moveSpeed: clamp(v.moveSpeed, 0, 20, d.moveSpeed),
+    moveDirection: oneOf(v.moveDirection, PARTICLE_MOVE_DIRECTIONS, d.moveDirection),
+    moveRandom: typeof v.moveRandom === 'boolean' ? v.moveRandom : d.moveRandom,
+    moveStraight: typeof v.moveStraight === 'boolean' ? v.moveStraight : d.moveStraight,
+    moveOutMode: oneOf(v.moveOutMode, PARTICLE_OUT_MODES, d.moveOutMode),
+    moveBounce: typeof v.moveBounce === 'boolean' ? v.moveBounce : d.moveBounce,
+    moveAttractEnable: typeof v.moveAttractEnable === 'boolean' ? v.moveAttractEnable : d.moveAttractEnable,
+    moveAttractRotateX: clamp(v.moveAttractRotateX, 0, 20000, d.moveAttractRotateX),
+    moveAttractRotateY: clamp(v.moveAttractRotateY, 0, 20000, d.moveAttractRotateY),
+    detectOn: oneOf(v.detectOn, PARTICLE_DETECT_ON, d.detectOn),
+    hoverEnable: typeof v.hoverEnable === 'boolean' ? v.hoverEnable : d.hoverEnable,
+    hoverMode: oneOf(v.hoverMode, PARTICLE_HOVER_MODES, d.hoverMode),
+    clickEnable: typeof v.clickEnable === 'boolean' ? v.clickEnable : d.clickEnable,
+    clickMode: oneOf(v.clickMode, PARTICLE_CLICK_MODES, d.clickMode),
+    resize: typeof v.resize === 'boolean' ? v.resize : d.resize,
+    grabDistance: clamp(v.grabDistance, 0, 500, d.grabDistance),
+    grabLineOpacity: clamp(v.grabLineOpacity, 0, 1, d.grabLineOpacity),
+    bubbleDistance: clamp(v.bubbleDistance, 0, 500, d.bubbleDistance),
+    bubbleSize: clamp(v.bubbleSize, 0, 40, d.bubbleSize),
+    bubbleDuration: clamp(v.bubbleDuration, 0, 20, d.bubbleDuration),
+    bubbleOpacity: clamp(v.bubbleOpacity, 0, 1, d.bubbleOpacity),
+    repulseDistance: clamp(v.repulseDistance, 0, 500, d.repulseDistance),
+    repulseDuration: clamp(v.repulseDuration, 0, 10, d.repulseDuration),
+    pushCount: Math.round(clamp(v.pushCount, 0, 50, d.pushCount)),
+    removeCount: Math.round(clamp(v.removeCount, 0, 50, d.removeCount)),
+    retinaDetect: typeof v.retinaDetect === 'boolean' ? v.retinaDetect : d.retinaDetect,
+  }
+}
+
+export function normalizeGalaxySettings(value: unknown, legacy?: Record<string, unknown>): GalaxySettings {
+  const d = DEFAULT_GALAXY_SETTINGS
+  const old = asObject(legacy)
+  const v: Record<string, unknown> = {
+    ...(typeof old.galaxyDensity === 'number' ? { density: old.galaxyDensity / 100 } : {}),
+    ...(typeof old.galaxySpeed === 'number' ? { speed: old.galaxySpeed } : {}),
+    ...(typeof old.galaxyHoles === 'number' ? { autoCenterRepulsion: old.galaxyHoles * 0.5 } : {}),
+    ...asObject(value),
+  }
+
+  return {
+    focalX: clamp(v.focalX, 0, 1, d.focalX),
+    focalY: clamp(v.focalY, 0, 1, d.focalY),
+    rotationAngle: clamp(v.rotationAngle, -180, 180, d.rotationAngle),
+    starSpeed: clamp(v.starSpeed, 0, 5, d.starSpeed),
+    density: clamp(v.density, 0.05, 5, d.density),
+    hueShift: clamp(v.hueShift, 0, 360, d.hueShift),
+    disableAnimation: typeof v.disableAnimation === 'boolean' ? v.disableAnimation : d.disableAnimation,
+    speed: clamp(v.speed, 0.05, 10, d.speed),
+    mouseInteraction: typeof v.mouseInteraction === 'boolean' ? v.mouseInteraction : d.mouseInteraction,
+    glowIntensity: clamp(v.glowIntensity, 0, 3, d.glowIntensity),
+    saturation: clamp(v.saturation, 0, 3, d.saturation),
+    mouseRepulsion: typeof v.mouseRepulsion === 'boolean' ? v.mouseRepulsion : d.mouseRepulsion,
+    repulsionStrength: clamp(v.repulsionStrength, 0, 10, d.repulsionStrength),
+    twinkleIntensity: clamp(v.twinkleIntensity, 0, 1, d.twinkleIntensity),
+    rotationSpeed: clamp(v.rotationSpeed, -3, 3, d.rotationSpeed),
+    autoCenterRepulsion: clamp(v.autoCenterRepulsion, 0, 10, d.autoCenterRepulsion),
+    transparent: typeof v.transparent === 'boolean' ? v.transparent : d.transparent,
+    starColors: normalizePalette(v.starColors, 4),
+    starSize: clamp(v.starSize, 0, 5, d.starSize),
+    flareIntensity: clamp(v.flareIntensity, 0, 5, d.flareIntensity),
+    layers: Math.round(clamp(v.layers, 2, 8, d.layers)),
+    direction: oneOf(v.direction, GALAXY_DIRECTIONS, d.direction),
+    clickWarp: typeof v.clickWarp === 'boolean' ? v.clickWarp : d.clickWarp,
+    intro: typeof v.intro === 'boolean' ? v.intro : d.intro,
+    backgroundColor: normalizeOptionalColor(v.backgroundColor),
+    opacity: clamp(v.opacity, 0, 1, d.opacity),
+  }
+}
+
+export function normalizeLetterGlitchSettings(value: unknown, legacy?: Record<string, unknown>): LetterGlitchSettings {
+  const d = DEFAULT_LETTER_GLITCH_SETTINGS
+  const old = asObject(legacy)
+  const v: Record<string, unknown> = {
+    ...(typeof old.glitchSpeed === 'number' ? { speed: old.glitchSpeed } : {}),
+    ...(typeof old.glitchIntensity === 'number' ? { glitchAmount: old.glitchIntensity / 20 } : {}),
+    ...(typeof old.glitchOpacity === 'number' ? { baseOpacity: old.glitchOpacity } : {}),
+    ...asObject(value),
+  }
+
+  return {
+    glitchColors: normalizePalette(v.glitchColors, 8),
+    baseColor: normalizeOptionalColor(v.baseColor),
+    characters:
+      typeof v.characters === 'string' && v.characters.length > 0 ? v.characters : d.characters,
+    fontFamily: typeof v.fontFamily === 'string' ? v.fontFamily : d.fontFamily,
+    fontSize: clamp(v.fontSize, 6, 48, d.fontSize),
+    spacing: clamp(v.spacing, 0, 2, d.spacing),
+    density: clamp(v.density, 0, 1, d.density),
+    baseOpacity: clamp(v.baseOpacity, 0, 1, d.baseOpacity),
+    glitchAmount: clamp(v.glitchAmount, 0, 1, d.glitchAmount),
+    speed: clamp(v.speed, 0.05, 10, d.speed),
+    smooth: typeof v.smooth === 'boolean' ? v.smooth : d.smooth,
+    interactive: typeof v.interactive === 'boolean' ? v.interactive : d.interactive,
+    cursorRadius: clamp(v.cursorRadius, 20, 500, d.cursorRadius),
+    clickEffect: oneOf(v.clickEffect, LETTER_GLITCH_CLICK_EFFECTS, d.clickEffect),
+    flow: clamp(v.flow, 0, 1, d.flow),
+    edgeFade: clamp(v.edgeFade, 0, 0.5, d.edgeFade),
+    centerFade: clamp(v.centerFade, 0, 1, d.centerFade),
+    intro: typeof v.intro === 'boolean' ? v.intro : d.intro,
+    backgroundColor: normalizeOptionalColor(v.backgroundColor),
+  }
+}
+
+export function normalizeHyperspeedSettings(value: unknown, legacy?: Record<string, unknown>): HyperspeedSettings {
+  const d = DEFAULT_HYPERSPEED_SETTINGS
+  const old = asObject(legacy)
+  const v: Record<string, unknown> = {
+    ...(typeof old.hyperspeedStreaks === 'number' ? { density: old.hyperspeedStreaks } : {}),
+    ...(typeof old.hyperspeedLength === 'number' ? { trailLength: old.hyperspeedLength / 5 } : {}),
+    ...(typeof old.hyperspeedRotation === 'number' ? { curvature: old.hyperspeedRotation } : {}),
+    ...asObject(value),
+  }
+
+  return {
+    curve: oneOf(v.curve, HYPERSPEED_CURVES, d.curve),
+    curvature: clamp(v.curvature, 0, 5, d.curvature),
+    speed: clamp(v.speed, 0, 5, d.speed),
+    boost: clamp(v.boost, 1, 10, d.boost),
+    fov: clamp(v.fov, 20, 170, d.fov),
+    boostFov: clamp(v.boostFov, 20, 170, d.boostFov),
+    lanes: Math.round(clamp(v.lanes, 1, 8, d.lanes)),
+    roadWidth: clamp(v.roadWidth, 1, 30, d.roadWidth),
+    medianWidth: clamp(v.medianWidth, 0, 10, d.medianWidth),
+    density: Math.round(clamp(v.density, 0, 200, d.density)),
+    trailLength: clamp(v.trailLength, 0.05, 5, d.trailLength),
+    lightSize: clamp(v.lightSize, 0.1, 5, d.lightSize),
+    poles: Math.round(clamp(v.poles, 0, 100, d.poles)),
+    poleHeight: clamp(v.poleHeight, 0.1, 4, d.poleHeight),
+    dust: Math.round(clamp(v.dust, 0, 400, d.dust)),
+    glow: clamp(v.glow, 0, 3, d.glow),
+    reflections: clamp(v.reflections, 0, 2, d.reflections),
+    steer: clamp(v.steer, 0, 2, d.steer),
+    tailColors: normalizePalette(v.tailColors, 8),
+    headColors: normalizePalette(v.headColors, 8),
+    poleColors: normalizePalette(v.poleColors, 8),
+    roadColor: normalizeOptionalColor(v.roadColor),
+    roadOpacity: clamp(v.roadOpacity, 0, 1, d.roadOpacity),
+    lineColor: normalizeOptionalColor(v.lineColor),
+    background: normalizeOptionalColor(v.background),
+    interactive: typeof v.interactive === 'boolean' ? v.interactive : d.interactive,
+  }
+}
+
+export function normalizeLightningSettings(value: unknown, legacy?: Record<string, unknown>): LightningSettings {
+  const d = DEFAULT_LIGHTNING_SETTINGS
+  const old = asObject(legacy)
+  const v: Record<string, unknown> = {
+    ...(typeof old.lightningBolts === 'number' ? { bolts: old.lightningBolts } : {}),
+    ...(typeof old.lightningThickness === 'number' ? { thickness: old.lightningThickness } : {}),
+    ...(typeof old.lightningFrequency === 'number' ? { speed: old.lightningFrequency } : {}),
+    ...asObject(value),
+  }
+
+  return {
+    color: normalizeRequiredColor(v.color, d.color),
+    bolts: Math.round(clamp(v.bolts, 1, 8, d.bolts)),
+    spread: clamp(v.spread, 0, 3, d.spread),
+    branches: clamp(v.branches, 0, 1, d.branches),
+    xOffset: clamp(v.xOffset, -2, 2, d.xOffset),
+    angle: clamp(v.angle, -180, 180, d.angle),
+    size: clamp(v.size, 0.2, 4, d.size),
+    thickness: clamp(v.thickness, 0.2, 6, d.thickness),
+    glow: clamp(v.glow, 0, 3, d.glow),
+    intensity: clamp(v.intensity, 0, 3, d.intensity),
+    speed: clamp(v.speed, 0.1, 5, d.speed),
+    flicker: clamp(v.flicker, 0, 1, d.flicker),
+    mouseInteraction: typeof v.mouseInteraction === 'boolean' ? v.mouseInteraction : d.mouseInteraction,
+    mouseStrength: clamp(v.mouseStrength, 0, 3, d.mouseStrength),
+    clickStrike: typeof v.clickStrike === 'boolean' ? v.clickStrike : d.clickStrike,
+    intro: typeof v.intro === 'boolean' ? v.intro : d.intro,
+    fade: clamp(v.fade, 0, 1, d.fade),
+    opacity: clamp(v.opacity, 0, 1, d.opacity),
+    paused: typeof v.paused === 'boolean' ? v.paused : d.paused,
+  }
+}
+
+export function normalizeSideRaysSettings(value: unknown, legacy?: Record<string, unknown>): SideRaysSettings {
+  const d = DEFAULT_SIDE_RAYS_SETTINGS
+  const old = asObject(legacy)
+  const v: Record<string, unknown> = {
+    ...(typeof old.sideraysCount === 'number' ? { density: old.sideraysCount } : {}),
+    ...(typeof old.sideraysWidth === 'number' ? { spread: old.sideraysWidth } : {}),
+    ...(typeof old.sideraysIntensity === 'number' ? { intensity: old.sideraysIntensity * 2 } : {}),
+    ...asObject(value),
+  }
+
+  return {
+    rayColor1: normalizeRequiredColor(v.rayColor1, d.rayColor1),
+    rayColor2: normalizeRequiredColor(v.rayColor2, d.rayColor2),
+    blend: clamp(v.blend, 0, 1, d.blend),
+    origin: oneOf(v.origin, SIDE_RAYS_ORIGINS, d.origin),
+    speed: clamp(v.speed, 0, 10, d.speed),
+    intensity: clamp(v.intensity, 0, 5, d.intensity),
+    spread: clamp(v.spread, 0.1, 8, d.spread),
+    density: clamp(v.density, 1, 40, d.density),
+    sharpness: clamp(v.sharpness, 0, 1, d.sharpness),
+    tilt: clamp(v.tilt, -180, 180, d.tilt),
+    falloff: clamp(v.falloff, 0.2, 6, d.falloff),
+    glow: clamp(v.glow, 0, 5, d.glow),
+    saturation: clamp(v.saturation, 0, 3, d.saturation),
+    dust: clamp(v.dust, 0, 1, d.dust),
+    followMouse: typeof v.followMouse === 'boolean' ? v.followMouse : d.followMouse,
+    mouseInfluence: clamp(v.mouseInfluence, 0, 1, d.mouseInfluence),
+    intro: typeof v.intro === 'boolean' ? v.intro : d.intro,
+    opacity: clamp(v.opacity, 0, 1, d.opacity),
+  }
+}
+
 export function normalizeHeroBackgroundSettings(value: unknown): HeroBackgroundSettings {
   const v = (value && typeof value === 'object' ? value : {}) as Record<string, unknown>
 
@@ -274,20 +765,11 @@ export function normalizeHeroBackgroundSettings(value: unknown): HeroBackgroundS
     enabled: typeof v.enabled === 'boolean' ? v.enabled : DEFAULT_HERO_BACKGROUND_SETTINGS.enabled,
     style: oneOf(v.style, HERO_BACKGROUND_STYLES, DEFAULT_HERO_BACKGROUND_SETTINGS.style),
     antigravity: normalizeAntigravitySettings(v.antigravity),
-    galaxyDensity: typeof v.galaxyDensity === 'number' ? v.galaxyDensity : DEFAULT_HERO_BACKGROUND_SETTINGS.galaxyDensity,
-    galaxySpeed: typeof v.galaxySpeed === 'number' ? v.galaxySpeed : DEFAULT_HERO_BACKGROUND_SETTINGS.galaxySpeed,
-    galaxyHoles: typeof v.galaxyHoles === 'number' ? v.galaxyHoles : DEFAULT_HERO_BACKGROUND_SETTINGS.galaxyHoles,
-    glitchSpeed: typeof v.glitchSpeed === 'number' ? v.glitchSpeed : DEFAULT_HERO_BACKGROUND_SETTINGS.glitchSpeed,
-    glitchIntensity: typeof v.glitchIntensity === 'number' ? v.glitchIntensity : DEFAULT_HERO_BACKGROUND_SETTINGS.glitchIntensity,
-    glitchOpacity: typeof v.glitchOpacity === 'number' ? v.glitchOpacity : DEFAULT_HERO_BACKGROUND_SETTINGS.glitchOpacity,
-    hyperspeedStreaks: typeof v.hyperspeedStreaks === 'number' ? v.hyperspeedStreaks : DEFAULT_HERO_BACKGROUND_SETTINGS.hyperspeedStreaks,
-    hyperspeedLength: typeof v.hyperspeedLength === 'number' ? v.hyperspeedLength : DEFAULT_HERO_BACKGROUND_SETTINGS.hyperspeedLength,
-    hyperspeedRotation: typeof v.hyperspeedRotation === 'number' ? v.hyperspeedRotation : DEFAULT_HERO_BACKGROUND_SETTINGS.hyperspeedRotation,
-    lightningBolts: typeof v.lightningBolts === 'number' ? v.lightningBolts : DEFAULT_HERO_BACKGROUND_SETTINGS.lightningBolts,
-    lightningThickness: typeof v.lightningThickness === 'number' ? v.lightningThickness : DEFAULT_HERO_BACKGROUND_SETTINGS.lightningThickness,
-    lightningFrequency: typeof v.lightningFrequency === 'number' ? v.lightningFrequency : DEFAULT_HERO_BACKGROUND_SETTINGS.lightningFrequency,
-    sideraysCount: typeof v.sideraysCount === 'number' ? v.sideraysCount : DEFAULT_HERO_BACKGROUND_SETTINGS.sideraysCount,
-    sideraysWidth: typeof v.sideraysWidth === 'number' ? v.sideraysWidth : DEFAULT_HERO_BACKGROUND_SETTINGS.sideraysWidth,
-    sideraysIntensity: typeof v.sideraysIntensity === 'number' ? v.sideraysIntensity : DEFAULT_HERO_BACKGROUND_SETTINGS.sideraysIntensity,
+    particles: normalizeParticleSettings(v.particles, v),
+    galaxy: normalizeGalaxySettings(v.galaxy, v),
+    letterGlitch: normalizeLetterGlitchSettings(v.letterGlitch, v),
+    hyperspeed: normalizeHyperspeedSettings(v.hyperspeed, v),
+    lightning: normalizeLightningSettings(v.lightning, v),
+    sideRays: normalizeSideRaysSettings(v.sideRays, v),
   }
 }

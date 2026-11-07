@@ -87,9 +87,9 @@ export default function EducationPage() {
           <div className="bg-[var(--bg-elevated)] rounded-xl p-4">
             <p className="text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-3">Preview</p>
             {form.style === 'nit' ? (
-              <div className="mx-auto flex aspect-[3/4] w-full max-w-[300px] flex-col overflow-hidden rounded-lg bg-[#faf8f0] p-4 dark:bg-[#1a1818]">
-                <div className="flex h-full flex-col border-2 border-[#1a237e]/40 p-1 dark:border-[#5a6abf]/40">
-                  <div className="flex h-full flex-col items-center justify-between border border-[#1a237e]/20 px-4 py-5 text-center dark:border-[#5a6abf]/20">
+              <div className="mx-auto flex aspect-[3/4] w-full max-w-[300px] flex-col overflow-hidden rounded-lg bg-[#faf8f0] p-4">
+                <div className="flex h-full flex-col border-2 border-[#1a237e]/40 p-1">
+                  <div className="flex h-full flex-col items-center justify-between border border-[#1a237e]/20 px-4 py-5 text-center">
                     <div className="flex w-full flex-col items-center">
                       <div className="flex justify-center pb-3">
                         {form.logo ? <img src={form.logo} alt="" className="w-20 h-20 rounded-full object-contain" /> : <div className="w-20 h-20 rounded-full bg-[#e8eaf6] flex items-center justify-center text-[#1a237e] text-xs">Logo</div>}
@@ -113,26 +113,26 @@ export default function EducationPage() {
                 </div>
               </div>
             ) : form.style === 'international' ? (
-              <div className="mx-auto flex aspect-[3/4] w-full max-w-[300px] flex-col overflow-hidden rounded-lg bg-[#fdfbf5] p-4 dark:bg-[#0f0e0c]">
-                <div className="flex h-full flex-col border border-[#c9a84c]/30 p-1 dark:border-[#c9a84c]/20">
+              <div className="mx-auto flex aspect-[3/4] w-full max-w-[300px] flex-col overflow-hidden rounded-lg bg-[#fdfbf5] p-4">
+                <div className="flex h-full flex-col border border-[#c9a84c]/30 p-1">
                   <div className="flex h-full flex-col items-center justify-between px-3 py-5 text-center">
                     <div className="flex w-full flex-col items-center">
+                      {form.logo && <div className="flex justify-center pb-3"><img src={form.logo} alt="" className="w-12 h-12 rounded-full object-contain opacity-75" /></div>}
                       {form.country_name && <p className="text-[8px] tracking-[0.2em] uppercase text-[#8a7a5a] font-sans">{form.country_name}</p>}
-                      {form.board_name && <p className="text-[9px] tracking-[0.1em] uppercase text-[#1a1a2e] dark:text-[#c9a84c]/60 font-medium mt-0.5 font-sans">{form.board_name}</p>}
-                      {form.institution && <p className="text-[11px] text-[#1a1a2e] dark:text-[#e0d5c0] mt-3 font-certificate">{form.institution}</p>}
+                      {form.board_name && <p className="text-[9px] tracking-[0.1em] uppercase text-[#1a1a2e] font-medium mt-0.5 font-sans">{form.board_name}</p>}
+                      {form.institution && <p className="text-[11px] text-[#1a1a2e] mt-3 font-certificate">{form.institution}</p>}
                     </div>
                     <div className="flex w-full flex-col items-center">
-                      <div className="flex justify-center my-3"><div className="w-10 h-px bg-[#c9a84c]/40 dark:bg-[#c9a84c]/25" /></div>
-                      {form.certificate_label && <p className="text-[8px] text-[#8a7a5a] dark:text-[#c9a84c]/45 uppercase tracking-[0.2em] font-sans">{form.certificate_label}</p>}
-                      <h3 className="text-lg text-[#1a1a2e] dark:text-[#f0e6d0] mt-1 font-certificate tracking-wide">{form.degree || 'Degree'}</h3>
-                      {form.subject && <p className="text-[11px] text-[#5a5a5a] dark:text-[#c9a84c]/55 mt-1 font-sans italic">in {form.subject}</p>}
-                      {form.logo && <div className="flex justify-center mt-3"><img src={form.logo} alt="" className="w-12 h-12 rounded-full object-contain opacity-70" /></div>}
+                      <div className="flex justify-center my-3"><div className="w-10 h-px bg-[#c9a84c]/40" /></div>
+                      {form.certificate_label && <p className="text-[8px] text-[#8a7a5a] uppercase tracking-[0.2em] font-sans">{form.certificate_label}</p>}
+                      <h3 className="text-lg text-[#1a1a2e] mt-1 font-certificate tracking-wide">{form.degree || 'Degree'}</h3>
+                      {form.subject && <p className="text-[11px] text-[#5a5a5a] mt-1 font-sans italic">in {form.subject}</p>}
                     </div>
                     <div className="flex w-full flex-col items-center">
-                      <div className="flex justify-center my-3"><div className="w-10 h-px bg-[#c9a84c]/40 dark:bg-[#c9a84c]/25" /></div>
+                      <div className="flex justify-center my-3"><div className="w-10 h-px bg-[#c9a84c]/40" /></div>
                       <div className="flex w-full items-end justify-between">
-                        <div className="text-left">{form.signatory && <p className="text-[8px] text-[#8a7a5a] dark:text-[#c9a84c]/45 font-certificate">{form.signatory}</p>}</div>
-                        <div className="text-center">{form.year && <p className="text-[10px] font-semibold text-[#1a1a2e] dark:text-[#c9a84c] font-sans tracking-widest">{form.year}</p>}</div>
+                        <div className="text-left">{form.signatory && <p className="text-[8px] text-[#8a7a5a] font-certificate">{form.signatory}</p>}</div>
+                        <div className="text-center">{form.year && <p className="text-[10px] font-semibold text-[#1a1a2e] font-sans tracking-widest">{form.year}</p>}</div>
                         <div className="text-right"><div className="w-5 h-5 flex items-center justify-center mx-auto"><MdCheckCircle className="w-2.5 h-2.5 text-[#c9a84c]/40" /></div></div>
                       </div>
                     </div>
@@ -140,9 +140,9 @@ export default function EducationPage() {
                 </div>
               </div>
             ) : (
-              <div className="mx-auto flex aspect-[3/4] w-full max-w-[300px] flex-col overflow-hidden rounded-lg bg-[#faf8f0] p-4 dark:bg-[#1a1816]">
-                <div className="flex h-full flex-col border-2 border-[#c8b88a] p-1 dark:border-[#5a4f3a]">
-                  <div className="flex h-full flex-col items-center justify-between border border-[#c8b88a]/60 px-4 py-5 text-center dark:border-[#5a4f3a]/60">
+              <div className="mx-auto flex aspect-[3/4] w-full max-w-[300px] flex-col overflow-hidden rounded-lg bg-[#faf8f0] p-4">
+                <div className="flex h-full flex-col border-2 border-[#c8b88a] p-1">
+                  <div className="flex h-full flex-col items-center justify-between border border-[#c8b88a]/60 px-4 py-5 text-center">
                     <div className="flex w-full flex-col items-center">
                       <div className="flex justify-center pb-3">
                         {form.logo ? <img src={form.logo} alt="" className="w-20 h-20 rounded-full object-cover" /> : <div className="w-20 h-20 rounded-full bg-[#f5f0e0] flex items-center justify-center text-[#8a7a6a] text-xs">Logo</div>}

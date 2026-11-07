@@ -1,88 +1,178 @@
 import { useEffect } from 'react'
+import type { ParticleSettings } from '../types/database'
 
-export default function ParticleBackground() {
+interface ParticleBackgroundProps {
+  /** Full particles.js v2 configuration. */
+  settings: ParticleSettings
+}
+
+const THEME_COLORS = {
+  dark: { particle: '#c7c7c7', line: '#737373' },
+  light: { particle: '#312e81', line: '#4338ca' },
+}
+
+export default function ParticleBackground({ settings }: ParticleBackgroundProps) {
   useEffect(() => {
+    const elementId = 'particles-js'
+    let observer: MutationObserver | null = null
+    let interval: ReturnType<typeof setInterval> | null = null
+    let disposed = false
+
+    const destroy = () => {
+      const dom = window.pJSDom
+      if (dom) {
+        dom.forEach((instance) => {
+          try {
+            instance.pJS?.fn?.vendors?.destroypJS?.()
+          } catch {
+            /* ignore teardown errors */
+          }
+        })
+        window.pJSDom = []
+      }
+      const el = document.getElementById(elementId)
+      if (el) el.innerHTML = ''
+    }
+
     const init = () => {
+      if (disposed) return
+      destroy()
+
       const isDark = document.documentElement.classList.contains('dark')
+      const theme = isDark ? THEME_COLORS.dark : THEME_COLORS.light
+      const particleColor = settings.color || theme.particle
+      const lineColor = settings.lineLinkedColor || theme.line
+      const shapeType = settings.shapeType === 'image' && !settings.imageSrc ? 'circle' : settings.shapeType
 
-      const isMobile = window.innerWidth < 768
-
-      window.particlesJS!('particles-js', {
+      window.particlesJS?.(elementId, {
         particles: {
-          number: { value: isMobile ? 80 : 110, density: { enable: true, value_area: isMobile ? 800 : 700 } },
-          color: { value: isDark ? '#c7c7c7' : '#312e81' },
-          shape: { type: 'circle' },
+          number: {
+            value: settings.number,
+            density: { enable: settings.densityEnable, value_area: settings.densityArea },
+          },
+          color: { value: particleColor },
+          shape: {
+            type: shapeType,
+            stroke: { width: settings.shapeStrokeWidth, color: settings.shapeStrokeColor },
+            polygon: { nb_sides: settings.polygonSides },
+            image: {
+              src: settings.imageSrc,
+              width: settings.imageWidth,
+              height: settings.imageHeight,
+            },
+          },
           opacity: {
-            value: 0.65,
-            random: true,
-            anim: { enable: true, speed: 0.6, opacity_min: 0.2, sync: false },
+            value: settings.opacity,
+            random: settings.opacityRandom,
+            anim: {
+              enable: settings.opacityAnimEnable,
+              speed: settings.opacityAnimSpeed,
+              opacity_min: settings.opacityAnimMin,
+              sync: settings.opacityAnimSync,
+            },
           },
           size: {
-            value: 3.5,
-            random: true,
-            anim: { enable: true, speed: 1, size_min: 1, sync: false },
+            value: settings.size,
+            random: settings.sizeRandom,
+            anim: {
+              enable: settings.sizeAnimEnable,
+              speed: settings.sizeAnimSpeed,
+              size_min: settings.sizeAnimMin,
+              sync: settings.sizeAnimSync,
+            },
           },
           line_linked: {
-            enable: true,
-            distance: 210,
-            color: isDark ? '#737373' : '#4338ca',
-            opacity: 0.4,
-            width: 1,
+            enable: settings.lineLinkedEnable,
+            distance: settings.lineLinkedDistance,
+            color: lineColor,
+            opacity: settings.lineLinkedOpacity,
+            width: settings.lineLinkedWidth,
           },
           move: {
-            enable: true,
-            speed: 1.5,
-            direction: 'none',
-            random: true,
-            straight: false,
-            out_mode: 'out',
-            bounce: false,
+            enable: settings.moveEnable,
+            speed: settings.moveSpeed,
+            direction: settings.moveDirection,
+            random: settings.moveRandom,
+            straight: settings.moveStraight,
+            out_mode: settings.moveOutMode,
+            bounce: settings.moveBounce,
+            attract: {
+              enable: settings.moveAttractEnable,
+              rotateX: settings.moveAttractRotateX,
+              rotateY: settings.moveAttractRotateY,
+            },
           },
         },
         interactivity: {
-          detect_on: 'window',
+          detect_on: settings.detectOn,
           events: {
-            onhover: { enable: true, mode: 'repulse' },
-            onclick: { enable: true, mode: 'push' },
-            resize: true,
+            onhover: { enable: settings.hoverEnable, mode: settings.hoverMode },
+            onclick: { enable: settings.clickEnable, mode: settings.clickMode },
+            resize: settings.resize,
           },
           modes: {
-            repulse: { distance: 180, duration: 0.4 },
-            push: { particles_nb: 3 },
+            grab: {
+              distance: settings.grabDistance,
+              line_linked: { opacity: settings.grabLineOpacity },
+            },
+            bubble: {
+              distance: settings.bubbleDistance,
+              size: settings.bubbleSize,
+              duration: settings.bubbleDuration,
+              opacity: settings.bubbleOpacity,
+            },
+            repulse: {
+              distance: settings.repulseDistance,
+              duration: settings.repulseDuration,
+            },
+            push: { particles_nb: settings.pushCount },
+            remove: { particles_nb: settings.removeCount },
           },
         },
-        retina_detect: true,
+        retina_detect: settings.retinaDetect,
       })
 
-      const observer = new MutationObserver(() => {
-        const pJS = window.pJSDom?.[0]?.pJS
-        if (!pJS) return
-        const d = document.documentElement.classList.contains('dark')
-        pJS.particles.color.value = d ? '#c7c7c7' : '#312e81'
-        pJS.particles.line_linked.color = d ? '#737373' : '#4338ca'
-        pJS.particles.array.forEach((p: any) => { p.color.value = pJS.particles.color.value })
-      })
-      observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+      // Keep the theme-driven colours in sync when the site theme changes.
+      if (!settings.color || !settings.lineLinkedColor) {
+        observer = new MutationObserver(() => {
+          const pJS = window.pJSDom?.[0]?.pJS
+          if (!pJS) return
+          const dark = document.documentElement.classList.contains('dark')
+          const nextTheme = dark ? THEME_COLORS.dark : THEME_COLORS.light
+          if (!settings.color) {
+            pJS.particles.color.value = nextTheme.particle
+            pJS.particles.array.forEach((particle: any) => {
+              particle.color.value = nextTheme.particle
+            })
+          }
+          if (!settings.lineLinkedColor) {
+            pJS.particles.line_linked.color = nextTheme.line
+          }
+        })
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+      }
     }
 
     if (window.particlesJS) {
       init()
     } else {
-      // poll until particlesJS is available (script loads before React)
-      const interval = setInterval(() => {
+      // Poll until the particles.js script (loaded before React) is available.
+      interval = setInterval(() => {
         if (window.particlesJS) {
-          clearInterval(interval)
+          if (interval) clearInterval(interval)
+          interval = null
           init()
         }
       }, 50)
     }
 
     return () => {
-      if (window.pJSDom) window.pJSDom = []
-      const el = document.getElementById('particles-js')
-      if (el) el.innerHTML = ''
+      disposed = true
+      if (interval) clearInterval(interval)
+      observer?.disconnect()
+      destroy()
     }
-  }, [])
+  }, [settings])
 
   return <div id="particles-js" className="absolute inset-0 z-0 pointer-events-none" />
 }
