@@ -7,6 +7,8 @@ import { useExperiences } from '../../hooks/useExperiences'
 import {
   DEFAULT_LANYARD_SETTINGS,
   LANYARD_FONT_OPTIONS,
+  contrastText,
+  isLightColor,
   normalizeLanyardSettings,
   renderCardBack,
   renderCardFront,
@@ -180,6 +182,8 @@ export default function LanyardPage() {
   const currentExp = experiences?.[0] ?? null
   const name = profile?.name || 'Your Name'
   const role = currentExp?.role || profile?.title || 'Your Role'
+  const previewCardBg = isDark ? form.cardBgDark : form.cardBg
+  const previewRoleColor = isLightColor(previewCardBg) ? '#4338ca' : '#ffffff'
 
   useEffect(() => {
     if (saved) setForm(saved)
@@ -328,11 +332,11 @@ export default function LanyardPage() {
                 ))}
               </select>
             </div>
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-5 text-center">
-              <p className="text-lg font-bold text-[var(--text-primary)]" style={{ fontFamily: `"${form.fontFamily}", Inter, system-ui, sans-serif` }}>
+            <div className="rounded-xl border border-[var(--border)] px-4 py-5 text-center" style={{ background: previewCardBg }}>
+              <p className="text-lg font-bold" style={{ fontFamily: `"${form.fontFamily}", Inter, system-ui, sans-serif`, color: contrastText(previewCardBg) }}>
                 {name}
               </p>
-              <p className="text-sm text-primary-400 mt-1" style={{ fontFamily: `"${form.fontFamily}", Inter, system-ui, sans-serif` }}>
+              <p className="text-sm mt-1" style={{ fontFamily: `"${form.fontFamily}", Inter, system-ui, sans-serif`, color: previewRoleColor }}>
                 {role}
               </p>
             </div>

@@ -146,7 +146,9 @@ export async function renderCardFront({
 
   const bg = isDark ? settings.cardBgDark : settings.cardBg
   const textColor = contrastText(bg)
-  const roleColor = isDark ? '#c7c7c7' : '#4338ca'
+  // Keep the role readable on custom card colours too: dark cards (including a
+  // dark "light mode" background) get white text, light cards keep the accent.
+  const roleColor = isLightColor(bg) ? '#4338ca' : '#ffffff'
   const INNER_PAD = 70
   const BOTTOM_ZONE = 200
   const imageX = INNER_PAD
