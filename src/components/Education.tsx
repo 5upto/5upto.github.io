@@ -103,9 +103,9 @@ export default function Education() {
       <div
         className="flex flex-none items-center justify-center rounded-full"
         style={{
-          width: unit(isInternational ? 28 : 34),
-          height: unit(isInternational ? 28 : 34),
-          background: isNIT ? 'rgba(26, 35, 126, 0.06)' : isInternational ? 'transparent' : 'rgba(249, 245, 224, 0.9)',
+          width: unit(isInternational ? 30 : 36),
+          height: unit(isInternational ? 30 : 36),
+          background: 'transparent',
           overflow: 'hidden',
         }}
       >
@@ -115,7 +115,7 @@ export default function Education() {
             alt={edu.institution}
             draggable={false}
             className="h-full w-full object-contain"
-            style={{ padding: unit(1), opacity: isInternational ? 0.75 : 1 }}
+            style={{ transform: 'scale(1.08)', opacity: isInternational ? 0.8 : 1 }}
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
           />
         ) : (
@@ -160,7 +160,7 @@ export default function Education() {
 
     if (isInternational) {
       return (
-        <div className="h-full w-full overflow-hidden" style={{ background: '#fdfbf5', padding: unit(4) }}>
+        <div className="h-full w-full overflow-hidden" style={{ background: '#ffffff', padding: unit(4) }}>
           <div className="flex h-full flex-col" style={{ border: `${unit(1.3)} solid ${outerFrame}`, padding: unit(1) }}>
             <div
               className="flex h-full flex-col items-center justify-between text-center"
@@ -213,7 +213,7 @@ export default function Education() {
     }
 
     return (
-      <div className="h-full w-full overflow-hidden" style={{ background: '#faf8f0', padding: unit(4) }}>
+      <div className="h-full w-full overflow-hidden" style={{ background: '#ffffff', padding: unit(4) }}>
         <div className="flex h-full flex-col" style={{ border: `${unit(1.3)} solid ${outerFrame}`, padding: unit(1) }}>
           <div
             className="flex h-full flex-col items-center justify-between text-center"
@@ -319,7 +319,7 @@ export default function Education() {
             mode="book"
             variant="solid"
             color={isDark ? '#4f5fd4' : '#1a237e'}
-            paperColor="#faf8f0"
+            paperColor="#ffffff"
             ariaLabel="Education records"
             tabPosition="right"
             layout={isDesktop ? 'spread' : 'stack'}
