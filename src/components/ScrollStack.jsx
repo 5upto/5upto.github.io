@@ -200,14 +200,32 @@ const ScrollStack = ({
       card.style.zIndex = `${i + 1}`;
     });
 
+    // Coalesce layout-triggered re-measures into one per frame.
+    let scheduleRaf = 0;
+    const scheduleRecompute = () => {
+      if (scheduleRaf) return;
+      scheduleRaf = requestAnimationFrame(() => {
+        scheduleRaf = 0;
+        recompute();
+      });
+    };
+
     recompute();
-    window.addEventListener('resize', recompute);
-    window.addEventListener('load', recompute);
+    window.addEventListener('resize', scheduleRecompute);
+    window.addEventListener('load', scheduleRecompute);
     if (document.fonts?.ready) {
-      document.fonts.ready.then(recompute).catch(() => {});
+      document.fonts.ready.then(scheduleRecompute).catch(() => {});
     }
-    const resizeObserver = new ResizeObserver(recompute);
+    const resizeObserver = new ResizeObserver(scheduleRecompute);
     cards.forEach(card => resizeObserver.observe(card));
+    // Sections/images above the stack can change height after the initial
+    // measurement (async data, fonts, mobile browser chrome). Keep the cached
+    // card offsets fresh, otherwise a resize corrects them mid-scroll and the
+    // cards visibly snap, most noticeably when scrolling back up on mobile.
+    const layoutObserver = new ResizeObserver(scheduleRecompute);
+    layoutObserver.observe(document.body);
+    const viewport = window.visualViewport;
+    viewport?.addEventListener('resize', scheduleRecompute);
 
     if (useWindowScroll) {
       lenisCount++;
@@ -216,12 +234,11 @@ const ScrollStack = ({
           duration: 1.2,
           easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
           smoothWheel: true,
-          touchMultiplier: 2,
           infinite: false,
           wheelMultiplier: 1,
-          lerp: 0.1,
-          syncTouch: true,
-          syncTouchLerp: 0.3
+          // Keep touch scrolling native: Lenis syncTouch can fight momentum
+          // when the scroll direction reverses on mobile.
+          lerp: 0.1
         });
 
         const raf = time => {
@@ -242,13 +259,12 @@ const ScrollStack = ({
         duration: 1.2,
         easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
         smoothWheel: true,
-        touchMultiplier: 2,
         infinite: false,
         normalizeWheel: true,
         wheelMultiplier: 1,
-        lerp: 0.1,
-        syncTouch: true,
-        syncTouchLerp: 0.3
+        // Keep touch scrolling native: Lenis syncTouch can fight momentum
+        // when the scroll direction reverses on mobile.
+        lerp: 0.1
       });
 
       lenis.on('scroll', handleScroll);
@@ -288,8 +304,11 @@ const ScrollStack = ({
       positionsRef.current = [];
       endTopRef.current = 0;
       resizeObserver.disconnect();
-      window.removeEventListener('resize', recompute);
-      window.removeEventListener('load', recompute);
+      layoutObserver.disconnect();
+      viewport?.removeEventListener('resize', scheduleRecompute);
+      if (scheduleRaf) cancelAnimationFrame(scheduleRaf);
+      window.removeEventListener('resize', scheduleRecompute);
+      window.removeEventListener('load', scheduleRecompute);
     };
   }, [
     itemDistance,

@@ -450,7 +450,14 @@ const Galaxy = ({
     };
     let raf = 0;
     let last = 0;
+    let lastDraw = 0;
     let visible = true;
+    // Phones render this full-screen shader behind the hero; cap the resolution
+    // and frame rate so it does not keep the GPU pegged while idling.
+    const lowPower =
+      window.matchMedia('(pointer: coarse)').matches ||
+      window.matchMedia('(max-width: 767px)').matches;
+    const minDrawGap = lowPower ? 1000 / 30 : 0;
 
     const render = () => {
       const s = settingsRef.current;
@@ -504,6 +511,11 @@ const Galaxy = ({
     const frame = (now: number) => {
       raf = 0;
       if (!visible || document.hidden) return;
+      if (minDrawGap && now - lastDraw < minDrawGap - 1) {
+        raf = requestAnimationFrame(frame);
+        return;
+      }
+      lastDraw = now;
       const s = settingsRef.current;
       const dt = last ? clamp((now - last) / 1000, 0.0005, 0.05) : 1 / 60;
       last = now;
@@ -546,7 +558,7 @@ const Galaxy = ({
       const s = settingsRef.current;
       const width = Math.max(1, container.clientWidth);
       const height = Math.max(1, container.clientHeight);
-      const ratio = Math.min(s.dpr || window.devicePixelRatio || 1, 2);
+      const ratio = Math.min(s.dpr || window.devicePixelRatio || 1, lowPower ? 1.25 : 2);
       canvas.width = Math.max(1, Math.round(width * ratio));
       canvas.height = Math.max(1, Math.round(height * ratio));
       render();

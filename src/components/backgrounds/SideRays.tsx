@@ -328,6 +328,13 @@ const SideRays = ({
     if (!gl || !shader) return;
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // Mobile GPUs run this full-screen shader every frame; halve the pixel
+    // count and frame rate so the hero does not heat up the phone.
+    const lowPower =
+      window.matchMedia('(pointer: coarse)').matches ||
+      window.matchMedia('(max-width: 767px)').matches;
+    const minDrawGap = lowPower ? 1000 / 30 : 0;
+    let lastDraw = 0;
     const vao = gl.createVertexArray();
     const size = { width: 1, height: 1 };
     const pointer = { x: 0, y: 0, inside: false };
@@ -349,6 +356,7 @@ const SideRays = ({
       const ratio = Math.min(
         window.devicePixelRatio || 1,
         s.maxRatio,
+        lowPower ? 1.25 : 3,
         Math.sqrt(PIXEL_BUDGET / (cssWidth * cssHeight))
       );
       const width = Math.max(1, Math.round(cssWidth * ratio));
@@ -373,6 +381,11 @@ const SideRays = ({
     const frame = (now: number) => {
       raf = 0;
       if (lost) return;
+      if (minDrawGap && now - lastDraw < minDrawGap - 1) {
+        if (visible && pageVisible) raf = requestAnimationFrame(frame);
+        return;
+      }
+      lastDraw = now;
       const s = settingsRef.current;
       const dt = clamp((now - last) / 1000 || 0, 0, 0.05);
       last = Math.max(last, now);

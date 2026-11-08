@@ -31,6 +31,28 @@ interface LanyardProps {
   coverColor?: 'silver' | 'black'
 }
 
+/**
+ * R3F has no built-in frame cap. With `frameloop="demand"` this keeps the
+ * simulation advancing while drawing only as often as we ask, which roughly
+ * halves GPU work on phones.
+ */
+function FramePacer({
+  fps,
+  awakeRef
+}: {
+  fps: number
+  awakeRef: { current: boolean }
+}) {
+  const invalidate = useThree(state => state.invalidate)
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      if (awakeRef.current) invalidate()
+    }, 1000 / fps)
+    return () => window.clearInterval(id)
+  }, [fps, invalidate, awakeRef])
+  return null
+}
+
 export default function Lanyard({
   position = [0, 0, 30],
   gravity = [0, -40, 0],
@@ -47,7 +69,11 @@ export default function Lanyard({
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768)
   const [phoneLandscape, setPhoneLandscape] = useState(() => typeof window !== 'undefined' && window.innerWidth > window.innerHeight && window.innerHeight < 600)
   const wrapperRef = useRef<HTMLDivElement>(null!)
-  const scrollYRef = useRef(0)
+  // Stop rendering once the rope/card physics has settled; any touch wakes it.
+  const awakeRef = useRef(true)
+  // Stop the render loop when the hero is offscreen or the tab is hidden, so
+  // the always-on canvas does not keep the GPU busy while reading the page.
+  const [active, setActive] = useState(true)
 
   useEffect(() => {
     const handleResize = () => {
@@ -61,47 +87,48 @@ export default function Lanyard({
   useEffect(() => {
     const el = wrapperRef.current
     if (!el) return
-    const prevent = (e: TouchEvent) => {
-      if (!el.contains(e.target as Node)) return
-      e.preventDefault()
-      scrollYRef.current = window.scrollY
-      document.body.style.position = 'fixed'
-      document.body.style.top = `-${scrollYRef.current}px`
-      document.body.style.left = '0'
-      document.body.style.right = '0'
-    }
-    const unlock = () => {
-      if (document.body.style.position !== 'fixed') return
-      document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.left = ''
-      document.body.style.right = ''
-      window.scrollTo(0, scrollYRef.current)
-    }
-    document.addEventListener('touchstart', prevent, { passive: false, capture: true })
-    document.addEventListener('touchmove', prevent, { passive: false, capture: true })
-    document.addEventListener('touchend', unlock, { passive: true })
-    document.addEventListener('touchcancel', unlock, { passive: true })
+    let onScreen = true
+    const update = () => setActive(onScreen && !document.hidden)
+    const observer = new IntersectionObserver(
+      entries => {
+        onScreen = entries.some(entry => entry.isIntersecting)
+        update()
+      },
+      { rootMargin: '100px' }
+    )
+    observer.observe(el)
+    document.addEventListener('visibilitychange', update)
     return () => {
-      document.removeEventListener('touchstart', prevent, { capture: true })
-      document.removeEventListener('touchmove', prevent, { capture: true })
-      document.removeEventListener('touchend', unlock)
-      document.removeEventListener('touchcancel', unlock)
-      unlock()
+      observer.disconnect()
+      document.removeEventListener('visibilitychange', update)
     }
   }, [])
 
+  const dpr = useMemo<[number, number]>(() => (isMobile ? [1, 1.5] : [1.5, 2]), [isMobile])
+  const glOptions = useMemo(
+    () => ({ alpha: transparent, antialias: !isMobile, powerPreference: 'high-performance' as const }),
+    [transparent, isMobile]
+  )
+
   return (
-    <div ref={wrapperRef} className="lanyard-wrapper">
+    <div
+      ref={wrapperRef}
+      className="lanyard-wrapper"
+      onPointerDown={() => {
+        awakeRef.current = true
+      }}
+    >
       <Canvas
         camera={{ position: position, fov: fov }}
-        dpr={[2, 2]}
-        gl={{ alpha: transparent }}
+        dpr={dpr}
+        frameloop={active ? 'demand' : 'never'}
+        gl={glOptions}
         onCreated={({ gl }) => {
           gl.setClearColor(new THREE.Color(0x000000), transparent ? 0 : 1)
-          gl.domElement.style.touchAction = 'none'
+          gl.domElement.style.touchAction = 'pan-y'
         }}
       >
+        <FramePacer fps={isMobile ? 30 : 60} awakeRef={awakeRef} />
         <ambientLight intensity={Math.PI} />
         <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
             <Band
@@ -114,6 +141,7 @@ export default function Lanyard({
               lanyardWidth={lanyardWidth}
               compact={compact}
               coverColor={coverColor}
+              awakeRef={awakeRef}
             />
         </Physics>
         <Environment blur={0.75}>
@@ -162,7 +190,8 @@ function Band({
   lanyardImage = null,
   lanyardWidth = 1,
   compact = false,
-  coverColor = 'black'
+  coverColor = 'black',
+  awakeRef = null
 }) {
   const band = useRef(),
     fixed = useRef(),
@@ -266,7 +295,12 @@ function Band({
 
   const [curve] = useState(
     () =>
-      new THREE.CatmullRomCurve3([new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3(), new THREE.Vector3()])
+      new THREE.CatmullRomCurve3([
+        new THREE.Vector3(2, -2.5, 0),
+        new THREE.Vector3(1.5, 0, 0),
+        new THREE.Vector3(1, 0, 0),
+        new THREE.Vector3(0.5, 0, 0)
+      ])
   )
   const [dragged, drag] = useState(false)
   const [hovered, hover] = useState(false)
@@ -315,6 +349,16 @@ function Band({
       rot.copy(card.current.rotation())
       card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z })
     }
+    if (awakeRef) {
+      const bodies = [j1, j2, j3, card]
+      const moving =
+        dragged ||
+        bodies.some(ref => {
+          const body = ref.current
+          return body && typeof body.isSleeping === 'function' && !body.isSleeping()
+        })
+      awakeRef.current = moving
+    }
   })
 
   curve.curveType = 'chordal'
@@ -341,12 +385,24 @@ function Band({
             onPointerOver={() => hover(true)}
             onPointerOut={() => hover(false)}
             onPointerUp={e => {
-              e.target.releasePointerCapture(e.pointerId)
+              try {
+                e.target.releasePointerCapture(e.pointerId)
+              } catch {
+                /* capture may already be gone after a cancelled touch */
+              }
               drag(false)
             }}
+            onPointerCancel={() => {
+              // Vertical page scroll wins on touch; release the card cleanly.
+              drag(false)
+              hover(false)
+            }}
             onPointerDown={e => {
-              e.nativeEvent.preventDefault()
-              e.target.setPointerCapture(e.pointerId)
+              try {
+                e.target.setPointerCapture(e.pointerId)
+              } catch {
+                /* no-op */
+              }
               drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())))
             }}
           >
@@ -365,7 +421,7 @@ function Band({
           </group>
         </RigidBody>
       </group>
-      <mesh ref={band}>
+      <mesh ref={band} raycast={() => null}>
         <meshLineGeometry />
         <meshLineMaterial
           color="white"

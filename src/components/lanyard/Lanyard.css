@@ -2,8 +2,8 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  touch-action: none;
-  overscroll-behavior: none;
+  /* Let vertical swipes scroll the page; the card only takes horizontal drags. */
+  touch-action: pan-y;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   user-select: none;
@@ -11,6 +11,6 @@
 
 .lanyard-wrapper canvas {
   display: block;
-  touch-action: none;
+  touch-action: pan-y;
   pointer-events: auto;
 }
