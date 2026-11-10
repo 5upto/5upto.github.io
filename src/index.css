@@ -198,21 +198,8 @@
   }
 }
 
-#experience .scroll-stack-inner {
-  padding-bottom: 8rem;
-}
-
-@media (max-width: 768px) {
-  #experience .scroll-stack-inner {
-    padding-bottom: 12rem;
-  }
-}
-
-@media (max-width: 480px) {
-  #experience .scroll-stack-inner {
-    padding-bottom: 10rem;
-  }
-}
+/* The space after an Experience stack comes from the dynamic end spacer that
+   ScrollStack sizes in JS (it doubles as the sticky range extender). */
 
 /* Mobile navbar: every control (logo, section icons, sound, theme, menu) uses
    the same box size so the space-between gaps read as identical end to end. */

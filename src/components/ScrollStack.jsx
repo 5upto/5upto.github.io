@@ -52,6 +52,7 @@ const ScrollStack = ({
   const isScrollingRef = useRef(false);
   const pendingRecomputeRef = useRef(false);
   const scrollIdleTimerRef = useRef(0);
+  const scrollRafRef = useRef(0);
 
   const calculateProgress = useCallback((scrollTop, start, end) => {
     if (scrollTop < start) return 0;
@@ -100,15 +101,32 @@ const ScrollStack = ({
       }
       const containerHeight = viewportHeightRef.current;
       const stackPx = parsePercentage(stackPosition, containerHeight);
+      // offsetTop lies for a stuck element (it reports the pinned position),
+      // so neutralize sticky for the measurement. All reads happen between two
+      // forced layouts, and the styles are restored before anything paints.
+      const savedStyles = cards.map(card => ({ position: card.style.position, top: card.style.top }));
+      cards.forEach(card => {
+        card.style.position = 'static';
+        card.style.top = '';
+      });
       cards.forEach((card, i) => {
         positionsRef.current[i] = getOffsetTop(card);
-        // Pin with sticky instead of a per-scroll translateY. The browser's
-        // compositor keeps a sticky card locked to the viewport at native
-        // scroll speed, so it cannot lag behind the page and shake.
-        card.style.position = 'sticky';
-        card.style.top = `${stackPx + itemStackDistance * i}px`;
       });
       endTopRef.current = endEl ? getOffsetTop(endEl) : 0;
+      savedStyles.forEach((saved, i) => {
+        cards[i].style.position = saved.position;
+        cards[i].style.top = saved.top;
+      });
+      // A sticky card can only hold its pin while the sticky container still
+      // has content below it, so the end marker doubles as a spacer sized to
+      // keep every card pinnable until the shared release point (pinEnd).
+      if (endEl) {
+        let need = 0;
+        cards.forEach((card, i) => {
+          need = Math.max(need, stackPx + itemStackDistance * i + card.offsetHeight - containerHeight / 2);
+        });
+        endEl.style.height = `${Math.max(160, Math.round(need + 100))}px`;
+      }
     } else {
       cards.forEach((card, i) => {
         positionsRef.current[i] = card.offsetTop;
@@ -136,7 +154,8 @@ const ScrollStack = ({
         positionsRef.current[i] = cardTop;
       }
 
-      const triggerStart = cardTop - stackPx - itemStackDistance * i;
+      const stackOffset = stackPx + itemStackDistance * i;
+      const triggerStart = cardTop - stackOffset;
       const triggerEnd = cardTop - endPx;
       if (scrollTop >= triggerStart) newActive = i;
 
@@ -147,18 +166,45 @@ const ScrollStack = ({
       let rotZ = 0;
       let opacity = 1;
 
+      // Sticky follows the compositor, so the pin itself never lags. The
+      // release at pinEnd is a one-time mode flip to a frozen transform, which
+      // makes the whole stack scroll off together instead of peeling apart.
+      const released = useWindowScroll && scrollTop >= triggerStart && scrollTop > pinEnd;
+
+      if (useWindowScroll) {
+        const wantPosition = released ? 'relative' : 'sticky';
+        const wantTop = released ? '' : `${stackOffset}px`;
+        let last = lastTransformsRef.current.get(i);
+        if (!last) {
+          last = { pos: '', topStr: '', y: 0, s: 1, rx: 0, ry: 0, rz: 0, o: 1 };
+          lastTransformsRef.current.set(i, last);
+        }
+        if (last.pos !== wantPosition) {
+          card.style.position = wantPosition;
+          last.pos = wantPosition;
+        }
+        // `top` must be cleared in relative mode, otherwise it shifts the
+        // card on top of the frozen translateY.
+        if (last.topStr !== wantTop) {
+          card.style.top = wantTop;
+          last.topStr = wantTop;
+        }
+        if (released) translateY = pinEnd - cardTop + stackOffset;
+      }
+
       if (scrollTop >= triggerStart) {
         const t = calculateProgress(scrollTop, triggerStart, triggerEnd);
         const targetScale = baseScale + i * itemScale;
         scale = 1 - t * (1 - targetScale);
 
-        // Window scrolling is pinned by `position: sticky` (see
-        // measurePositions), so no per-scroll translation is needed there.
+        // Window scrolling is pinned by `position: sticky`, so no per-scroll
+        // translation is needed there; the container-scrolled variant still
+        // tracks the scroll by transform.
         if (!useWindowScroll) {
           if (scrollTop <= pinEnd) {
-            translateY = scrollTop - cardTop + stackPx + itemStackDistance * i;
+            translateY = scrollTop - cardTop + stackOffset;
           } else {
-            translateY = pinEnd - cardTop + stackPx + itemStackDistance * i;
+            translateY = pinEnd - cardTop + stackOffset;
           }
         }
 
@@ -174,13 +220,21 @@ const ScrollStack = ({
       const roundedRotY = Math.round(rotY * 100) / 100;
       const roundedRotZ = Math.round(rotZ * 100) / 100;
       const roundedOpacity = Math.round(opacity * 100) / 100;
-      const last = lastTransformsRef.current.get(i);
 
       const rotStr = `rotateX(${roundedRotX}deg) rotateY(${roundedRotY}deg) rotateZ(${roundedRotZ}deg)`;
+      const last = lastTransformsRef.current.get(i);
       if (!last || last.y !== roundedY || last.s !== roundedScale || last.rx !== roundedRotX || last.ry !== roundedRotY || last.rz !== roundedRotZ || last.o !== roundedOpacity) {
         card.style.transform = `translate3d(0, ${roundedY}px, 0) scale(${roundedScale}) ${rotStr}`;
         card.style.opacity = roundedOpacity;
-        lastTransformsRef.current.set(i, { y: roundedY, s: roundedScale, rx: roundedRotX, ry: roundedRotY, rz: roundedRotZ, o: roundedOpacity });
+        lastTransformsRef.current.set(i, {
+          ...(last || {}),
+          y: roundedY,
+          s: roundedScale,
+          rx: roundedRotX,
+          ry: roundedRotY,
+          rz: roundedRotZ,
+          o: roundedOpacity
+        });
       }
     });
     if (newActive !== -1 && newActive !== lastActiveIndexRef.current) {
@@ -228,8 +282,20 @@ const ScrollStack = ({
 
   const handleScroll = useCallback(() => {
     markScrolled();
-    updateCardTransforms();
-  }, [markScrolled, updateCardTransforms]);
+    if (useWindowScroll) {
+      // Scroll events can trail the compositor during native momentum, and
+      // rAF runs before paint, so the pass below always sees the scroll
+      // position of the frame it will be displayed in.
+      if (!scrollRafRef.current) {
+        scrollRafRef.current = requestAnimationFrame(() => {
+          scrollRafRef.current = 0;
+          updateCardTransforms();
+        });
+      }
+    } else {
+      updateCardTransforms();
+    }
+  }, [useWindowScroll, markScrolled, updateCardTransforms]);
 
   useLayoutEffect(() => {
     const scroller = scrollerRef.current;
@@ -369,6 +435,10 @@ const ScrollStack = ({
       if (scrollIdleTimerRef.current) {
         window.clearTimeout(scrollIdleTimerRef.current);
         scrollIdleTimerRef.current = 0;
+      }
+      if (scrollRafRef.current) {
+        cancelAnimationFrame(scrollRafRef.current);
+        scrollRafRef.current = 0;
       }
       isScrollingRef.current = false;
       pendingRecomputeRef.current = false;
