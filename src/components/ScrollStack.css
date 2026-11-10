@@ -12,9 +12,9 @@
   overflow-x: visible;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  scroll-behavior: smooth;
+  /* Native/Lenis owns smoothness; CSS smooth would fight the animation loop. */
+  scroll-behavior: auto;
   transform: translateZ(0);
-  will-change: scroll-position;
 }
 
 .scroll-stack-inner {

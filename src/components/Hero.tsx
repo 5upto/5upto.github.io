@@ -257,7 +257,7 @@ export default function Hero() {
     <section
       ref={containerRef}
       id="hero"
-      className="relative min-h-dvh flex items-center px-4 py-12"
+      className="relative isolate min-h-svh flex items-center px-4 py-12 overflow-hidden"
     >
       {heroBackgroundFetched && <HeroBackground settings={heroBackground} isDark={isDark} />}
       {front && <Lanyard frontImage={front} backImage={back} lanyardImage={band} coverColor={lanyardSettings.coverColor} position={[0, 0, 28]} fov={18} transparent />}

@@ -32,6 +32,13 @@ const ScrollStack = ({
   const positionsRef = useRef([]);
   const endTopRef = useRef(0);
   const lastActiveIndexRef = useRef(-1);
+  // Viewport height is cached so mobile browser chrome (address bar) collapsing
+  // mid-scroll cannot move the pin line/target scale under the user's finger.
+  const viewportHeightRef = useRef(0);
+  const viewportWidthRef = useRef(0);
+  const isScrollingRef = useRef(false);
+  const pendingRecomputeRef = useRef(false);
+  const scrollIdleTimerRef = useRef(0);
 
   const calculateProgress = useCallback((scrollTop, start, end) => {
     if (scrollTop < start) return 0;
@@ -50,7 +57,7 @@ const ScrollStack = ({
     if (useWindowScroll) {
       return {
         scrollTop: window.scrollY,
-        containerHeight: window.innerHeight,
+        containerHeight: viewportHeightRef.current || window.innerHeight,
         scrollContainer: document.documentElement
       };
     } else {
@@ -68,11 +75,22 @@ const ScrollStack = ({
     if (!cards.length) return;
     const endEl = scrollerRef.current?.querySelector('.scroll-stack-end');
     if (useWindowScroll) {
+      // Keep the cached viewport height stable across small mobile browser
+      // chrome changes (address bar), but still follow real resizes/orientation.
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const widthChanged = width !== viewportWidthRef.current;
+      const bigHeightChange = Math.abs(height - viewportHeightRef.current) > 150;
+      if (!viewportHeightRef.current || widthChanged || bigHeightChange) {
+        viewportHeightRef.current = height;
+        viewportWidthRef.current = width;
+      }
+      const scrollTop = window.scrollY;
       cards.forEach((card, i) => {
         const appliedY = lastTransformsRef.current.get(i)?.y || 0;
-        positionsRef.current[i] = card.getBoundingClientRect().top + window.scrollY - appliedY;
+        positionsRef.current[i] = card.getBoundingClientRect().top + scrollTop - appliedY;
       });
-      endTopRef.current = endEl ? endEl.getBoundingClientRect().top + window.scrollY : 0;
+      endTopRef.current = endEl ? endEl.getBoundingClientRect().top + scrollTop : 0;
     } else {
       cards.forEach((card, i) => {
         positionsRef.current[i] = card.offsetTop;
@@ -171,14 +189,31 @@ const ScrollStack = ({
     measurePositions
   ]);
 
-  const handleScroll = useCallback(() => {
-    updateCardTransforms();
-  }, [updateCardTransforms]);
-
   const recompute = useCallback(() => {
     measurePositions();
     updateCardTransforms();
   }, [measurePositions, updateCardTransforms]);
+
+  const markScrolled = useCallback(() => {
+    isScrollingRef.current = true;
+    if (scrollIdleTimerRef.current) window.clearTimeout(scrollIdleTimerRef.current);
+    scrollIdleTimerRef.current = window.setTimeout(() => {
+      scrollIdleTimerRef.current = 0;
+      isScrollingRef.current = false;
+      // Layout changes while a finger is down (fonts, images, and the mobile
+      // address bar resizing) are measured once the scroll comes to rest.
+      // Re-measuring mid-gesture is what made the stack visibly jump.
+      if (pendingRecomputeRef.current) {
+        pendingRecomputeRef.current = false;
+        recompute();
+      }
+    }, 140);
+  }, [recompute]);
+
+  const handleScroll = useCallback(() => {
+    markScrolled();
+    updateCardTransforms();
+  }, [markScrolled, updateCardTransforms]);
 
   useLayoutEffect(() => {
     const scroller = scrollerRef.current;
@@ -200,12 +235,19 @@ const ScrollStack = ({
       card.style.zIndex = `${i + 1}`;
     });
 
-    // Coalesce layout-triggered re-measures into one per frame.
+    // Coalesce layout-triggered re-measures into one per frame. If a layout
+    // change lands while the reader is actively scrolling, postpone it until
+    // the gesture settles so the cards never snap under their finger.
     let scheduleRaf = 0;
     const scheduleRecompute = () => {
       if (scheduleRaf) return;
       scheduleRaf = requestAnimationFrame(() => {
         scheduleRaf = 0;
+        if (isScrollingRef.current) {
+          pendingRecomputeRef.current = true;
+          return;
+        }
+        pendingRecomputeRef.current = false;
         recompute();
       });
     };
@@ -218,37 +260,43 @@ const ScrollStack = ({
     }
     const resizeObserver = new ResizeObserver(scheduleRecompute);
     cards.forEach(card => resizeObserver.observe(card));
-    // Sections/images above the stack can change height after the initial
-    // measurement (async data, fonts, mobile browser chrome). Keep the cached
-    // card offsets fresh, otherwise a resize corrects them mid-scroll and the
-    // cards visibly snap, most noticeably when scrolling back up on mobile.
+    // Async content (fonts/images/other sections) can change the card offsets
+    // after the initial measurement. Keep them fresh, but only while at rest.
     const layoutObserver = new ResizeObserver(scheduleRecompute);
     layoutObserver.observe(document.body);
     const viewport = window.visualViewport;
     viewport?.addEventListener('resize', scheduleRecompute);
 
     if (useWindowScroll) {
-      lenisCount++;
-      if (!sharedLenis) {
-        sharedLenis = new Lenis({
-          duration: 1.2,
-          easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-          smoothWheel: true,
-          infinite: false,
-          wheelMultiplier: 1,
-          // Keep touch scrolling native: Lenis syncTouch can fight momentum
-          // when the scroll direction reverses on mobile.
-          lerp: 0.1
-        });
+      // Touch devices scroll natively, which is smoother than any JS smoothing.
+      // Lenis is only needed for desktop wheel input.
+      const nativeTouchScroll =
+        typeof window.matchMedia === 'function' &&
+        window.matchMedia('(pointer: coarse)').matches;
 
-        const raf = time => {
-          sharedLenis?.raf(time);
+      if (!nativeTouchScroll) {
+        lenisCount++;
+        if (!sharedLenis) {
+          sharedLenis = new Lenis({
+            duration: 1.2,
+            easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            smoothWheel: true,
+            infinite: false,
+            wheelMultiplier: 1,
+            // Keep touch scrolling native: Lenis syncTouch can fight momentum
+            // when the scroll direction reverses on mobile.
+            lerp: 0.1
+          });
+
+          const raf = time => {
+            sharedLenis?.raf(time);
+            sharedRafId = requestAnimationFrame(raf);
+          };
           sharedRafId = requestAnimationFrame(raf);
-        };
-        sharedRafId = requestAnimationFrame(raf);
+        }
+        lenisRef.current = sharedLenis;
+        sharedLenis.on('scroll', handleScroll);
       }
-      lenisRef.current = sharedLenis;
-      sharedLenis.on('scroll', handleScroll);
       // Also react to native scroll events (scroll restoration, resize, etc.)
       // so transforms never get stuck at a stale position.
       window.addEventListener('scroll', handleScroll, { passive: true });
@@ -278,7 +326,6 @@ const ScrollStack = ({
       lenisRef.current = lenis;
     }
 
-    updateCardTransforms();
     // Catch late layout/scroll-restoration shifts that happen after mount.
     requestAnimationFrame(() => {
       recompute();
@@ -287,22 +334,34 @@ const ScrollStack = ({
 
     return () => {
       if (useWindowScroll) {
-        sharedLenis?.off('scroll', handleScroll);
         window.removeEventListener('scroll', handleScroll);
-        lenisCount--;
-        if (lenisCount <= 0 && sharedLenis) {
-          cancelAnimationFrame(sharedRafId);
-          sharedLenis.destroy();
-          sharedLenis = null;
-          sharedRafId = null;
+        if (lenisRef.current) {
+          sharedLenis?.off('scroll', handleScroll);
+          lenisCount--;
+          if (lenisCount <= 0 && sharedLenis) {
+            cancelAnimationFrame(sharedRafId);
+            sharedLenis.destroy();
+            sharedLenis = null;
+            sharedRafId = null;
+          }
+          lenisRef.current = null;
         }
       } else if (lenisRef.current) {
         lenisRef.current.destroy();
+        lenisRef.current = null;
       }
+      if (scrollIdleTimerRef.current) {
+        window.clearTimeout(scrollIdleTimerRef.current);
+        scrollIdleTimerRef.current = 0;
+      }
+      isScrollingRef.current = false;
+      pendingRecomputeRef.current = false;
       cardsRef.current = [];
       transformsCache.clear();
       positionsRef.current = [];
       endTopRef.current = 0;
+      viewportHeightRef.current = 0;
+      viewportWidthRef.current = 0;
       resizeObserver.disconnect();
       layoutObserver.disconnect();
       viewport?.removeEventListener('resize', scheduleRecompute);

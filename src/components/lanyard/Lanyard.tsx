@@ -71,6 +71,10 @@ export default function Lanyard({
   const wrapperRef = useRef<HTMLDivElement>(null!)
   // Stop rendering once the rope/card physics has settled; any touch wakes it.
   const awakeRef = useRef(true)
+  // Rigid bodies take a few frames to register after the GLB/textures resolve.
+  // Keep the loop alive until the simulation has actually settled, otherwise
+  // the first (empty) frame can park the card in mid-air until a touch wakes it.
+  const settleFramesRef = useRef(0)
   // Stop the render loop when the hero is offscreen or the tab is hidden, so
   // the always-on canvas does not keep the GPU busy while reading the page.
   const [active, setActive] = useState(true)
@@ -103,6 +107,11 @@ export default function Lanyard({
       document.removeEventListener('visibilitychange', update)
     }
   }, [])
+
+  // The render loop is demand-driven, so waking back up needs a manual nudge.
+  useEffect(() => {
+    if (active) awakeRef.current = true
+  }, [active])
 
   const dpr = useMemo<[number, number]>(() => (isMobile ? [1, 1.5] : [1.5, 2]), [isMobile])
   const glOptions = useMemo(
@@ -142,6 +151,7 @@ export default function Lanyard({
               compact={compact}
               coverColor={coverColor}
               awakeRef={awakeRef}
+              settleFramesRef={settleFramesRef}
             />
         </Physics>
         <Environment blur={0.75}>
@@ -191,7 +201,8 @@ function Band({
   lanyardWidth = 1,
   compact = false,
   coverColor = 'black',
-  awakeRef = null
+  awakeRef = null,
+  settleFramesRef = null
 }) {
   const band = useRef(),
     fixed = useRef(),
@@ -351,13 +362,24 @@ function Band({
     }
     if (awakeRef) {
       const bodies = [j1, j2, j3, card]
-      const moving =
-        dragged ||
-        bodies.some(ref => {
+      // While the physics bodies are still being created (or the card is being
+      // dragged) the simulation must keep getting frames, otherwise demand mode
+      // can freeze the lanyard before it ever falls into place.
+      const ready = bodies.every(ref => !!ref.current)
+      const asleep =
+        ready &&
+        bodies.every(ref => {
           const body = ref.current
-          return body && typeof body.isSleeping === 'function' && !body.isSleeping()
+          return typeof body.isSleeping === 'function' && body.isSleeping()
         })
-      awakeRef.current = moving
+      if (dragged || !ready || !asleep) {
+        if (settleFramesRef) settleFramesRef.current = 0
+      } else if (settleFramesRef) {
+        settleFramesRef.current += 1
+      }
+      // Give the rope lerp a handful of extra frames after the bodies sleep so
+      // the last interpolated position is rendered before the loop parks.
+      awakeRef.current = !settleFramesRef || settleFramesRef.current < 8
     }
   })
 
