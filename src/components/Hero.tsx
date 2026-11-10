@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import gsap from 'gsap'
 import Lanyard from './lanyard/Lanyard'
 import HeroBackground from './backgrounds/HeroBackground'
@@ -10,6 +10,8 @@ import { useLanyardSettings } from '../hooks/useLanyardSettings'
 import { useHeroBackgroundSettings } from '../hooks/useHeroBackgroundSettings'
 import { renderCardBack, renderCardFront, renderRibbon } from '../lib/lanyardCard'
 import type { LanyardSettings } from '../types/database'
+
+const LanyardModern = lazy(() => import('./lanyard/LanyardModern'))
 
 function useIsDarkTheme() {
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'))
@@ -260,7 +262,31 @@ export default function Hero() {
       className="relative isolate min-h-svh flex items-center px-4 py-12 overflow-hidden"
     >
       {heroBackgroundFetched && <HeroBackground settings={heroBackground} isDark={isDark} />}
-      {front && <Lanyard frontImage={front} backImage={back} lanyardImage={band} coverColor={lanyardSettings.coverColor} position={[0, 0, 28]} fov={18} transparent />}
+      {front && (lanyardSettings.version === 'modern' ? (
+        <Suspense fallback={null}><LanyardModern
+          frontImage={front}
+          backImage={back}
+          cardColor={isDark ? lanyardSettings.cardBgDark : lanyardSettings.cardBg}
+          finish={lanyardSettings.finish}
+          orientation={lanyardSettings.orientation}
+          cornerRadius={lanyardSettings.cornerRadius}
+          size={lanyardSettings.size}
+          anchor={lanyardSettings.positionMode === 'classic' ? 'auto' : lanyardSettings.anchor}
+          strapLength={lanyardSettings.strapLength}
+          strapImage={band}
+          strapColor={isDark ? lanyardSettings.ribbonColorDark : lanyardSettings.ribbonColor}
+          strapWidth={lanyardSettings.strapWidth}
+          metal={lanyardSettings.metal}
+          gravity={lanyardSettings.gravity}
+          damping={lanyardSettings.damping}
+          elasticity={lanyardSettings.elasticity}
+          breeze={lanyardSettings.breeze}
+          interactive={lanyardSettings.interactive}
+          intro={lanyardSettings.intro}
+        /></Suspense>
+      ) : (
+        <Lanyard frontImage={front} backImage={back} lanyardImage={band} coverColor={lanyardSettings.coverColor} position={[0, 0, 28]} fov={18} transparent />
+      ))}
       <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col landscape:flex-row md:flex-row items-center gap-8 landscape:gap-16 md:gap-16 pointer-events-none">
         <div ref={textRef} className="hidden landscape:block md:block w-full landscape:w-1/2 md:w-1/2 text-left pointer-events-auto">
           <p className="text-primary-400 font-display text-base landscape:text-lg md:text-lg mb-4 tracking-[0.2em] uppercase opacity-80">

@@ -17,6 +17,7 @@ export const LANYARD_FONT_OPTIONS = [
 ] as const
 
 export const DEFAULT_LANYARD_SETTINGS: LanyardSettings = {
+  version: 'classic',
   cardBg: '#f8fafc',
   cardBgDark: '#1a1a1a',
   ribbonColor: '#4338ca',
@@ -27,6 +28,21 @@ export const DEFAULT_LANYARD_SETTINGS: LanyardSettings = {
   photoRadius: 20,
   coverColor: 'black',
   fontFamily: 'Inter',
+  orientation: 'portrait',
+  finish: 'glossy',
+  cornerRadius: 0.3,
+  size: 0.6,
+  anchor: 'center',
+  positionMode: 'classic',
+  strapLength: 0.5,
+  strapWidth: 0.65,
+  metal: 'silver',
+  gravity: 1,
+  damping: 0.5,
+  elasticity: 0.5,
+  breeze: 0,
+  interactive: true,
+  intro: true,
 }
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/
@@ -36,6 +52,7 @@ const clamp = (value: unknown, min: number, max: number, fallback: number) =>
 export function normalizeLanyardSettings(raw: unknown): LanyardSettings {
   const value = (raw && typeof raw === 'object' ? raw : {}) as Partial<LanyardSettings>
   return {
+    version: value.version === 'modern' ? 'modern' : 'classic',
     cardBg: typeof value.cardBg === 'string' && HEX_RE.test(value.cardBg) ? value.cardBg : DEFAULT_LANYARD_SETTINGS.cardBg,
     cardBgDark: typeof value.cardBgDark === 'string' && HEX_RE.test(value.cardBgDark) ? value.cardBgDark : DEFAULT_LANYARD_SETTINGS.cardBgDark,
     ribbonColor: typeof value.ribbonColor === 'string' && HEX_RE.test(value.ribbonColor) ? value.ribbonColor : DEFAULT_LANYARD_SETTINGS.ribbonColor,
@@ -48,6 +65,23 @@ export function normalizeLanyardSettings(raw: unknown): LanyardSettings {
     fontFamily: LANYARD_FONT_OPTIONS.some((font) => font.value === value.fontFamily)
       ? (value.fontFamily as string)
       : DEFAULT_LANYARD_SETTINGS.fontFamily,
+    orientation: value.orientation === 'landscape' ? 'landscape' : 'portrait',
+    finish: ['matte', 'holographic', 'metallic'].includes(value.finish as string)
+      ? (value.finish as LanyardSettings['finish'])
+      : 'glossy',
+    cornerRadius: clamp(value.cornerRadius, 0, 1, DEFAULT_LANYARD_SETTINGS.cornerRadius),
+    size: clamp(value.size, 0.15, 0.9, DEFAULT_LANYARD_SETTINGS.size),
+    anchor: value.anchor === 'left' || value.anchor === 'right' ? value.anchor : 'center',
+    positionMode: value.positionMode === 'custom' ? 'custom' : 'classic',
+    strapLength: clamp(value.strapLength, 0, 1, DEFAULT_LANYARD_SETTINGS.strapLength),
+    strapWidth: clamp(value.strapWidth, 0.4, 2, DEFAULT_LANYARD_SETTINGS.strapWidth),
+    metal: value.metal === 'gold' || value.metal === 'graphite' ? value.metal : 'silver',
+    gravity: clamp(value.gravity, 0, 3, DEFAULT_LANYARD_SETTINGS.gravity),
+    damping: clamp(value.damping, 0, 1, DEFAULT_LANYARD_SETTINGS.damping),
+    elasticity: clamp(value.elasticity, 0, 1, DEFAULT_LANYARD_SETTINGS.elasticity),
+    breeze: clamp(value.breeze, 0, 1, DEFAULT_LANYARD_SETTINGS.breeze),
+    interactive: typeof value.interactive === 'boolean' ? value.interactive : DEFAULT_LANYARD_SETTINGS.interactive,
+    intro: typeof value.intro === 'boolean' ? value.intro : DEFAULT_LANYARD_SETTINGS.intro,
   }
 }
 
@@ -161,7 +195,7 @@ export async function renderCardFront({
   ctx.roundRect(0, 0, CARD_WIDTH, CARD_HEIGHT, 40)
   ctx.fill()
 
-  paintCardCover(ctx, settings.coverColor)
+  if (settings.version !== 'modern') paintCardCover(ctx, settings.coverColor)
 
   ctx.save()
   ctx.beginPath()
@@ -228,7 +262,7 @@ export async function renderCardBack({ logoUrl, isDark, settings, scale = 1 }: C
   ctx.roundRect(0, 0, CARD_WIDTH, CARD_HEIGHT, 40)
   ctx.fill()
 
-  paintCardCover(ctx, settings.coverColor)
+  if (settings.version !== 'modern') paintCardCover(ctx, settings.coverColor)
 
   if (logoUrl) {
     try {

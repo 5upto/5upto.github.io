@@ -1,4 +1,4 @@
-import { Suspense, useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import type { LanyardSettings } from '../../types/database'
@@ -19,6 +19,7 @@ import Toast from '../components/Toast'
 import { MdRestartAlt, MdSave } from 'react-icons/md'
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/
+const LanyardModern = lazy(() => import('../../components/lanyard/LanyardModern'))
 
 function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
@@ -117,6 +118,31 @@ function ToggleField({
           className={`inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${checked ? 'translate-x-[22px]' : 'translate-x-0.5'}`}
         />
       </button>
+    </div>
+  )
+}
+
+function SelectField({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string
+  value: string
+  options: { value: string; label: string }[]
+  onChange: (value: string) => void
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">{label}</label>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-primary-500/30 focus:border-primary-500 transition-all"
+      >
+        {options.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+      </select>
     </div>
   )
 }
@@ -279,6 +305,53 @@ export default function LanyardPage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_380px] gap-6">
         <div className="space-y-4">
+          <Section title="Lanyard version" description="Choose which 3D lanyard is shown on your public hero. The classic version remains available at any time.">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {([
+                { value: 'classic', label: 'Classic', detail: 'Existing 3D badge and rope' },
+                { value: 'modern', label: 'Updated ReactBits', detail: 'New card finishes and adjustable strap' },
+              ] as const).map((option) => {
+                const active = form.version === option.value
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setForm((current) => ({ ...current, version: option.value }))}
+                    aria-pressed={active}
+                    className={`rounded-xl border px-4 py-3 text-left transition-all ${active ? 'border-primary-500 bg-primary-600/10' : 'border-[var(--border)] bg-[var(--bg-elevated)] hover:border-primary-500/50'}`}
+                  >
+                    <span className="block text-sm font-semibold text-[var(--text-primary)]">{option.label}</span>
+                    <span className="block text-xs text-[var(--text-muted)] mt-1">{option.detail}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </Section>
+
+          {form.version === 'modern' && (
+            <Section title="Updated lanyard options" description="Tune the card shape, materials and movement used by the ReactBits version.">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <SelectField label="Orientation" value={form.orientation} options={[{ value: 'portrait', label: 'Portrait' }, { value: 'landscape', label: 'Landscape' }]} onChange={(v) => setForm((f) => ({ ...f, orientation: v as LanyardSettings['orientation'] }))} />
+                <SelectField label="Card finish" value={form.finish} options={[{ value: 'glossy', label: 'Glossy' }, { value: 'matte', label: 'Matte' }, { value: 'holographic', label: 'Holographic' }, { value: 'metallic', label: 'Metallic' }]} onChange={(v) => setForm((f) => ({ ...f, finish: v as LanyardSettings['finish'] }))} />
+                <SelectField label="Metal" value={form.metal} options={[{ value: 'silver', label: 'Silver' }, { value: 'gold', label: 'Gold' }, { value: 'graphite', label: 'Graphite' }]} onChange={(v) => setForm((f) => ({ ...f, metal: v as LanyardSettings['metal'] }))} />
+                <SelectField label="Hero position" value={form.positionMode} options={[{ value: 'classic', label: 'Match classic position' }, { value: 'custom', label: 'Custom anchor' }]} onChange={(v) => setForm((f) => ({ ...f, positionMode: v as LanyardSettings['positionMode'] }))} />
+                {form.positionMode === 'custom' && (
+                  <SelectField label="Strap anchor" value={form.anchor} options={[{ value: 'left', label: 'Left' }, { value: 'center', label: 'Center' }, { value: 'right', label: 'Right' }]} onChange={(v) => setForm((f) => ({ ...f, anchor: v as LanyardSettings['anchor'] }))} />
+                )}
+              </div>
+              <RangeField label="Card corner radius" value={Math.round(form.cornerRadius * 100)} min={0} max={100} suffix="%" onChange={(v) => setForm((f) => ({ ...f, cornerRadius: v / 100 }))} />
+              <RangeField label="Card size" value={Math.round(form.size * 100)} min={15} max={90} suffix="%" onChange={(v) => setForm((f) => ({ ...f, size: v / 100 }))} />
+              <RangeField label="Strap length" value={Math.round(form.strapLength * 100)} min={0} max={100} suffix="%" onChange={(v) => setForm((f) => ({ ...f, strapLength: v / 100 }))} />
+              <RangeField label="Strap width" value={Math.round(form.strapWidth * 100)} min={40} max={200} suffix="%" onChange={(v) => setForm((f) => ({ ...f, strapWidth: v / 100 }))} />
+              <RangeField label="Gravity" value={Math.round(form.gravity * 100)} min={0} max={300} suffix="%" onChange={(v) => setForm((f) => ({ ...f, gravity: v / 100 }))} />
+              <RangeField label="Damping" value={Math.round(form.damping * 100)} min={0} max={100} suffix="%" onChange={(v) => setForm((f) => ({ ...f, damping: v / 100 }))} />
+              <RangeField label="Elasticity" value={Math.round(form.elasticity * 100)} min={0} max={100} suffix="%" onChange={(v) => setForm((f) => ({ ...f, elasticity: v / 100 }))} />
+              <RangeField label="Breeze" value={Math.round(form.breeze * 100)} min={0} max={100} suffix="%" onChange={(v) => setForm((f) => ({ ...f, breeze: v / 100 }))} />
+              <ToggleField label="Interactive" description="Allow visitors to drag, throw and flip the card." checked={form.interactive} onChange={(v) => setForm((f) => ({ ...f, interactive: v }))} />
+              <ToggleField label="Drop-in intro" description="Animate the card swinging into view on load." checked={form.intro} onChange={(v) => setForm((f) => ({ ...f, intro: v }))} />
+            </Section>
+          )}
+
           <Section title="Card background" description="Base colour behind the photo, name and role.">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <ColorField label="Light mode" value={form.cardBg} onChange={(v) => setForm((f) => ({ ...f, cardBg: v }))} />
@@ -354,24 +427,50 @@ export default function LanyardPage() {
 
             <div className="relative mx-auto w-full max-w-[340px] aspect-[3/4] rounded-2xl overflow-hidden border border-[var(--border)] shadow-2xl bg-[var(--bg-elevated)]">
               {preview.front ? (
-                <Suspense
-                  fallback={
-                    <div className="absolute inset-0 flex items-center justify-center text-xs text-[var(--text-muted)]">
-                      Loading 3D preview…
-                    </div>
-                  }
-                >
-                  <Lanyard
+                form.version === 'modern' ? (
+                  <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center text-xs text-[var(--text-muted)]">Loading 3D preview…</div>}>
+                    <LanyardModern
                     frontImage={preview.front}
                     backImage={preview.back}
-                    lanyardImage={preview.ribbon}
-                    coverColor={form.coverColor}
-                    position={[0, 0, 28]}
-                    fov={18}
-                    compact
-                    transparent
-                  />
-                </Suspense>
+                    cardColor={previewCardBg}
+                    finish={form.finish}
+                    orientation={form.orientation}
+                    cornerRadius={form.cornerRadius}
+                    size={form.size}
+                    anchor={form.positionMode === 'classic' ? 'auto' : form.anchor}
+                    strapLength={form.strapLength}
+                    strapImage={preview.ribbon}
+                    strapColor={isDark ? form.ribbonColorDark : form.ribbonColor}
+                    strapWidth={form.strapWidth}
+                    metal={form.metal}
+                    gravity={form.gravity}
+                    damping={form.damping}
+                    elasticity={form.elasticity}
+                    breeze={form.breeze}
+                    interactive={form.interactive}
+                    intro={form.intro}
+                    />
+                  </Suspense>
+                ) : (
+                  <Suspense
+                    fallback={
+                      <div className="absolute inset-0 flex items-center justify-center text-xs text-[var(--text-muted)]">
+                        Loading 3D preview…
+                      </div>
+                    }
+                  >
+                    <Lanyard
+                      frontImage={preview.front}
+                      backImage={preview.back}
+                      lanyardImage={preview.ribbon}
+                      coverColor={form.coverColor}
+                      position={[0, 0, 28]}
+                      fov={18}
+                      compact
+                      transparent
+                    />
+                  </Suspense>
+                )
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center text-xs text-[var(--text-muted)]">Loading preview…</div>
               )}
