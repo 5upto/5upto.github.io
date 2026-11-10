@@ -6,6 +6,19 @@ let sharedLenis = null;
 let lenisCount = 0;
 let sharedRafId = null;
 
+// Document-space offset of an element. Unlike getBoundingClientRect() this is
+// not affected by `position: sticky` or by the card's own transform, so the
+// natural (un-pinned) position stays stable while the card is pinned.
+const getOffsetTop = el => {
+  let top = 0;
+  let node = el;
+  while (node) {
+    top += node.offsetTop || 0;
+    node = node.offsetParent;
+  }
+  return top;
+};
+
 export const ScrollStackItem = ({ children, itemClassName = '', ...props }) => (
   <div role="button" tabIndex={0} className={`scroll-stack-card ${itemClassName}`.trim()} {...props}>{children}</div>
 );
@@ -85,19 +98,24 @@ const ScrollStack = ({
         viewportHeightRef.current = height;
         viewportWidthRef.current = width;
       }
-      const scrollTop = window.scrollY;
+      const containerHeight = viewportHeightRef.current;
+      const stackPx = parsePercentage(stackPosition, containerHeight);
       cards.forEach((card, i) => {
-        const appliedY = lastTransformsRef.current.get(i)?.y || 0;
-        positionsRef.current[i] = card.getBoundingClientRect().top + scrollTop - appliedY;
+        positionsRef.current[i] = getOffsetTop(card);
+        // Pin with sticky instead of a per-scroll translateY. The browser's
+        // compositor keeps a sticky card locked to the viewport at native
+        // scroll speed, so it cannot lag behind the page and shake.
+        card.style.position = 'sticky';
+        card.style.top = `${stackPx + itemStackDistance * i}px`;
       });
-      endTopRef.current = endEl ? endEl.getBoundingClientRect().top + scrollTop : 0;
+      endTopRef.current = endEl ? getOffsetTop(endEl) : 0;
     } else {
       cards.forEach((card, i) => {
         positionsRef.current[i] = card.offsetTop;
       });
       endTopRef.current = endEl ? endEl.offsetTop : 0;
     }
-  }, [useWindowScroll]);
+  }, [useWindowScroll, parsePercentage, stackPosition, itemStackDistance]);
 
   const updateCardTransforms = useCallback(() => {
     const cards = cardsRef.current;
@@ -112,9 +130,8 @@ const ScrollStack = ({
     cards.forEach((card, i) => {
       let cardTop = positionsRef.current[i];
       if (cardTop == null) {
-        const appliedY = lastTransformsRef.current.get(i)?.y || 0;
         cardTop = useWindowScroll
-          ? card.getBoundingClientRect().top + window.scrollY - appliedY
+          ? getOffsetTop(card)
           : card.offsetTop;
         positionsRef.current[i] = cardTop;
       }
@@ -123,27 +140,26 @@ const ScrollStack = ({
       const triggerEnd = cardTop - endPx;
       if (scrollTop >= triggerStart) newActive = i;
 
-      let translateY;
-      let scale;
+      let translateY = 0;
+      let scale = 1;
       let rotX = 0;
       let rotY = 0;
       let rotZ = 0;
       let opacity = 1;
 
-      if (scrollTop < triggerStart) {
-        // Scrolled above the stack: restore the natural state so cards
-        // are never left stuck in a stacked position.
-        translateY = 0;
-        scale = 1;
-      } else {
+      if (scrollTop >= triggerStart) {
         const t = calculateProgress(scrollTop, triggerStart, triggerEnd);
         const targetScale = baseScale + i * itemScale;
         scale = 1 - t * (1 - targetScale);
 
-        if (scrollTop <= pinEnd) {
-          translateY = scrollTop - cardTop + stackPx + itemStackDistance * i;
-        } else {
-          translateY = pinEnd - cardTop + stackPx + itemStackDistance * i;
+        // Window scrolling is pinned by `position: sticky` (see
+        // measurePositions), so no per-scroll translation is needed there.
+        if (!useWindowScroll) {
+          if (scrollTop <= pinEnd) {
+            translateY = scrollTop - cardTop + stackPx + itemStackDistance * i;
+          } else {
+            translateY = pinEnd - cardTop + stackPx + itemStackDistance * i;
+          }
         }
 
         rotX = rotateXAmount ? -rotateXAmount * t : 0;
@@ -385,7 +401,7 @@ const ScrollStack = ({
   return (
       <div
         ref={scrollerRef}
-        className={`${useWindowScroll ? '' : 'scroll-stack-scroller'} ${className}`.trim()}
+        className={`${useWindowScroll ? 'scroll-stack-root' : 'scroll-stack-scroller'} ${className}`.trim()}
       >
       <div className="scroll-stack-inner">
         {children}

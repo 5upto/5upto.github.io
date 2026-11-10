@@ -51,13 +51,17 @@
 
   html {
     scroll-behavior: auto;
+    /* `clip` keeps `position: sticky` working; `hidden` would turn the body
+       into a non-scrolling scroll container and disable sticky pinning. */
     overflow-x: hidden;
+    overflow-x: clip;
   }
 
   body {
     @apply bg-[var(--bg-primary)] text-[var(--text-primary)];
     font-family: 'Inter', system-ui, sans-serif;
     overflow-x: hidden;
+    overflow-x: clip;
   }
 
   /* Admin input consistency */

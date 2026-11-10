@@ -69,6 +69,12 @@ export default function Lanyard({
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768)
   const [phoneLandscape, setPhoneLandscape] = useState(() => typeof window !== 'undefined' && window.innerWidth > window.innerHeight && window.innerHeight < 600)
   const wrapperRef = useRef<HTMLDivElement>(null!)
+  // Screen-space box of the card, updated by <Band> every frame. A touch that
+  // starts inside it is treated as a drag, so the page keeps native scrolling
+  // everywhere else in the hero.
+  const hitRectRef = useRef<{ x: number; y: number; width: number; height: number } | null>(null)
+  // True only while a press that started on the card is still down.
+  const cardPressRef = useRef(false)
   // Stop rendering once the rope/card physics has settled; any touch wakes it.
   const awakeRef = useRef(true)
   // Rigid bodies take a few frames to register after the GLB/textures resolve.
@@ -83,6 +89,9 @@ export default function Lanyard({
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768)
       setPhoneLandscape(window.innerWidth > window.innerHeight && window.innerHeight < 600)
+      // Re-project the card's touch target and make sure a frame runs to do it.
+      hitRectRef.current = null
+      awakeRef.current = true
     }
     window.addEventListener('resize', handleResize)
     return () => window.removeEventListener('resize', handleResize)
@@ -113,6 +122,48 @@ export default function Lanyard({
     if (active) awakeRef.current = true
   }, [active])
 
+  // `touch-action: pan-y` is needed so the page can scroll from the hero, but
+  // it also makes the browser steal vertical drags (and fire pointercancel).
+  // When a press starts on the card itself, cancel the browser's pan so the
+  // card can be dragged in any direction; touches elsewhere scroll natively.
+  useEffect(() => {
+    const canvas = wrapperRef.current?.querySelector('canvas')
+    if (!canvas) return
+    const touchDragRef = { current: false }
+
+    const onTouchStart = (event: TouchEvent) => {
+      if (event.touches.length !== 1 || !cardPressRef.current) return
+      const rect = hitRectRef.current
+      if (!rect) return
+      const box = canvas.getBoundingClientRect()
+      const x = event.touches[0].clientX - box.left
+      const y = event.touches[0].clientY - box.top
+      const inside = x >= rect.x && x <= rect.x + rect.width && y >= rect.y && y <= rect.y + rect.height
+      if (!inside) return
+      touchDragRef.current = true
+      // Stops the native pan for this gesture only, before it can start.
+      if (event.cancelable) event.preventDefault()
+    }
+    const onTouchMove = (event: TouchEvent) => {
+      if (touchDragRef.current && event.cancelable) event.preventDefault()
+    }
+    const onTouchEnd = () => {
+      touchDragRef.current = false
+      cardPressRef.current = false
+    }
+
+    canvas.addEventListener('touchstart', onTouchStart, { passive: false })
+    canvas.addEventListener('touchmove', onTouchMove, { passive: false })
+    canvas.addEventListener('touchend', onTouchEnd)
+    canvas.addEventListener('touchcancel', onTouchEnd)
+    return () => {
+      canvas.removeEventListener('touchstart', onTouchStart)
+      canvas.removeEventListener('touchmove', onTouchMove)
+      canvas.removeEventListener('touchend', onTouchEnd)
+      canvas.removeEventListener('touchcancel', onTouchEnd)
+    }
+  }, [])
+
   const dpr = useMemo<[number, number]>(() => (isMobile ? [1, 1.5] : [1.5, 2]), [isMobile])
   const glOptions = useMemo(
     () => ({ alpha: transparent, antialias: !isMobile, powerPreference: 'high-performance' as const }),
@@ -125,6 +176,12 @@ export default function Lanyard({
       className="lanyard-wrapper"
       onPointerDown={() => {
         awakeRef.current = true
+      }}
+      onPointerUp={() => {
+        cardPressRef.current = false
+      }}
+      onPointerCancel={() => {
+        cardPressRef.current = false
       }}
     >
       <Canvas
@@ -152,6 +209,8 @@ export default function Lanyard({
               coverColor={coverColor}
               awakeRef={awakeRef}
               settleFramesRef={settleFramesRef}
+              hitRectRef={hitRectRef}
+              cardPressRef={cardPressRef}
             />
         </Physics>
         <Environment blur={0.75}>
@@ -202,14 +261,17 @@ function Band({
   compact = false,
   coverColor = 'black',
   awakeRef = null,
-  settleFramesRef = null
+  settleFramesRef = null,
+  hitRectRef = null,
+  cardPressRef = null
 }) {
   const band = useRef(),
     fixed = useRef(),
     j1 = useRef(),
     j2 = useRef(),
     j3 = useRef(),
-    card = useRef()
+    card = useRef(),
+    cardMesh = useRef()
   const vec = new THREE.Vector3(),
     ang = new THREE.Vector3(),
     rot = new THREE.Vector3(),
@@ -360,6 +422,26 @@ function Band({
       rot.copy(card.current.rotation())
       card.current.setAngvel({ x: ang.x, y: ang.y - rot.y * 0.25, z: ang.z })
     }
+    if (hitRectRef && cardMesh.current) {
+      const geometry = nodes.card.geometry
+      if (!geometry.boundingSphere) geometry.computeBoundingSphere()
+      const sphere = geometry.boundingSphere
+      cardMesh.current.updateWorldMatrix(true, false)
+      const center = vec.copy(sphere.center).applyMatrix4(cardMesh.current.matrixWorld)
+      const radius = sphere.radius * cardMesh.current.matrixWorld.getMaxScaleOnAxis()
+      const cam = state.camera
+      const ndc = dir.copy(center).project(cam)
+      const distance = Math.max(center.distanceTo(cam.position), 0.001)
+      const fov = ((cam.fov || 45) * Math.PI) / 180
+      const radiusPx = (radius / (distance * Math.tan(fov / 2))) * (size.height / 2)
+      if (ndc.z < 1 && radiusPx > 1 && Number.isFinite(radiusPx)) {
+        const x = (ndc.x * 0.5 + 0.5) * size.width
+        const y = (-ndc.y * 0.5 + 0.5) * size.height
+        hitRectRef.current = { x: x - radiusPx, y: y - radiusPx, width: radiusPx * 2, height: radiusPx * 2 }
+      } else {
+        hitRectRef.current = null
+      }
+    }
     if (awakeRef) {
       const bodies = [j1, j2, j3, card]
       // While the physics bodies are still being created (or the card is being
@@ -412,10 +494,12 @@ function Band({
               } catch {
                 /* capture may already be gone after a cancelled touch */
               }
+              if (cardPressRef) cardPressRef.current = false
               drag(false)
             }}
             onPointerCancel={() => {
               // Vertical page scroll wins on touch; release the card cleanly.
+              if (cardPressRef) cardPressRef.current = false
               drag(false)
               hover(false)
             }}
@@ -425,10 +509,11 @@ function Band({
               } catch {
                 /* no-op */
               }
+              if (cardPressRef) cardPressRef.current = true
               drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())))
             }}
           >
-            <mesh geometry={nodes.card.geometry}>
+            <mesh ref={cardMesh} geometry={nodes.card.geometry}>
               <meshPhysicalMaterial
                 map={cardMap}
                 map-anisotropy={16}
