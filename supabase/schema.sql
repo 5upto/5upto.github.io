@@ -118,6 +118,7 @@ create table public.skills (
   id uuid primary key default uuid_generate_v4(),
   label text not null,
   color text,
+  icon_name text default '',
   category text not null,
   sort_order int default 0,
   created_at timestamptz default now()

@@ -342,7 +342,7 @@ export default function Education() {
         </p>
       </div>
 
-      <div className="max-w-4xl mx-auto mt-12 md:mt-16">
+      <div className="max-w-4xl mx-auto mt-16 md:mt-20">
         <h2 className="section-heading text-center mb-8 md:mb-10">
           <span className="gradient-text">Certifications</span>
         </h2>
@@ -594,7 +594,7 @@ export default function Education() {
           Drag a card or let the stack cycle through each credential.
         </p>
 
-        <div className="mt-8 md:mt-10">
+        <div className="mt-16 md:mt-20">
           <h2 className="section-heading text-center mb-8 md:mb-10">
             <span className="gradient-text">Publications</span>
           </h2>

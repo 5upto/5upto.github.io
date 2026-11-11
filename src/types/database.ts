@@ -115,7 +115,7 @@ export interface Skill {
   label: string
   color: string
   icon_name: string
-  category: 'languages' | 'web' | 'databases'
+  category: string
   sort_order: number
   created_at: string
 }

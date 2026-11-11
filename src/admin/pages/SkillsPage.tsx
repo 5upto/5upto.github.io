@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core'
 import { SortableContext, useSortable, horizontalListSortingStrategy } from '@dnd-kit/sortable'
@@ -10,33 +10,34 @@ import DeleteDialog from '../components/DeleteDialog'
 import IconPicker from '../components/IconPicker'
 import Toast from '../components/Toast'
 import { MdClose, MdDragIndicator } from 'react-icons/md'
+import { getIconFallbackColor, useIconLibrary, type IconComponent } from '../../lib/iconLibrary'
+import {
+  mergeSkillCategories,
+  saveSkillCategories,
+  SKILL_CATEGORIES_QUERY_KEY,
+  uniqueCategoryKey,
+  useSkillCategories,
+  type SkillCategory,
+} from '../../hooks/useSkillCategories'
 
-const empty: { label: string; color: string; icon_name: string; category: 'languages' | 'web' | 'databases' } = { label: '', color: '#000000', icon_name: '', category: 'web' }
-
-const allIcons: Record<string, React.ComponentType<any>> = {}
-let iconsLoaded = false
-
-function useAllIcons() {
-  const [loaded, setLoaded] = useState(iconsLoaded)
-  useEffect(() => {
-    if (loaded) return
-    Promise.all([
-      import('react-icons/si'),
-      import('react-icons/fa'),
-      import('react-icons/di'),
-    ]).then(([si, fa, di]) => {
-      Object.assign(allIcons, si, fa, di)
-      iconsLoaded = true
-      setLoaded(true)
-    })
-  }, [loaded])
-  return loaded
+interface SkillForm {
+  label: string
+  color: string
+  icon_name: string
+  category: string
 }
 
-function SortableSkill({ skill, onEdit, onDelete }: { skill: Skill; onEdit: (s: Skill) => void; onDelete: (s: Skill) => void }) {
+const empty: SkillForm = { label: '', color: '#000000', icon_name: '', category: 'web' }
+
+function SortableSkill({ skill, icons, onEdit, onDelete }: {
+  skill: Skill
+  icons: Record<string, IconComponent>
+  onEdit: (s: Skill) => void
+  onDelete: (s: Skill) => void
+}) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: skill.id })
   const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.5 : 1 }
-  const IconComp = skill.icon_name ? allIcons[skill.icon_name] : null
+  const IconComp = skill.icon_name ? icons[skill.icon_name] : null
 
   return (
     <div ref={setNodeRef} style={style} className="group bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl rounded-xl px-3 py-2 flex items-center gap-2 hover:border-primary-500/30 transition-all cursor-pointer" onClick={() => onEdit(skill)}>
@@ -54,11 +55,16 @@ function SortableSkill({ skill, onEdit, onDelete }: { skill: Skill; onEdit: (s: 
 
 export default function SkillsPage() {
   const qc = useQueryClient()
+  const { icons } = useIconLibrary()
+  const { data: skillCategories } = useSkillCategories()
   const [dialogOpen, setDialogOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
+  const [sectionDialogOpen, setSectionDialogOpen] = useState(false)
   const [editing, setEditing] = useState<Skill | null>(null)
   const [deleting, setDeleting] = useState<Skill | null>(null)
-  const [form, setForm] = useState(empty)
+  const [form, setForm] = useState<SkillForm>(empty)
+  const [sectionDraft, setSectionDraft] = useState<SkillCategory[]>([])
+  const [newSectionName, setNewSectionName] = useState('')
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   const { data: items = [], isLoading } = useQuery({
@@ -70,8 +76,13 @@ export default function SkillsPage() {
     },
   })
 
+  const categories = useMemo(
+    () => mergeSkillCategories(skillCategories, items.map(skill => skill.category)),
+    [skillCategories, items]
+  )
+
   const save = useMutation({
-    mutationFn: async (d: typeof form) => {
+    mutationFn: async (d: SkillForm) => {
       if (editing) { const { error } = await supabase.from('skills').update(d).eq('id', editing.id); if (error) throw error }
       else { const { error } = await supabase.from('skills').insert(d); if (error) throw error }
     },
@@ -85,18 +96,27 @@ export default function SkillsPage() {
     onError: (e: any) => setToast({ message: e.message, type: 'error' }),
   })
 
+  const saveSections = useMutation({
+    mutationFn: async (draft: SkillCategory[]) => {
+      const cleaned = draft
+        .map(category => ({ key: category.key, label: category.label.trim() }))
+        .filter(category => category.key && category.label)
+      await saveSkillCategories(cleaned)
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: SKILL_CATEGORIES_QUERY_KEY })
+      setSectionDialogOpen(false)
+      setToast({ message: 'Sections updated', type: 'success' })
+    },
+    onError: (e: any) => setToast({ message: e.message, type: 'error' }),
+  })
+
   const reorder = useMutation({
     mutationFn: async (updates: { id: string; sort_order: number }[]) => {
       await Promise.all(updates.map(u => supabase.from('skills').update({ sort_order: u.sort_order }).eq('id', u.id)))
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-skills'] }),
   })
-
-  const categories = [
-    { key: 'languages' as const, label: 'Languages', color: 'blue' },
-    { key: 'web' as const, label: 'Web Technologies', color: 'purple' },
-    { key: 'databases' as const, label: 'Databases', color: 'green' },
-  ]
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }))
 
@@ -117,14 +137,51 @@ export default function SkillsPage() {
     reorder.mutate(updates)
   }
 
-  const iconsLoaded = useAllIcons()
+  const openAddSkill = () => {
+    setEditing(null)
+    setForm({ ...empty, category: categories[0]?.key ?? 'web' })
+    setDialogOpen(true)
+  }
+
+  const openEditSkill = (skill: Skill) => {
+    setEditing(skill)
+    setForm({ label: skill.label, color: skill.color, icon_name: skill.icon_name || '', category: skill.category })
+    setDialogOpen(true)
+  }
+
+  const openSections = () => {
+    setSectionDraft(categories.map(category => ({ ...category })))
+    setNewSectionName('')
+    setSectionDialogOpen(true)
+  }
+
+  const addSection = () => {
+    const label = newSectionName.trim()
+    if (!label) return
+    const key = uniqueCategoryKey(label, sectionDraft.map(category => category.key))
+    setSectionDraft(draft => [...draft, { key, label }])
+    setNewSectionName('')
+  }
+
+  const removeSection = (key: string) => {
+    if (items.some(skill => skill.category === key)) return
+    setSectionDraft(draft => draft.filter(category => category.key !== key))
+  }
+
+  const sectionLabels = sectionDraft.map(category => category.label.trim().toLowerCase()).filter(Boolean)
+  const hasDuplicateLabels = new Set(sectionLabels).size !== sectionLabels.length
+  const hasBlankLabels = sectionDraft.some(category => !category.label.trim())
+  const sectionsInvalid = hasDuplicateLabels || hasBlankLabels
 
   return (
     <div className="space-y-6">
       <Toast message={toast?.message} type={toast?.type} onClose={() => setToast(null)} />
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div><h1 className="text-xl lg:text-2xl font-display font-bold text-[var(--text-primary)]">Skills</h1><p className="text-sm text-[var(--text-muted)] mt-1">{items.length} skills across {categories.length} categories</p></div>
-        <button onClick={() => { setEditing(null); setForm(empty); setDialogOpen(true) }} className="px-5 py-2.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl text-sm font-medium transition-all hover:shadow-lg hover:shadow-primary-500/25">+ Add Skill</button>
+        <div><h1 className="text-xl lg:text-2xl font-display font-bold text-[var(--text-primary)]">Skills</h1><p className="text-sm text-[var(--text-muted)] mt-1">{items.length} skills across {categories.length} sections</p></div>
+        <div className="flex items-center gap-2">
+          <button onClick={openSections} className="px-4 py-2.5 bg-[var(--bg-elevated)] hover:bg-[var(--bg-card)] border border-[var(--border)] text-[var(--text-secondary)] rounded-xl text-sm font-medium transition-all">Edit Sections</button>
+          <button onClick={openAddSkill} className="px-5 py-2.5 bg-primary-600 hover:bg-primary-500 text-white rounded-xl text-sm font-medium transition-all hover:shadow-lg hover:shadow-primary-500/25">+ Add Skill</button>
+        </div>
       </div>
 
       {isLoading ? <div className="text-center py-12 text-[var(--text-muted)]">Loading...</div> : categories.map(cat => {
@@ -136,7 +193,7 @@ export default function SkillsPage() {
               <SortableContext items={catItems.map(s => s.id)} strategy={horizontalListSortingStrategy}>
                 <div className="flex flex-wrap gap-2">
                   {catItems.map(skill => (
-                    <SortableSkill key={skill.id} skill={skill} onEdit={(s) => { setEditing(s); setForm({ label: s.label, color: s.color, icon_name: s.icon_name || '', category: s.category }); setDialogOpen(true) }} onDelete={(s) => { setDeleting(s); setDeleteOpen(true) }} />
+                    <SortableSkill key={skill.id} skill={skill} icons={icons} onEdit={openEditSkill} onDelete={(s) => { setDeleting(s); setDeleteOpen(true) }} />
                   ))}
                 </div>
               </SortableContext>
@@ -160,32 +217,103 @@ export default function SkillsPage() {
           <div className="bg-[var(--bg-elevated)] rounded-xl p-4 flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl flex items-center justify-center" style={{ background: `${form.color}15` }}>
               {(() => {
-                const Icon = form.icon_name ? allIcons[form.icon_name] : null
+                const Icon = form.icon_name ? icons[form.icon_name] : null
                 return Icon ? <Icon size={24} style={{ color: form.color }} />
                   : (form.label && <span className="text-sm font-bold" style={{ color: form.color }}>{form.label.charAt(0)}</span>)
               })()}
             </div>
             <div>
               <p className="text-sm font-bold text-[var(--text-primary)]">{form.label || 'Skill Name'}</p>
-              <p className="text-xs text-[var(--text-muted)]">{form.category}</p>
+              <p className="text-xs text-[var(--text-muted)]">{categories.find(category => category.key === form.category)?.label ?? form.category}</p>
             </div>
           </div>
           <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Name *</label>
             <input value={form.label} onChange={e => setForm(f => ({...f, label: e.target.value}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
-          <IconPicker value={form.icon_name} onChange={iconName => {
-            const colors: Record<string, string> = { SiPython: '#3776AB', FaJava: '#ED8B00', SiCplusplus: '#00599C', SiJavascript: '#F7DF1E', SiTypescript: '#3178C6', SiReact: '#61DAFB', SiNodedotjs: '#339933', SiPostgresql: '#4169E1', SiMongodb: '#47A248', SiDocker: '#2496ED', SiTailwindcss: '#06B6D4', SiFastapi: '#009688', SiDjango: '#092E20', SiTensorflow: '#FF6F00', SiPytorch: '#EE4C2C', SiGit: '#F05032' }
-            setForm(f => ({...f, icon_name: iconName, color: colors[iconName] || f.color}))
+          <IconPicker value={form.icon_name} color={form.color} onChange={(iconName, iconColor) => {
+            setForm(f => ({
+              ...f,
+              icon_name: iconName,
+              ...(iconName ? { color: iconColor ?? getIconFallbackColor(iconName) } : {}),
+            }))
           }} />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Color</label>
               <div className="flex gap-2"><input type="color" value={form.color} onChange={e => setForm(f => ({...f, color: e.target.value}))} className="w-10 h-10 rounded-lg cursor-pointer border border-[var(--border)]" /><input value={form.color} onChange={e => setForm(f => ({...f, color: e.target.value}))} className="flex-1 px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)]" /></div></div>
-            <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Category</label>
-              <select value={form.category} onChange={e => setForm(f => ({...f, category: e.target.value as any}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)]">
-                <option value="languages">Languages</option><option value="web">Web</option><option value="databases">Databases</option>
+            <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Section</label>
+              <select value={form.category} onChange={e => setForm(f => ({...f, category: e.target.value}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)]">
+                {categories.map(category => (
+                  <option key={category.key} value={category.key}>{category.label}</option>
+                ))}
               </select></div>
           </div>
         </div>
       </FormDialog>
+
+      <FormDialog
+        open={sectionDialogOpen}
+        onClose={() => setSectionDialogOpen(false)}
+        title="Edit Sections"
+        footer={
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-xs text-[var(--text-muted)]">
+              {hasDuplicateLabels ? 'Section names must be unique.' : hasBlankLabels ? 'Section names cannot be empty.' : 'Rename sections or add a new one.'}
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setSectionDialogOpen(false)} className="px-4 py-2 text-sm text-[var(--text-muted)]">Cancel</button>
+              <button onClick={() => saveSections.mutate(sectionDraft)} disabled={saveSections.isPending || sectionsInvalid || sectionDraft.length === 0} className="px-6 py-2.5 bg-primary-600 hover:bg-primary-500 disabled:opacity-50 text-white rounded-xl text-sm font-medium">{saveSections.isPending ? 'Saving...' : 'Save Sections'}</button>
+            </div>
+          </div>
+        }
+      >
+        <div className="space-y-4">
+          <div className="space-y-2">
+            {sectionDraft.map((category) => {
+              const count = items.filter(skill => skill.category === category.key).length
+              return (
+                <div key={category.key} className="flex items-center gap-2">
+                  <input
+                    value={category.label}
+                    onChange={e => setSectionDraft(draft => draft.map(item => item.key === category.key ? { ...item, label: e.target.value } : item))}
+                    className="flex-1 px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] focus:ring-2 focus:ring-primary-500/30"
+                  />
+                  <span className="w-20 shrink-0 text-[11px] text-[var(--text-muted)]">{count} skill{count === 1 ? '' : 's'}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeSection(category.key)}
+                    disabled={count > 0}
+                    title={count > 0 ? 'Move or delete the skills in this section first' : 'Remove section'}
+                    className="p-2 rounded-lg text-red-400 hover:text-red-300 hover:bg-red-500/10 disabled:opacity-25 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors"
+                  >
+                    <MdClose className="w-4 h-4" />
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+
+          <div className="pt-4 border-t border-[var(--border)]">
+            <label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Add Section</label>
+            <div className="flex gap-2">
+              <input
+                value={newSectionName}
+                onChange={e => setNewSectionName(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSection() } }}
+                placeholder="e.g. Cloud & DevOps"
+                className="flex-1 px-3 py-2 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30"
+              />
+              <button
+                type="button"
+                onClick={addSection}
+                disabled={!newSectionName.trim()}
+                className="px-4 py-2 bg-[var(--bg-elevated)] hover:bg-[var(--bg-card)] border border-[var(--border)] disabled:opacity-50 text-[var(--text-secondary)] rounded-xl text-sm font-medium transition-colors"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      </FormDialog>
+
       <DeleteDialog open={deleteOpen} onClose={() => setDeleteOpen(false)} onConfirm={() => deleting && del.mutate(deleting.id)} title="Skill" loading={del.isPending} />
     </div>
   )

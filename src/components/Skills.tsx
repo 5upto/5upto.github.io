@@ -1,13 +1,12 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import LogoLoop from './LogoLoop'
 import { useSkills } from '../hooks/useSkills'
+import { mergeSkillCategories, useSkillCategories } from '../hooks/useSkillCategories'
+import { useIconLibrary, type IconComponent } from '../lib/iconLibrary'
 
 gsap.registerPlugin(ScrollTrigger)
-
-// All icons loaded dynamically from react-icons
-const allIcons: Record<string, React.ComponentType<{ size?: number; style?: React.CSSProperties }>> = {}
 
 // Label -> icon_name mapping for fallback
 const labelToIcon: Record<string, string> = {
@@ -22,33 +21,18 @@ const labelToIcon: Record<string, string> = {
   Dask: 'SiDask', Polars: 'SiPolars', 'Scikit-learn': 'SiScikitlearn', OpenCV: 'SiOpencv',
   Plotly: 'SiPlotly', tqdm: 'SiTqdm', SciPy: 'SiScipy', MLflow: 'SiMlflow', LangChain: 'SiLangchain',
   PostgreSQL: 'SiPostgresql', MySQL: 'SiMysql', MongoDB: 'SiMongodb', SQLite: 'SiSqlite', Firebase: 'SiFirebase',
+  'Power Platform': 'PowerPlatform', 'Power Apps': 'PowerApps', 'Power Automate': 'PowerAutomate',
+  'Power Pages': 'PowerPages', 'Power BI': 'PowerBI', Dataverse: 'Dataverse', 'AI Builder': 'AIBuilder',
+  SharePoint: 'SharePoint',
   Yeoman: 'DiYeoman',
 }
 
-function useAllIcons() {
-  const [loaded, setLoaded] = useState(Object.keys(allIcons).length > 0)
-
-  useEffect(() => {
-    if (loaded) return
-    Promise.all([
-      import('react-icons/si'),
-      import('react-icons/fa'),
-      import('react-icons/di'),
-    ]).then(([si, fa, di]) => {
-      Object.assign(allIcons, si, fa, di)
-      setLoaded(true)
-    })
-  }, [loaded])
-
-  return loaded
-}
-
-function getIcon(skill: { label: string; icon_name?: string }): React.ComponentType<{ size?: number; style?: React.CSSProperties }> | null {
+function getIcon(skill: { label: string; icon_name?: string }, icons: Record<string, IconComponent>): IconComponent | null {
   // 1. Try icon_name from database
-  if (skill.icon_name && allIcons[skill.icon_name]) return allIcons[skill.icon_name]
+  if (skill.icon_name && icons[skill.icon_name]) return icons[skill.icon_name]
   // 2. Try label -> icon_name mapping
   const iconName = labelToIcon[skill.label]
-  if (iconName && allIcons[iconName]) return allIcons[iconName]
+  if (iconName && icons[iconName]) return icons[iconName]
   return null
 }
 
@@ -56,7 +40,16 @@ export default function Skills() {
   const sectionRef = useRef<HTMLElement>(null)
   const headingRef = useRef<HTMLHeadingElement>(null)
   const { data: skills } = useSkills()
-  const iconsLoaded = useAllIcons()
+  const { data: skillCategories } = useSkillCategories()
+  const { icons, loaded: iconsLoaded } = useIconLibrary()
+
+  const categories = useMemo(() => {
+    const merged = mergeSkillCategories(skillCategories, (skills ?? []).map(skill => skill.category))
+    return merged.map((category, index) => ({
+      ...category,
+      speed: index % 2 === 0 ? 50 : -60,
+    }))
+  }, [skillCategories, skills])
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -70,12 +63,6 @@ export default function Skills() {
 
   if (!skills || !iconsLoaded) return null
 
-  const categories = [
-    { label: 'Languages', category: 'languages' as const, speed: 50 },
-    { label: 'Web Technologies', category: 'web' as const, speed: -60 },
-    { label: 'Databases', category: 'databases' as const, speed: 50 },
-  ]
-
   return (
     <section ref={sectionRef} id="skills" className="py-20 md:py-24 px-4 relative">
       <div className="max-w-5xl mx-auto">
@@ -84,13 +71,13 @@ export default function Skills() {
         </h2>
         <div className="mt-6 space-y-6">
           {categories.map((cat) => {
-            const items = (skills ?? []).filter(s => s.category === cat.category)
+            const items = (skills ?? []).filter(s => s.category === cat.key)
             return (
-              <div key={cat.label}>
+              <div key={cat.key}>
                 <p className="text-xs font-semibold uppercase tracking-widest text-[var(--text-muted)] mb-2">{cat.label}</p>
                 <LogoLoop
                   logos={items.map((skill) => {
-                    const Icon = getIcon(skill)
+                    const Icon = getIcon(skill, icons)
                     return {
                       node: (
                         <span title={skill.label} className="skill-icon-wrapper inline-flex items-center justify-center cursor-pointer">
