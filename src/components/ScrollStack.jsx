@@ -239,8 +239,6 @@ const ScrollStack = ({
     });
     if (newActive !== -1 && newActive !== lastActiveIndexRef.current) {
       lastActiveIndexRef.current = newActive;
-      const playFn = window.__portfolioPlaySound;
-      if (typeof playFn === 'function') playFn(480 + newActive * 90, 0.05);
     }
   }, [
     itemScale,

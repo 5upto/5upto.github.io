@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom/client'
 import { BrowserRouter, HashRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
-import { SoundProvider } from './hooks/useSound'
 import './index.css'
 
 const queryClient = new QueryClient()
@@ -16,9 +15,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <HashRouter>
-        <SoundProvider>
-          <App />
-        </SoundProvider>
+        <App />
       </HashRouter>
     </QueryClientProvider>
   </React.StrictMode>,

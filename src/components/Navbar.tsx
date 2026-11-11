@@ -2,13 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { getNavIcon } from '../lib/navIcons'
-import { useSound } from '../hooks/useSound'
 import AdaptiveIcon from './AdaptiveIcon'
 import {
-  MdVolumeUp,
-  MdOutlineVolumeUp,
-  MdVolumeOff,
-  MdOutlineVolumeOff,
   MdLightMode,
   MdOutlineLightMode,
   MdDarkMode,
@@ -39,7 +34,6 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
   const [isMobilePortrait, setIsMobilePortrait] = useState(() =>
     window.matchMedia('(max-width: 480px) and (orientation: portrait)').matches
   )
-  const { enabled: soundOn, toggle: toggleSound } = useSound()
   const circleRefs = useRef<Array<HTMLSpanElement | null>>([])
   const iconRefs = useRef<Array<HTMLSpanElement | null>>([])
   const tlRefs = useRef<Array<gsap.core.Timeline | null>>([])
@@ -401,21 +395,6 @@ export default function Navbar({ logoUrl, onLogoClick, items }: NavbarProps) {
               })}
             </ul>
           </div>
-
-          <button
-            className="nav-mobile-control group rounded-full flex items-center justify-center shrink-0 transition-colors"
-            style={{ width: 'var(--nav-avatar)', height: 'var(--nav-avatar)' }}
-            onClick={toggleSound}
-            aria-label={soundOn ? 'Mute sound' : 'Unmute sound'}
-            aria-pressed={soundOn}
-            title={soundOn ? 'Sound on' : 'Sound off'}
-          >
-            {soundOn ? (
-              <AdaptiveIcon outline={MdOutlineVolumeUp} filled={MdVolumeUp} size={18} className="text-[var(--text-muted)]" />
-            ) : (
-              <AdaptiveIcon outline={MdOutlineVolumeOff} filled={MdVolumeOff} size={18} className="text-[var(--text-muted)]" />
-            )}
-          </button>
 
           <button
             className="nav-mobile-control group rounded-full flex items-center justify-center shrink-0 transition-colors"

@@ -1,5 +1,6 @@
-import { useEffect, lazy, Suspense } from 'react'
-import { Routes, Route, useNavigate } from 'react-router-dom'
+import { useEffect, useLayoutEffect, useRef, lazy, Suspense } from 'react'
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import About from './components/About'
@@ -19,6 +20,8 @@ import { useNavItems } from './hooks/useNavItems'
 import { useProfile } from './hooks/useProfile'
 import { useJobTitle } from './hooks/useJobTitle'
 import { useScrollRestoration } from './hooks/useScrollRestoration'
+import { useAppLoader } from './hooks/useAppLoader'
+import { useHeroBackgroundSettings } from './hooks/useHeroBackgroundSettings'
 import LoadingSpinner from './components/LoadingSpinner'
 
 const AdminLayout = lazy(() => import('./admin/AdminLayout'))
@@ -105,10 +108,73 @@ const S = ({ children }: { children: React.ReactNode }) => <Suspense fallback={<
 
 export default function App() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const queryClient = useQueryClient()
   const { data: profile, isFetched } = useProfile()
+  const { isFetched: heroBackgroundFetched } = useHeroBackgroundSettings()
   const name = profile?.name ?? ''
   const jobTitle = useJobTitle()
   useScrollRestoration()
+  // Keep the loader up until the hero's background is known, otherwise the
+  // default background can pop in right as the loader fades away.
+  const isAdminRoute = location.pathname.startsWith('/admin')
+  useAppLoader(isFetched && heroBackgroundFetched, !isAdminRoute)
+
+  const previousPath = useRef(location.pathname)
+  useLayoutEffect(() => {
+    const previous = previousPath.current
+    previousPath.current = location.pathname
+    if (previous === location.pathname || !['/gallery', '/blog'].includes(location.pathname)) return
+
+    const loader = document.getElementById('app-loader')
+    if (!loader) return
+
+    let active = true
+    let hideTimer: number | undefined
+    let maxTimer: number | undefined
+    let unsubscribe: (() => void) | undefined
+    const startedAt = performance.now()
+    const minimumVisibleMs = 800
+    const maximumVisibleMs = 6000
+    const queryKey = location.pathname === '/gallery' ? ['gallery_stories'] : ['blogs']
+
+    document.documentElement.classList.remove('app-admin-route')
+    loader.style.animation = 'none'
+    loader.classList.remove('is-hidden')
+    loader.setAttribute('aria-hidden', 'false')
+    document.documentElement.classList.add('app-loading')
+
+    const hide = () => {
+      if (!active) return
+      loader.classList.add('is-hidden')
+      loader.setAttribute('aria-hidden', 'true')
+      document.documentElement.classList.remove('app-loading')
+    }
+    const hideWhenReady = () => {
+      const state = queryClient.getQueryState(queryKey)
+      const settled = state?.data !== undefined || state?.status === 'error'
+      if (!settled) return
+
+      const elapsed = performance.now() - startedAt
+      window.clearTimeout(hideTimer)
+      hideTimer = window.setTimeout(hide, Math.max(0, minimumVisibleMs - elapsed))
+    }
+
+    unsubscribe = queryClient.getQueryCache().subscribe(hideWhenReady)
+    maxTimer = window.setTimeout(hide, maximumVisibleMs)
+    hideWhenReady()
+
+    return () => {
+      active = false
+      unsubscribe?.()
+      window.clearTimeout(hideTimer)
+      window.clearTimeout(maxTimer)
+      loader.classList.add('is-hidden')
+      loader.setAttribute('aria-hidden', 'true')
+      document.documentElement.classList.remove('app-loading')
+    }
+  }, [location.pathname, queryClient])
+
 
   // Navbar logo + favicon image: navbar avatar, else lanyard avatar, else the legacy jersey.
   const logoUrl = isFetched ? profile?.nav_avatar_url || profile?.avatar_url || FALLBACK_LOGO : ''
