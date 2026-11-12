@@ -152,7 +152,10 @@ export type ContentBlock =
 export interface GalleryStory {
   id: string
   title: string
+  /** Cover image shown in the circular gallery and at the top of the story. */
   image: string
+  /** All uploaded photos for this story. `image` is always one of these when present. */
+  photos: string[]
   period: string
   slug: string
   story: string

@@ -2,14 +2,29 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import { sortByDate } from '../../lib/sortByDate'
+import { galleryCover, galleryPhotos } from '../../hooks/useGallery'
 import type { GalleryStory } from '../../types/database'
 import FormDialog from '../components/FormDialog'
 import DeleteDialog from '../components/DeleteDialog'
 import JsonArrayField from '../components/JsonArrayField'
-import ImagePicker from '../components/ImagePicker'
+import MultiImagePicker from '../components/MultiImagePicker'
 import Toast from '../components/Toast'
 
-const empty = { title: '', image: '', period: '', slug: '', story: '', tags: [] as string[] }
+const empty = { title: '', image: '', photos: [] as string[], period: '', slug: '', story: '', tags: [] as string[] }
+type GalleryForm = typeof empty
+
+const formFromStory = (story: GalleryStory): GalleryForm => {
+  const photos = galleryPhotos(story)
+  return {
+    title: story.title,
+    image: story.image || photos[0] || '',
+    photos,
+    period: story.period,
+    slug: story.slug,
+    story: story.story,
+    tags: story.tags,
+  }
+}
 
 export default function GalleryAdminPage() {
   const qc = useQueryClient()
@@ -17,7 +32,7 @@ export default function GalleryAdminPage() {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [editing, setEditing] = useState<GalleryStory | null>(null)
   const [deleting, setDeleting] = useState<GalleryStory | null>(null)
-  const [form, setForm] = useState(empty)
+  const [form, setForm] = useState<GalleryForm>(empty)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   const { data: items = [], isLoading } = useQuery({
@@ -26,19 +41,53 @@ export default function GalleryAdminPage() {
   })
 
   const save = useMutation({
-    mutationFn: async (d: typeof form) => {
-      if (editing) { const { error } = await supabase.from('gallery_stories').update(d).eq('id', editing.id); if (error) throw error }
-      else { const { error } = await supabase.from('gallery_stories').insert(d); if (error) throw error }
+    mutationFn: async (data: GalleryForm) => {
+      const photos = Array.from(new Set([...(data.image ? [data.image] : []), ...data.photos.filter(Boolean)]))
+      const image = data.image && photos.includes(data.image) ? data.image : photos[0] ?? ''
+      const payload = {
+        title: data.title,
+        image,
+        photos,
+        period: data.period,
+        slug: data.slug,
+        story: data.story,
+        tags: data.tags,
+      }
+      if (editing) { const { error } = await supabase.from('gallery_stories').update(payload).eq('id', editing.id); if (error) throw error }
+      else { const { error } = await supabase.from('gallery_stories').insert(payload); if (error) throw error }
     },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin-gallery'] }); setDialogOpen(false); setEditing(null); setToast({ message: editing ? 'Updated' : 'Added', type: 'success' }) },
-    onError: (e: any) => setToast({ message: e.message, type: 'error' }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-gallery'] })
+      qc.invalidateQueries({ queryKey: ['gallery_stories'] })
+      setDialogOpen(false)
+      setEditing(null)
+      setToast({ message: editing ? 'Updated' : 'Added', type: 'success' })
+    },
+    onError: (e: any) => setToast({
+      message: /photos/i.test(e.message ?? '')
+        ? 'The database is missing the photos column. Run supabase/add_gallery_photos.sql in Supabase.'
+        : e.message,
+      type: 'error',
+    }),
   })
 
   const del = useMutation({
     mutationFn: async (id: string) => { const { error } = await supabase.from('gallery_stories').delete().eq('id', id); if (error) throw error },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['admin-gallery'] }); setDeleteOpen(false); setDeleting(null); setToast({ message: 'Deleted', type: 'success' }) },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-gallery'] })
+      qc.invalidateQueries({ queryKey: ['gallery_stories'] })
+      setDeleteOpen(false)
+      setDeleting(null)
+      setToast({ message: 'Deleted', type: 'success' })
+    },
     onError: (e: any) => setToast({ message: e.message, type: 'error' }),
   })
+
+  const openEdit = (story: GalleryStory) => {
+    setEditing(story)
+    setForm(formFromStory(story))
+    setDialogOpen(true)
+  }
 
   return (
     <div className="space-y-6">
@@ -49,27 +98,38 @@ export default function GalleryAdminPage() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {isLoading ? <div className="text-center py-12 text-[var(--text-muted)] col-span-3">Loading...</div> : items.map(s => (
-          <div key={s.id} className="bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl rounded-xl overflow-hidden hover:border-primary-500/30 transition-all group cursor-pointer" onClick={() => { setEditing(s); setForm({ title: s.title, image: s.image, period: s.period, slug: s.slug, story: s.story, tags: s.tags }); setDialogOpen(true) }}>
-            {s.image && <div className="h-32 bg-[var(--bg-elevated)]"><img src={s.image} alt={s.title} className="w-full h-full object-cover" /></div>}
-            <div className="p-4">
-              <h3 className="text-sm font-bold text-[var(--text-primary)]">{s.title}</h3>
-              <p className="text-xs text-primary-400 mt-0.5">{s.period}</p>
-              <div className="flex flex-wrap gap-1 mt-2">
-                {s.tags.slice(0, 3).map((t, i) => <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)]">{t}</span>)}
-              </div>
-              <div className="flex gap-2 mt-3 pt-3 border-t border-[var(--border)]">
-                <button onClick={(e) => { e.stopPropagation(); setEditing(s); setForm({ title: s.title, image: s.image, period: s.period, slug: s.slug, story: s.story, tags: s.tags }); setDialogOpen(true) }} className="flex-1 py-1.5 text-xs text-primary-400 hover:bg-primary-600/10 rounded-lg">Edit</button>
-                <button onClick={(e) => { e.stopPropagation(); setDeleting(s); setDeleteOpen(true) }} className="flex-1 py-1.5 text-xs text-red-400 hover:bg-red-500/10 rounded-lg">Delete</button>
+        {isLoading ? <div className="text-center py-12 text-[var(--text-muted)] col-span-3">Loading...</div> : items.map(s => {
+          const cover = galleryCover(s)
+          const photos = galleryPhotos(s)
+          return (
+            <div key={s.id} className="bg-[var(--glass-bg)] border border-[var(--glass-border)] backdrop-blur-xl rounded-xl overflow-hidden hover:border-primary-500/30 transition-all group cursor-pointer" onClick={() => openEdit(s)}>
+              {cover && (
+                <div className="relative h-32 bg-[var(--bg-elevated)]">
+                  <img src={cover} alt={s.title} className="w-full h-full object-cover" />
+                  <span className="absolute right-2 top-2 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">
+                    {photos.length} photo{photos.length === 1 ? '' : 's'}
+                  </span>
+                </div>
+              )}
+              <div className="p-4">
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">{s.title}</h3>
+                <p className="text-xs text-primary-400 mt-0.5">{s.period}</p>
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {s.tags.slice(0, 3).map((t, i) => <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-[var(--bg-elevated)] text-[var(--text-muted)]">{t}</span>)}
+                </div>
+                <div className="flex gap-2 mt-3 pt-3 border-t border-[var(--border)]">
+                  <button onClick={(e) => { e.stopPropagation(); openEdit(s) }} className="flex-1 py-1.5 text-xs text-primary-400 hover:bg-primary-600/10 rounded-lg">Edit</button>
+                  <button onClick={(e) => { e.stopPropagation(); setDeleting(s); setDeleteOpen(true) }} className="flex-1 py-1.5 text-xs text-red-400 hover:bg-red-500/10 rounded-lg">Delete</button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
-      <FormDialog 
-        open={dialogOpen} 
-        onClose={() => setDialogOpen(false)} 
+      <FormDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
         title={editing ? 'Edit Gallery Story' : 'Add Gallery Story'}
         footer={
           <div className="flex justify-end gap-3">
@@ -86,7 +146,14 @@ export default function GalleryAdminPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Period</label><input value={form.period} onChange={e => setForm(f => ({...f, period: e.target.value}))} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30" /></div>
           </div>
-          <ImagePicker value={form.image} onChange={v => setForm(f => ({...f, image: v}))} bucket="gallery" label="Story Image" />
+          <MultiImagePicker
+            photos={form.photos}
+            cover={form.image}
+            onChange={photos => setForm(f => ({ ...f, photos, image: photos.includes(f.image) ? f.image : photos[0] ?? '' }))}
+            onCoverChange={image => setForm(f => ({ ...f, image }))}
+            bucket="gallery"
+            label="Story Photos"
+          />
           <JsonArrayField value={form.tags} onChange={v => setForm(f => ({...f, tags: v}))} label="Tags" />
           <div><label className="block text-xs font-medium text-[var(--text-muted)] uppercase tracking-wider mb-1.5">Story</label><textarea value={form.story} onChange={e => setForm(f => ({...f, story: e.target.value}))} rows={8} className="w-full px-4 py-2.5 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-xl text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] placeholder:opacity-50 focus:ring-2 focus:ring-primary-500/30 resize-y" /></div>
         </div>

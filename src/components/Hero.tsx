@@ -7,6 +7,7 @@ import { useExperiences } from '../hooks/useExperiences'
 import { useLiveResume } from '../hooks/useResumes'
 import { useLanyardSettings } from '../hooks/useLanyardSettings'
 import { useHeroBackgroundSettings } from '../hooks/useHeroBackgroundSettings'
+import { useStableViewportHeight } from '../hooks/useStableViewportHeight'
 import { renderCardBack, renderCardFront, renderRibbon } from '../lib/lanyardCard'
 import type { LanyardSettings } from '../types/database'
 
@@ -235,6 +236,7 @@ export default function Hero() {
   const { data: resume } = useLiveResume()
   const currentExp = experiences?.[0] ?? null
   const isDark = useIsDarkTheme()
+  const heroHeight = useStableViewportHeight()
   const jobTitle = currentExp?.role || profile?.title || ''
   const lanyardReady = experiencesFetched && lanyardSettingsFetched
   const { front, back, band } = useIdCardImages(profile, currentExp, lanyardSettings, lanyardReady)
@@ -258,6 +260,7 @@ export default function Hero() {
       ref={containerRef}
       id="hero"
       className="relative isolate min-h-svh flex items-center px-4 py-12 overflow-hidden"
+      style={heroHeight > 0 ? { minHeight: heroHeight } : undefined}
     >
       {heroBackgroundFetched && <HeroBackground settings={heroBackground} isDark={isDark} />}
       {front && (lanyardSettings.version === 'modern' ? (

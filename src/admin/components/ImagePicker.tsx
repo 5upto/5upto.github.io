@@ -128,7 +128,7 @@ export default function ImagePicker({ value, onChange, bucket = 'logos', label =
   )
 }
 
-function StorageModal({ open, onClose, images, loading, error, onSelect, bucket, onRefresh }: {
+export function StorageModal({ open, onClose, images, loading, error, onSelect, bucket, onRefresh }: {
   open: boolean
   onClose: () => void
   images: string[]

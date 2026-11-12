@@ -161,6 +161,7 @@ create table public.gallery_stories (
   id uuid primary key default uuid_generate_v4(),
   title text not null,
   image text,
+  photos jsonb not null default '[]'::jsonb,
   period text,
   slug text unique not null,
   story text,
