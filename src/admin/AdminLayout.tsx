@@ -17,7 +17,7 @@ import {
   MdNavigateBefore,
   MdOutlineNavigateBefore,
   MdCancel,
-  MdOutlineCancel,
+  MdMenu,
 } from 'react-icons/md'
 import AdaptiveIcon from '../components/AdaptiveIcon'
 
@@ -202,19 +202,19 @@ export default function AdminLayout() {
             borderRadius: scrolled ? '9999px' : '16px',
             padding: scrolled ? '0 6px' : '0',
           }}>
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="group p-2 rounded-full hover:bg-[var(--bg-elevated)] text-[var(--text-muted)]">
+          <button onClick={() => setMobileOpen(!mobileOpen)} className="group flex items-center justify-center w-9 h-9 shrink-0 rounded-full hover:bg-[var(--bg-elevated)] text-[var(--text-muted)]">
             {mobileOpen ? (
-              <AdaptiveIcon outline={MdOutlineCancel} filled={MdCancel} className="w-5 h-5" />
+              <MdCancel className="block w-5 h-5" />
             ) : (
-              <AdaptiveIcon {...sectionIcons.navItems} className="w-5 h-5" />
+              <MdMenu className="block w-5 h-5" />
             )}
           </button>
           {/* Theme toggle */}
-          <button onClick={() => setDark(!dark)} className="group p-2 rounded-full hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] transition-colors">
+          <button onClick={() => setDark(!dark)} className="group flex items-center justify-center w-9 h-9 shrink-0 rounded-full hover:bg-[var(--bg-elevated)] text-[var(--text-muted)] transition-colors">
             {dark ? (
-              <AdaptiveIcon outline={MdOutlineLightMode} filled={MdLightMode} className="w-5 h-5" />
+              <AdaptiveIcon outline={MdOutlineLightMode} filled={MdLightMode} className="block w-5 h-5" />
             ) : (
-              <AdaptiveIcon outline={MdOutlineDarkMode} filled={MdDarkMode} className="w-5 h-5" />
+              <AdaptiveIcon outline={MdOutlineDarkMode} filled={MdDarkMode} className="block w-5 h-5" />
             )}
           </button>
         </div>
